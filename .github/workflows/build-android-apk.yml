@@ -1,0 +1,217 @@
+name: Build Android APK
+
+# Builds the Capacitor-wrapped web app into ONE signed, universal Android APK.
+# "Universal" means a single APK that installs on every architecture (arm64,
+# armv7, x86_64): the web bundle carries no native code, so no ABI split is
+# produced. Only this one APK is built - there is no separate debug artifact.
+#
+# On a tag push (v*) the signed APK is attached to the GitHub Release, which
+# gives a permanent, always-available download URL:
+#   https://github.com/<owner>/<repo>/releases/latest/download/app-release.apk
+#
+# Required repository secrets:
+#   ANDROID_KEYSTORE_BASE64    base64 of the release.keystore (PKCS12/JKS)
+#   ANDROID_KEYSTORE_PASSWORD  store password
+#   ANDROID_KEY_PASSWORD       key password
+#   ANDROID_KEY_ALIAS          key alias (defaults to "openhands")
+#
+# Optional repository variable:
+#   BACKEND_BASE_URL           baked into the web bundle as VITE_BACKEND_BASE_URL
+#   SIGNING_CERT_SHA256        pins the signer fingerprint (see SIGNING.md)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - "OpenHands-main/**"
+      - ".github/workflows/build-android-apk.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: OpenHands-main
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: OpenHands-main/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Capacitor toolchain
+        # The Capacitor packages are not in package.json; install them at the
+        # same major version the android/ project was generated with.
+        run: npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
+
+      - name: Build web bundle
+        env:
+          # Public URL of the OpenHands agent server the phone talks to.
+          # Set repo variable BACKEND_BASE_URL to bake it in; leave unset to
+          # let the user enter it in the app on first launch.
+          VITE_BACKEND_BASE_URL: ${{ vars.BACKEND_BASE_URL }}
+          VITE_MOCK_API: "false"
+        run: npm run build:app
+
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+
+      - name: Restore release keystore
+        id: keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            # Without the secret the build is unsigned, so it must never be
+            # published. The publish step below is gated on this output, which
+            # keeps a branch/PR run green while still refusing to ship an
+            # unsigned APK.
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set - the APK will be UNSIGNED and will not be published."
+            echo "::warning::Add the signing secrets (see README, section 'Signing') to publish releases."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+          echo "keystore restored: $(wc -c < android/app/release.keystore) bytes"
+          echo "signed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build the universal release APK
+        working-directory: OpenHands-main/android
+        env:
+          OPENHANDS_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          OPENHANDS_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          OPENHANDS_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          chmod +x gradlew
+          # assembleRelease produces the single universal APK. ABI splits are
+          # disabled in app/build.gradle, so this is the only output.
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Verify the release APK
+        working-directory: OpenHands-main/android
+        env:
+          KEYSTORE_WAS_RESTORED: ${{ steps.keystore.outputs.signed }}
+        run: |
+          APK=$(ls app/build/outputs/apk/release/*.apk 2>/dev/null | head -1)
+          if [ -z "$APK" ]; then
+            echo "::error::no release APK was produced"
+            exit 1
+          fi
+
+          # There must be exactly one APK: a universal build, not per-ABI splits.
+          COUNT=$(ls app/build/outputs/apk/release/*.apk 2>/dev/null | wc -l)
+          if [ "$COUNT" -ne 1 ]; then
+            echo "::error::expected exactly one universal APK, found $COUNT"
+            ls -l app/build/outputs/apk/release/*.apk
+            exit 1
+          fi
+          echo "apk: $APK"
+
+          # apksigner is a shell wrapper that execs `java`, so the JDK has to be
+          # on PATH - JAVA_HOME alone is not enough and the check silently fails.
+          export PATH="$JAVA_HOME/bin:$PATH"
+
+          AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 2>/dev/null | tail -1 || true)
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | tail -1 || true)
+
+          if [ -n "$AAPT" ]; then
+            "$AAPT" dump badging "$APK" 2>/dev/null | grep -E "^package|^native-code" || true
+          fi
+
+          certs=""
+          if [ -n "$APKSIGNER" ]; then
+            certs=$("$APKSIGNER" verify --print-certs "$APK" 2>&1 || true)
+          fi
+          if ! printf '%s' "$certs" | grep -q "Signer #1"; then
+            # keytool also reads a v1-signed APK, so use it as a fallback.
+            certs=$(keytool -printcert -jarfile "$APK" 2>&1 || true)
+          fi
+          printf '%s\n' "$certs" |
+            grep -E "Signer #1 certificate (DN|SHA-256)|^Certificate fingerprints|SHA256:" || true
+
+          if printf '%s' "$certs" | grep -qE "Signer #1 certificate|SHA256:"; then
+            echo "release APK is signed"
+          elif [ "$KEYSTORE_WAS_RESTORED" = "true" ]; then
+            echo "::error::the keystore was restored but the release APK is not signed"
+            exit 1
+          else
+            echo "::warning::release APK is UNSIGNED (no keystore secret) - not publishable"
+          fi
+
+          # The signing key must never change. Two APKs signed with different
+          # keys are different apps to Android, so a rotated key forces every
+          # user to uninstall first. Set the SIGNING_CERT_SHA256 repository
+          # variable to the fingerprint of your keystore and this step refuses
+          # to publish anything else. The fingerprint is public - it ships
+          # inside every APK - so it is safe to keep in the repository.
+          EXPECTED="${{ vars.SIGNING_CERT_SHA256 }}"
+
+          if [ "$KEYSTORE_WAS_RESTORED" = "true" ]; then
+            # apksigner prints the digest as bare hex, keytool as hex separated
+            # by colons. Accept either, then normalise to the colons form.
+            RAW=$(printf '%s' "$certs" | grep -oE '([0-9A-Fa-f]{2}:){31}[0-9A-Fa-f]{2}|[0-9A-Fa-f]{64}' | head -1)
+            if [ -z "$RAW" ]; then
+              echo "::error::could not read the signer fingerprint from the APK"
+              exit 1
+            fi
+            ACTUAL=$(printf '%s' "$RAW" | tr -d ':' | tr 'a-f' 'A-F' | sed 's/\(..\)/\1:/g; s/:$//')
+            echo "signer fingerprint : $ACTUAL"
+            if [ -z "$EXPECTED" ]; then
+              echo "::warning::SIGNING_CERT_SHA256 is not set - the fingerprint above was NOT enforced."
+              echo "::warning::Set the SIGNING_CERT_SHA256 repository variable to this value so future updates install in place."
+            else
+              echo "expected fingerprint: $EXPECTED"
+              if [ "$ACTUAL" != "$EXPECTED" ]; then
+                echo "::error::SIGNING KEY CHANGED. The APK is signed with a different key than the pinned fingerprint. Publishing this would force every existing user to uninstall. If the rotation is intentional, update SIGNING.md and set the SIGNING_CERT_SHA256 repository variable."
+                exit 1
+              fi
+              echo "signing key matches the pinned fingerprint - in-place updates stay possible"
+            fi
+          fi
+
+          sha256sum "$APK"
+          ls -l "$APK"
+
+      - name: Upload the universal APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: openhands-universal-apk
+          path: OpenHands-main/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+
+      - name: Attach the APK to the GitHub Release
+        # Only a signed APK is published, and only from a v* tag. Gating on
+        # `signed` means an unsigned APK can never be published, however the
+        # workflow is triggered.
+        if: startsWith(github.ref, 'refs/tags/v') && steps.keystore.outputs.signed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" \
+            --title "OpenHands Mobile $TAG" \
+            --notes "Android build of the OpenHands Agent Canvas UI, packaged with Capacitor.
+
+          This is a single universal APK (arm64, armv7, x86_64) signed with the
+          project release key, so it installs in place over any earlier build.
+
+          This release was produced by an AI agent (OpenHands) on behalf of the repository owner."
+          gh release upload "$TAG" \
+            android/app/build/outputs/apk/release/app-release.apk#app-release.apk \
+            --clobber
