@@ -173,7 +173,7 @@ four-step setup wizard:
 
 | 1 · Connect | 2 · Pick an agent |
 | :---: | :---: |
-| <img src="docs/assets/screens/01-backend.webp" alt="Add a backend screen with a friendly name, host URL, local or remote type, and an API key" width="300"> | <img src="docs/assets/screens/02-agent.webp" alt="Choose your agent screen listing OpenHands, Claude Code, Codex, Gemini CLI, Pi and OpenCode" width="300"> |
+| <img src="docs/assets/screens/01-backend.webp" alt="Add a backend screen with a friendly name, host URL, a Local/Cloud type toggle, and an API key" width="300"> | <img src="docs/assets/screens/02-agent.webp" alt="Choose your agent screen listing OpenHands, Claude Code, Codex, Gemini CLI, Pi and OpenCode" width="300"> |
 
 | 3 · Choose a model | 4 · Start working |
 | :---: | :---: |
