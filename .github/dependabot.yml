@@ -1,15 +1,8 @@
 version: 2
 updates:
-  - package-ecosystem: npm
-    directory: /OpenHands-main
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
-    groups:
-      npm-minor-and-patch:
-        patterns: ["*"]
-        update-types: ["minor", "patch"]
-
+  # The Android build inputs. These affect the APK we ship, so they are worth
+  # tracking: the Gradle wrapper and the Android Gradle Plugin are what
+  # assemble the release.
   - package-ecosystem: gradle
     directory: /OpenHands-main/android
     schedule:
@@ -20,3 +13,13 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 5
+
+# Deliberately NOT configured: npm for /OpenHands-main.
+#
+# That directory is a vendored snapshot of the upstream @openhands/agent-canvas
+# release, and the APK's JS bundle is built from it. Bumping its dependencies
+# one at a time would drift from upstream and change runtime behaviour that the
+# APK build never exercises (the workflow compiles the bundle, it does not run
+# the UI). When a new upstream release lands, re-sync the snapshot instead of
+# letting a bot edit it piecemeal.
