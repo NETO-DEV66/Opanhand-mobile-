@@ -12,13 +12,13 @@ import {
 } from "#/api/backend-registry/active-store";
 import type { Backend } from "#/api/backend-registry/types";
 import { isSdkHttpError } from "#/utils/sdk-http-error";
-import defaults from "../../config/defaults.json";
+import { compatibility } from "../../config/defaults.json";
 
 const AGENT_SERVER_INFO_TIMEOUT_MS = 5000;
 const UNKNOWN_AGENT_SERVER_VERSION = "unknown";
 
 export const MINIMUM_COMPATIBLE_AGENT_SERVER_VERSION =
-  defaults.compatibility.minimumAgentServer;
+  compatibility.minimumAgentServer;
 export const AGENT_SERVER_UNSUPPORTED_VERSION_ERROR_CODE =
   "AGENT_SERVER_UNSUPPORTED_VERSION";
 export const AGENT_SERVER_UNKNOWN_VERSION_ERROR_CODE =
