@@ -8,13 +8,13 @@
 # APK. Use this script when you built locally and want to publish by hand.
 #
 # Usage:
-#   GH_PAT=<token-with-repo-scope> bash publish-github.sh v1.27.2
+#   GH_PAT=<token-with-repo-scope> bash publish-github.sh v1.27.3
 set -u
 
 REPO="NETO-DEV66/Opanhand-mobile-"
 TAG="${1:-}"
 if [ -z "$TAG" ]; then
-  echo "usage: GH_PAT=<token> bash publish-github.sh <tag>   e.g. v1.27.2" >&2
+  echo "usage: GH_PAT=<token> bash publish-github.sh <tag>   e.g. v1.27.3" >&2
   exit 1
 fi
 TITLE="OpenHands Mobile $TAG (Android APK)"
@@ -57,11 +57,12 @@ print(json.dumps({
   "name": os.environ["TITLE"],
   "body": (
     "Android build of the OpenHands Agent Canvas UI, packaged with Capacitor 7.\n\n"
+    "This is a single universal APK (arm64, armv7, x86_64) signed with the "
+    "project release key, so it installs in place over any earlier build.\n\n"
     "**Install**\n"
-    "1. Uninstall any older OpenHands Mobile build - the app was re-signed.\n"
-    "2. Allow install from unknown sources for your browser / file manager.\n"
-    "3. Open the APK on the phone and install it.\n"
-    "4. On first launch, add your agent server host and API key.\n\n"
+    "1. Allow install from unknown sources for your browser / file manager.\n"
+    "2. Open the APK on the phone and install it.\n"
+    "3. On first launch, add your agent server host and API key.\n\n"
     "This release was produced by an AI agent (OpenHands) on behalf of the "
     "repository owner."
   ),
