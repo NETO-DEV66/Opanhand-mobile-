@@ -17,7 +17,7 @@ Run and supervise your AI coding agents from your phone.
 
 [![Download APK](https://img.shields.io/badge/Download-APK-6c5ce7?style=for-the-badge&logo=android&logoColor=white)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)
 [![Website](https://img.shields.io/badge/Website-openhands--app-FF6A3D?style=for-the-badge&logo=githubpages&logoColor=white)](https://neto-dev66.github.io/Opanhand-mobile-/)
-[![Version](https://img.shields.io/badge/version-1.28.0-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.28.0)
+[![Version](https://img.shields.io/badge/version-1.28.1-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.28.1)
 [![Build](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml/badge.svg)](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/blob/main/LICENSE)
 [![Support via UPI](https://img.shields.io/badge/Support-UPI-ff9f1c?style=for-the-badge&logo=buymeacoffee&logoColor=white)](#support-this-project)
@@ -363,8 +363,8 @@ release APK with the secret key and attaches it to the GitHub Release.
 2. Commit, then tag and push:
 
 ```bash
-git tag v1.28.0
-git push origin v1.28.0
+git tag v1.28.1
+git push origin v1.28.1
 ```
 
 GitHub Actions builds and publishes the APK. The `releases/latest/download`
