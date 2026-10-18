@@ -202,16 +202,52 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') && steps.keystore.outputs.signed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          SIGNING_CERT_SHA256: ${{ vars.SIGNING_CERT_SHA256 }}
         run: |
           TAG="${GITHUB_REF_NAME}"
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          SIZE=$(stat -c %s "$APK")
+          SHA256=$(sha256sum "$APK" | cut -d' ' -f1)
+          MD5=$(md5sum "$APK" | cut -d' ' -f1)
+          CERT="${SIGNING_CERT_SHA256:-unknown}"
+          # printf, not a heredoc: a heredoc body would inherit this step's YAML
+          # indentation and render as a code block on the release page.
+          printf '%s\n' \
+            'Android build of the OpenHands Agent Canvas UI, packaged with Capacitor.' \
+            '' \
+            '**One universal APK.** A single file for every phone - arm64, armv7 and' \
+            'x86_64. The web bundle carries no native code, so there is nothing to' \
+            'split per architecture. Signed with the project release key, so it' \
+            'installs in place over any later build.' \
+            '' \
+            '**Install**' \
+            '1. Allow install from unknown sources for your browser or file manager.' \
+            '2. Open the APK on the phone and install it.' \
+            '3. On first launch, add your agent server host and API key.' \
+            '' \
+            '**Verify the download**' \
+            '' \
+            '| | |' \
+            '| --- | --- |' \
+            '| File | `app-release.apk` |' \
+            "| Size | $SIZE bytes |" \
+            "| SHA-256 | \`$SHA256\` |" \
+            "| MD5 | \`$MD5\` |" \
+            "| Signer cert SHA-256 | \`$CERT\` |" \
+            '' \
+            '```bash' \
+            'sha256sum app-release.apk' \
+            'apksigner verify --print-certs app-release.apk' \
+            '```' \
+            '' \
+            'The signer fingerprint never changes between releases, which is what' \
+            'lets a new build install straight over an old one.' \
+            '' \
+            'This release was produced by an AI agent (OpenHands) on behalf of the repository owner.' \
+            > /tmp/notes.md
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" \
             --title "OpenHands Mobile $TAG" \
-            --notes "Android build of the OpenHands Agent Canvas UI, packaged with Capacitor.
-
-          This is a single universal APK (arm64, armv7, x86_64) signed with the
-          project release key, so it installs in place over any earlier build.
-
-          This release was produced by an AI agent (OpenHands) on behalf of the repository owner."
+            --notes-file /tmp/notes.md
           gh release upload "$TAG" \
-            android/app/build/outputs/apk/release/app-release.apk#app-release.apk \
+            "$APK#app-release.apk" \
             --clobber
