@@ -44,7 +44,6 @@ import { useConfig } from "#/hooks/query/use-config";
 import { useRestoreMarsTunnels } from "#/hooks/use-mars-tunnel-backend";
 import { QUERY_KEYS } from "#/hooks/query/query-keys";
 import { AgentServerUIRoot } from "#/components/providers";
-import { TelemetryConsentBanner } from "#/components/features/analytics/telemetry-consent-banner";
 import { buildAgentCanvasPath } from "#/utils/base-path";
 import { useOnboardingCompletion } from "#/components/features/onboarding/use-onboarding-completion";
 import { NavigationProvider } from "#/context/navigation-context";
@@ -103,10 +102,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="theme-color" content="#ffffff" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta
-          name="apple-mobile-web-app-status-bar-style"
-          content="default"
-        />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="OpenHands" />
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -376,12 +372,7 @@ export default function App() {
     isCloudBackendApiKeyOrNetworkHealthError(activeCloudHealth.lastError);
 
   if (showFirstRunOnboarding) {
-    return (
-      <>
-        <FirstRunOnboardingScreen onClose={markCompleted} />
-        <TelemetryConsentBanner />
-      </>
-    );
+    return <FirstRunOnboardingScreen onClose={markCompleted} />;
   }
 
   if (
@@ -415,10 +406,5 @@ export default function App() {
     return <MissingAgentServerScreen />;
   }
 
-  return (
-    <>
-      <Outlet />
-      <TelemetryConsentBanner />
-    </>
-  );
+  return <Outlet />;
 }

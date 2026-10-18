@@ -173,7 +173,7 @@ four-step setup wizard:
 
 | 1 · Connect | 2 · Pick an agent |
 | :---: | :---: |
-| <img src="docs/assets/screens/01-backend.webp" alt="Add a backend screen with a friendly name, host URL, local or cloud type, and an API key" width="300"> | <img src="docs/assets/screens/02-agent.webp" alt="Choose your agent screen listing OpenHands, Claude Code, Codex, Gemini CLI, Pi and OpenCode" width="300"> |
+| <img src="docs/assets/screens/01-backend.webp" alt="Add a backend screen with a friendly name, host URL, local or remote type, and an API key" width="300"> | <img src="docs/assets/screens/02-agent.webp" alt="Choose your agent screen listing OpenHands, Claude Code, Codex, Gemini CLI, Pi and OpenCode" width="300"> |
 
 | 3 · Choose a model | 4 · Start working |
 | :---: | :---: |
@@ -181,8 +181,9 @@ four-step setup wizard:
 
 1. **Connect** — the address of your OpenHands agent server, for example
    `https://my-server.example.com` or `http://192.168.1.10:3000` on your home
-   network. Use `https://` for anything reachable over the internet. You can
-   point it at OpenHands Cloud instead and connect instantly.
+   network. Use `https://` for anything reachable over the internet. There is no
+   hosted account to sign in to: this build talks only to a server you run, so
+   there is nothing to log into and nothing to approve.
 2. **Pick an agent** — OpenHands by default, or bring your own Claude Code,
    Codex, Gemini CLI, Pi or OpenCode agent.
 3. **Choose a model** — pick a provider and model. A sensible default is
@@ -207,7 +208,7 @@ Your settings are stored on the device. To change them later, open
 Everything the Agent Canvas web UI offers, adapted for a touch screen:
 
 - **Conversations** — start a task, watch the agent work, read the diff.
-- **Multiple backends** — local, remote, or cloud agent servers.
+- **Multiple backends** — connect to any number of agent servers you run.
 - **Agent profiles and settings** — pick the model, tools, and prompt.
 - **Automations** — schedule recurring agent tasks and review their runs.
 - **Skills and extensions** — manage reusable agent capabilities.
@@ -248,6 +249,25 @@ To bake in your own server URL, set it before step 3:
 
 ```bash
 VITE_BACKEND_BASE_URL=https://my-server.example.com npm run build:app
+```
+
+### Running the tests
+
+The web app has a Vitest suite (unit and component tests). It runs in two
+projects: DOM-free suites in a fast Node environment, everything else in jsdom
+with the shared MSW handlers answering network calls.
+
+```bash
+npm test              # one-shot run
+npm run test:watch    # re-run on change
+npm run test:coverage # with a coverage report
+```
+
+Type-checking and linting are separate:
+
+```bash
+npm run typecheck
+npm run lint
 ```
 
 ### Signing

@@ -32,7 +32,7 @@ export const FIELD_HELP_LINKS: Record<
     textKey: "SCHEMA$VERIFICATION$CRITIC_API_KEY$HELP_TEXT",
     linkTextKey: "SETTINGS$OPENHANDS_API_KEY_HELP_LINK",
     suffixKey: "SCHEMA$VERIFICATION$CRITIC_API_KEY$HELP_SUFFIX",
-    href: "https://app.all-hands.dev/settings/api-keys",
+    href: "https://docs.openhands.dev/usage/local-setup#getting-an-api-key",
     hideDescription: true,
   },
 };

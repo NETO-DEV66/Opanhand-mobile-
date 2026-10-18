@@ -28,13 +28,13 @@ const APP_CHUNK_MAX_BYTES = 450 * 1024;
 // Suites verified to be DOM-free: they import pure functions only, touch no
 // DOM, Web Storage, timers or network, and therefore need neither the jsdom
 // environment nor the shared `vitest.setup.ts`. They run in a separate Node
-// project instead, which is measurably faster. See docs/DEVELOPMENT.md →
-// "Unit test environments" for the classification rules a suite must meet
-// before it is added here, and for how to roll the pilot back.
+// project instead, which is measurably faster. A suite must stay import-only
+// (no `document`, `window`, `localStorage`, or `@testing-library/react`) to be
+// added here.
 const NODE_ENV_PILOT_TESTS = [
-  "__tests__/utils/file-language.test.ts",
-  "__tests__/utils/format-model-name.test.ts",
-  "__tests__/utils/parse-terminal-output.test.ts",
+  "src/utils/automation-export.test.ts",
+  "src/utils/format-model-name.test.ts",
+  "src/utils/user-facing-error.test.ts",
 ];
 
 const normalizeBasePath = (value?: string) => {

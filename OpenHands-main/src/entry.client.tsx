@@ -7,10 +7,7 @@
 import { HydratedRouter } from "react-router/dom";
 import { startTransition, StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
-import {
-  AgentServerUIProviders,
-  DEFAULT_AGENT_SERVER_ANALYTICS,
-} from "./components/providers";
+import { AgentServerUIProviders } from "./components/providers";
 import { installMarsWebBridge } from "./api/mars/mars-web-bridge";
 import { waitForI18n } from "./i18n";
 import { shouldStartMockWorker } from "./mocks/should-start-mock-worker";
@@ -21,12 +18,14 @@ async function prepareApp() {
   // Must settle before render — the UI reads `window.marsBridge` synchronously.
   await Promise.all([waitForI18n(), installMarsWebBridge()]);
 
-  if (shouldStartMockWorker()) {
-    const { worker } = await import("./mocks/browser");
+  if (import.meta.env.DEV || import.meta.env.VITE_MOCK_API === "true") {
+    if (shouldStartMockWorker()) {
+      const { worker } = await import("./mocks/browser");
 
-    await worker.start({
-      onUnhandledRequest: "bypass",
-    });
+      await worker.start({
+        onUnhandledRequest: "bypass",
+      });
+    }
   }
 
   if (import.meta.env.DEV) {
@@ -42,7 +41,11 @@ prepareApp().then(() =>
       document,
       <StrictMode>
         <AgentServerUIProviders
-          analytics={DEFAULT_AGENT_SERVER_ANALYTICS}
+          // Analytics off: this build must not contact OpenHands' telemetry
+          // endpoint (z.openhands.dev). Passing `false` means PostHog is never
+          // initialized, so no install/session event leaves the device and the
+          // consent banner is never shown.
+          analytics={false}
           withStyleRoot={false}
         >
           <HydratedRouter />

@@ -7,11 +7,6 @@ export interface AgentServerFormDefaults {
   sessionApiKey: string;
 }
 
-// Window-global key the static server injects `--lock-to-cloud` into; kept
-// module-private because only `getLockedCloudHost()` reads it. The static
-// server (`scripts/static-server.mjs`) and its tests reference the literal
-// string directly, not this constant.
-const LOCK_TO_CLOUD_WINDOW_KEY = "__AGENT_CANVAS_LOCK_TO_CLOUD__";
 const LEGACY_CLOUD_DOMAIN = "all-hands.dev";
 const CURRENT_CLOUD_DOMAIN = "openhands.dev";
 const LEGACY_PRODUCTION_APP_HOST = `app.${LEGACY_CLOUD_DOMAIN}`;
@@ -138,19 +133,17 @@ export function getAgentServerFormDefaults(): AgentServerFormDefaults {
   };
 }
 
+/**
+ * This build has no OpenHands Cloud backend. Locking the app to a single
+ * hosted Cloud origin is what pulls in the Cloud device-flow login and the
+ * main-app cookie session, so it is disabled outright: the app can only talk
+ * to an agent-server the user configures (local or self-hosted).
+ *
+ * Kept as a function (rather than deleted) because `root.tsx`,
+ * `onboarding-modal.tsx` and `default-backend.ts` branch on it. Always
+ * returning null makes every one of those branches take the non-Cloud path.
+ */
 export function getLockedCloudHost(): string | null {
-  const envHost = normalizeCloudHost(import.meta.env.VITE_LOCK_TO_CLOUD);
-  if (envHost) return envHost;
-
-  if (typeof window !== "undefined") {
-    const injected = (window as unknown as Record<string, unknown>)[
-      LOCK_TO_CLOUD_WINDOW_KEY
-    ];
-    if (typeof injected === "string") {
-      return normalizeCloudHost(injected);
-    }
-  }
-
   return null;
 }
 

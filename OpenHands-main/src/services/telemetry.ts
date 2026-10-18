@@ -1,25 +1,28 @@
 /**
- * Telemetry service for tracking library usage.
+ * Telemetry service for the @openhands/agent-canvas library.
  *
- * This module handles anonymous telemetry for the @openhands/agent-canvas package
- * using the PostHog SDK for reliable event delivery with batching, retry logic,
- * and offline support.
+ * THIS FORK SHIPS TELEMETRY OFF. `entry.client.tsx` passes `analytics={false}`
+ * to the UI providers, so the PostHog client is never initialized, no install
+ * or session event is sent, and the consent banner is never rendered. The
+ * module is kept intact because the upstream library API is unchanged; the
+ * sections below describe what it does when a host opts back in.
  *
- * TRACKING PHILOSOPHY:
+ * TRACKING PHILOSOPHY (when enabled):
  * - Install event (canvas_install): Sent immediately on first use, regardless of consent.
  *   This is anonymous and contains no PII - just basic browser info and a random ID.
  * - Session/custom events: Only sent after user grants consent via the consent modal.
  * - Users can opt out of all future tracking by declining consent.
  *
- * AD BLOCKER BYPASS:
- * By default, telemetry is routed through OpenHands' reverse proxy (z.openhands.dev)
- * to avoid being blocked by ad blockers. Library consumers can override this with:
- * - VITE_POSTHOG_HOST: Custom proxy URL or direct PostHog URL
- * - VITE_POSTHOG_UI_HOST: PostHog UI host (defaults to https://us.posthog.com)
+ * INGESTION HOST:
+ * There is no default host. Upstream shipped OpenHands' reverse proxy
+ * (z.openhands.dev) as the default, which made every build depend on
+ * OpenHands' servers; this fork requires an explicit `VITE_POSTHOG_HOST`
+ * before anything can be sent. `VITE_POSTHOG_UI_HOST` sets the PostHog UI
+ * host (defaults to https://us.posthog.com).
  *
- * IMPORTANT: By default, telemetry is sent to the OpenHands PostHog project.
- * Source builds can override this with VITE_POSTHOG_API_KEY. Precompiled
- * library consumers can pass the same settings to configureTelemetry().
+ * `VITE_POSTHOG_API_KEY` selects the PostHog project; without both a key and
+ * a host the client stays uninitialized. Precompiled library consumers can
+ * pass the same settings to configureTelemetry().
  *
  * Users can disable all telemetry (including install tracking) via:
  * - Setting VITE_DO_NOT_TRACK=1 environment variable
@@ -34,7 +37,6 @@
 
 import type { BootstrapConfig, CaptureResult, PostHog } from "posthog-js";
 import { getLockedCloudAuthMode } from "#/api/agent-server-config";
-import defaults from "../../config/defaults.json";
 
 import packageJson from "../../package.json";
 import {
@@ -64,17 +66,17 @@ const POSTHOG_BOOTSTRAP_STORAGE_PREFIX = "posthog_bootstrap";
 const POSTHOG_INSTANCE_NAME = "agent-canvas";
 const POSTHOG_PAGEVIEW_CAPTURE_MODE = "history_change";
 
-// Unconfigured source builds use staging. Production release workflows pass
-// VITE_POSTHOG_API_KEY explicitly for both the app and library artifacts.
+// This fork ships no PostHog project. A build that wants telemetry must
+// supply its own key and host; otherwise the client is never initialized.
 const DEFAULT_POSTHOG_API_KEY: string =
-  (import.meta.env.VITE_POSTHOG_API_KEY as string | undefined) ||
-  defaults.telemetry.posthogApiKey;
+  (import.meta.env.VITE_POSTHOG_API_KEY as string | undefined) || "";
 
-// Default to OpenHands' reverse proxy to bypass ad blockers.
-// The proxy at z.openhands.dev routes to PostHog's US region.
-// Library consumers can override this with their own proxy or direct PostHog URL.
-const DEFAULT_POSTHOG_HOST =
-  import.meta.env.VITE_POSTHOG_HOST || "https://z.openhands.dev";
+// No default ingestion host. Upstream pointed this at OpenHands' reverse proxy
+// (z.openhands.dev), which made every build depend on OpenHands' servers. An
+// empty host must stay empty: PostHog treats a falsy `api_host` as "use my own
+// default endpoint", so the config resolver below refuses to initialize unless
+// both a key and a host were supplied explicitly.
+const DEFAULT_POSTHOG_HOST = import.meta.env.VITE_POSTHOG_HOST || "";
 
 // UI host is needed for PostHog features like toolbar to work correctly
 // when using a reverse proxy. Defaults to US region.
@@ -313,9 +315,16 @@ function getResolvedTelemetryConfig(): Required<TelemetryConfig> | null {
   // initializing one anyway would still fetch remote config and flags.
   if (isDoNotTrackEnabled()) return null;
 
+  const apiKey = telemetryConfig.apiKey || DEFAULT_POSTHOG_API_KEY;
+  const apiHost = telemetryConfig.apiHost || DEFAULT_POSTHOG_HOST;
+  // No key or no host means no project to report to. Returning null here (as
+  // opposed to passing an empty api_host to PostHog) is what keeps the client
+  // from silently falling back to PostHog's own endpoint.
+  if (!apiKey || !apiHost) return null;
+
   return {
-    apiKey: telemetryConfig.apiKey || DEFAULT_POSTHOG_API_KEY,
-    apiHost: telemetryConfig.apiHost || DEFAULT_POSTHOG_HOST,
+    apiKey,
+    apiHost,
     uiHost: telemetryConfig.uiHost || DEFAULT_POSTHOG_UI_HOST,
   };
 }

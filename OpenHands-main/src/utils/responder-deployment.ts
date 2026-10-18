@@ -2,10 +2,6 @@ import type { RecommendedAutomation } from "@openhands/extensions/automations";
 import { I18nKey } from "#/i18n/declaration";
 import { getResponderIntegrationIds } from "#/manifests/automation-interface";
 import { getRequiredIntegrationIds } from "#/utils/automation-catalog";
-import { PRODUCT_URL } from "#/utils/constants";
-
-/** OpenHands Cloud integrations page — where always-on responders are set up. */
-export const OPENHANDS_CLOUD_INTEGRATIONS_URL = `${PRODUCT_URL.PRODUCTION}/settings/integrations`;
 
 /**
  * Single source of truth for "does this automation get the deployment-choice
@@ -24,18 +20,13 @@ export function isResponderAutomation(
 }
 
 /**
- * Where a responder runs. Only `local` and `openhands-cloud` are wired today;
- * `user-cloud` is reserved for a future remote-deployment target.
+ * Where a responder runs. This build only supports `local`; `user-cloud` is
+ * reserved for a future remote-deployment target.
  */
-export type ResponderDeploymentTarget =
-  | "local"
-  | "user-cloud"
-  | "openhands-cloud";
+export type ResponderDeploymentTarget = "local" | "user-cloud";
 
 /** What the launcher should do when an option's primary action fires. */
-export type ResponderDeploymentAction =
-  | { kind: "launch-local" }
-  | { kind: "open-url"; url: string };
+export type ResponderDeploymentAction = { kind: "launch-local" };
 
 /** Presentational + behavioral descriptor for one deployment option. */
 export interface ResponderDeploymentOption {
@@ -69,17 +60,6 @@ export function resolveResponderDeploymentOption(
         primaryActionTestId: "responder-deployment-continue-local",
         action: { kind: "launch-local" },
       };
-    case "openhands-cloud":
-      return {
-        target,
-        testId: "responder-deployment-option-openhands-cloud",
-        titleKey: I18nKey.RESPONDER_DEPLOYMENT$OPENHANDS_CLOUD_TITLE,
-        descriptionKey:
-          I18nKey.RESPONDER_DEPLOYMENT$OPENHANDS_CLOUD_DESCRIPTION,
-        primaryActionKey: I18nKey.RESPONDER_DEPLOYMENT$OPENHANDS_CLOUD_ACTION,
-        primaryActionTestId: "responder-deployment-open-openhands-cloud",
-        action: { kind: "open-url", url: OPENHANDS_CLOUD_INTEGRATIONS_URL },
-      };
     case "user-cloud":
       throw new Error("User Cloud responder deployment is not yet supported");
     default: {
@@ -89,6 +69,10 @@ export function resolveResponderDeploymentOption(
   }
 }
 
-/** Targets the modal renders today, in display order (excludes `user-cloud`). */
+/**
+ * Targets the modal renders today, in display order. This build has no
+ * OpenHands Cloud backend, so the `openhands-cloud` target (which opened the
+ * hosted integrations page) is not offered — responders run locally only.
+ */
 export const VISIBLE_RESPONDER_DEPLOYMENT_TARGETS: ResponderDeploymentTarget[] =
-  ["local", "openhands-cloud"];
+  ["local"];

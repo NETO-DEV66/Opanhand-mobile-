@@ -10,7 +10,6 @@ import {
   Monitor,
 } from "lucide-react";
 import { ServerClient } from "@openhands/typescript-client/clients";
-import OpenHandsLogoWhite from "#/assets/branding/openhands-logo-white.svg?react";
 import DigitalOceanLogo from "#/assets/branding/digitalocean-logo.svg?react";
 import { getMarsBridge } from "#/api/mars/mars-tunnel-backend";
 import { DigitalOceanConnectPanel } from "./managed-agents/digitalocean-connect-panel";
@@ -29,13 +28,11 @@ import { useBackendsHealth } from "#/hooks/query/use-backends-health";
 import { useTracking } from "#/hooks/use-tracking";
 import type { CloudConnectionSource } from "#/services/cloud-funnel-analytics";
 import { getAgentServerClientOptions } from "#/api/agent-server-client-options";
-import { getLockedCloudHost } from "#/api/agent-server-config";
 import { isOpenHandsCloudHost } from "#/api/device-flow-client";
 import {
   getDisplayAgentServerVersion,
   validateLocalBackend,
 } from "#/api/agent-server-compatibility";
-import ChevronDownSmallIcon from "#/icons/chevron-down-small.svg?react";
 import { I18nKey } from "#/i18n/declaration";
 import type { Backend, BackendKind } from "#/api/backend-registry/types";
 import { getUserFacingConnectionErrorMessage } from "#/utils/user-facing-error";
@@ -48,7 +45,6 @@ import ExternalLinkIcon from "#/icons/external-link.svg?react";
 import ServerIcon from "#/icons/server.svg?react";
 import { getBackendStatusLabel } from "./backend-status-label";
 import { BackendStatusDot } from "./backend-status-dot";
-import { DeviceFlowAuth } from "./device-flow-auth";
 import { useBackendSwitchRedirect } from "./use-backend-switch-redirect";
 
 export type BackendFormMode = "add" | "edit";
@@ -155,7 +151,6 @@ function isValidHostUrl(host: string): boolean {
   }
 }
 
-const DEFAULT_OPENHANDS_CLOUD_HOST = "https://app.all-hands.dev";
 const LOCAL_BACKEND_COMMAND = "agent-canvas --backend-only --port 8001";
 const LOCAL_AGENT_SERVER_DOCS_URL =
   "https://github.com/OpenHands/OpenHands/blob/main/docs/DEVELOPMENT.md#alternative-development-workflows";
@@ -634,7 +629,8 @@ export function BackendForm({
                 }
           }
           onBlur={() => setHostTouched(true)}
-          placeholder={DEFAULT_OPENHANDS_CLOUD_HOST}
+          // eslint-disable-next-line i18next/no-literal-string -- example URL, not user-facing copy
+          placeholder="https://your-agent-server.example.com"
           className="w-full"
           showRequiredTag
           error={hostError}
@@ -720,9 +716,12 @@ interface BackendConnectionOptionsProps {
 }
 
 /**
- * Manual agent-server connection plus OpenHands Cloud OAuth login.
- * Used by both the Add Backend modal and the onboarding backend step so
- * supported backend choices stay consistent across first-run and settings UI.
+ * Manual agent-server connection. Used by both the Add Backend modal and the
+ * onboarding backend step so supported backend choices stay consistent across
+ * first-run and settings UI.
+ *
+ * This build ships no hosted OpenHands Cloud backend, so there is exactly one
+ * way to connect: point the app at an agent-server you run yourself.
  */
 export function BackendConnectionOptions({
   onConnected,
@@ -732,28 +731,8 @@ export function BackendConnectionOptions({
   manualSubmitLabel,
   manualSubmittingLabel,
   manualSubmitTestId,
-  analyticsSource,
 }: BackendConnectionOptionsProps) {
   const { t } = useTranslation("openhands");
-  const lockedCloudHost = getLockedCloudHost();
-
-  if (lockedCloudHost) {
-    return (
-      <div
-        data-testid={`${testIdRoot}-connection-options`}
-        className="flex justify-center"
-      >
-        <div className="w-full">
-          <CloudLoginColumn
-            onConnected={onConnected}
-            testIdRoot={testIdRoot}
-            lockedHost={lockedCloudHost}
-            analyticsSource={analyticsSource}
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
@@ -772,14 +751,6 @@ export function BackendConnectionOptions({
             t(I18nKey.ONBOARDING$BACKEND_STATUS_CHECKING)
           }
           submitTestId={manualSubmitTestId}
-        />
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <CloudLoginColumn
-          onConnected={onConnected}
-          testIdRoot={testIdRoot}
-          analyticsSource={analyticsSource}
         />
       </div>
     </div>
@@ -945,156 +916,6 @@ function ManualConnectionColumn({
         {isSubmitting ? submittingLabel : submitLabel}
       </BrandButton>
     </form>
-  );
-}
-
-interface CloudLoginColumnProps {
-  onConnected: (
-    payload: BackendFormSubmitPayload,
-    connectionMethod: BackendConnectionMethod,
-    metadata?: BackendConnectionTestMetadata,
-  ) => void;
-  testIdRoot: string;
-  lockedHost?: string;
-  analyticsSource?: CloudConnectionSource;
-  /** Omit repeated branding when a surrounding chooser already names Cloud. */
-  showBranding?: boolean;
-}
-
-/**
- * One-click OAuth login with OpenHands Cloud. Includes an "Advanced"
- * disclosure for users who self-host OpenHands Cloud and need to override the
- * host.
- */
-function CloudLoginColumn({
-  onConnected,
-  testIdRoot,
-  lockedHost,
-  analyticsSource,
-  showBranding = true,
-}: CloudLoginColumnProps) {
-  const { t } = useTranslation("openhands");
-
-  const [advancedOpen, setAdvancedOpen] = React.useState(false);
-  const [customHost, setCustomHost] = React.useState("");
-  const advancedPanelId = `${testIdRoot}-advanced-panel`;
-
-  const effectiveHost =
-    lockedHost ?? (customHost.trim() || DEFAULT_OPENHANDS_CLOUD_HOST);
-
-  const handleLoginSuccess = (apiKey: string) => {
-    onConnected(
-      {
-        name: "OpenHands Cloud",
-        host: normalizeHost(effectiveHost),
-        apiKey,
-        kind: "cloud",
-      },
-      "cloud_login",
-    );
-  };
-
-  return (
-    <div className="flex w-full min-w-0 flex-col items-center gap-3">
-      {showBranding ? (
-        <div className="flex flex-col items-center gap-1">
-          <OpenHandsLogoWhite
-            width={56}
-            height={56}
-            className="text-contrast [&_path:not([fill=transparent])]:fill-current"
-            aria-hidden
-          />
-
-          <h4
-            className={modalTitleLgMediumClassName}
-            data-testid={`${testIdRoot}-cloud-title`}
-          >
-            {t(I18nKey.BACKEND$CLOUD_TITLE)}
-          </h4>
-        </div>
-      ) : null}
-
-      <DeviceFlowAuth
-        host={effectiveHost}
-        onSuccess={handleLoginSuccess}
-        testIdRoot={testIdRoot}
-        analyticsSource={analyticsSource}
-        className="w-full items-center"
-        idleDescription={
-          <p
-            className="text-center text-sm leading-relaxed text-muted"
-            data-testid={`${testIdRoot}-cloud-description`}
-          >
-            {t(I18nKey.BACKEND$CLOUD_DESCRIPTION)}
-          </p>
-        }
-        // Host overriding only matters before the flow starts, so it rides the
-        // same idle-only slot as the description instead of sitting under the
-        // authorization status.
-        idleFooter={
-          lockedHost ? null : (
-            // Keep the Advanced disclosure at the original compact width even
-            // though the surrounding cloud panel spans the full chooser.
-            <div className="mx-auto w-full max-w-md">
-              <button
-                type="button"
-                onClick={() => setAdvancedOpen((open) => !open)}
-                aria-expanded={advancedOpen}
-                aria-controls={advancedPanelId}
-                data-testid={`${testIdRoot}-advanced-toggle`}
-                className="flex w-full cursor-pointer items-center justify-center gap-1 text-center text-xs text-muted transition-colors hover:text-content-2"
-              >
-                <span>{t(I18nKey.BACKEND$ADVANCED)}</span>
-                <ChevronDownSmallIcon
-                  className={cn(
-                    "h-4 w-4 shrink-0 text-muted transition-transform duration-200 ease-out",
-                    advancedOpen && "rotate-180",
-                  )}
-                  aria-hidden
-                />
-              </button>
-              {/* Height animates through `grid-template-rows` (0fr ↔ 1fr) so no
-                  max-height guess is needed; the inner clip is what makes `0fr`
-                  collapse. Content stays mounted so a typed host survives, and
-                  `inert` keeps the collapsed field out of the tab order. */}
-              <div
-                className={cn(
-                  "grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none",
-                  advancedOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
-                )}
-              >
-                <div className="overflow-hidden">
-                  <div
-                    id={advancedPanelId}
-                    data-testid={`${testIdRoot}-advanced-panel`}
-                    aria-hidden={!advancedOpen}
-                    inert={!advancedOpen ? true : undefined}
-                    className={cn(
-                      "pt-3 transition-opacity duration-200 ease-out motion-reduce:transition-none",
-                      advancedOpen ? "opacity-100" : "opacity-0",
-                    )}
-                  >
-                    <SettingsInput
-                      testId={`${testIdRoot}-cloud-host`}
-                      name={`${testIdRoot}-cloud-host`}
-                      type="text"
-                      label={t(I18nKey.BACKEND$HOST_LABEL)}
-                      value={customHost}
-                      onChange={setCustomHost}
-                      placeholder={DEFAULT_OPENHANDS_CLOUD_HOST}
-                      className="w-full"
-                    />
-                    <p className="mt-1 text-xs text-muted">
-                      {t(I18nKey.BACKEND$LOGIN_CLOUD_HINT)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )
-        }
-      />
-    </div>
   );
 }
 
@@ -1340,7 +1161,6 @@ function AgentServerGuidance({ location }: { location: AgentServerLocation }) {
 function AddBackendChooser({
   onConnected,
   onSelectProvider,
-  source,
 }: {
   onConnected: (
     payload: BackendFormSubmitPayload,
@@ -1348,16 +1168,14 @@ function AddBackendChooser({
     metadata?: BackendConnectionTestMetadata,
   ) => void;
   onSelectProvider: () => void;
-  source: BackendAddedSource;
 }) {
   const { t } = useTranslation("openhands");
   const [selectedOption, setSelectedOption] =
-    React.useState<AddBackendOption>("cloud");
+    React.useState<AddBackendOption>("agent-server");
   const [agentServerLocation, setAgentServerLocation] =
     React.useState<AgentServerLocation>("local");
   const panelId = "add-backend-selected-panel";
   const selectedTabId = `add-backend-option-${selectedOption}-tab`;
-  const isCloudSelected = selectedOption === "cloud";
   const canUseDigitalOcean = getMarsBridge() !== null;
 
   let panel: React.ReactNode;
@@ -1392,29 +1210,6 @@ function AddBackendChooser({
         <p className="text-xs text-muted">
           {t(I18nKey.BACKEND$PROVIDERS_COMING_SOON)}
         </p>
-      </div>
-    );
-  } else if (isCloudSelected) {
-    /* Padding keeps the CTA and Advanced host field from hugging the
-       border; when Advanced expands the panel grows with the content
-       instead of squeezing it into the reserved min-height. */
-    panel = (
-      <div
-        data-testid="add-backend-cloud-panel"
-        className={cn(
-          "relative isolate flex min-h-[13.5rem] w-full items-center justify-center rounded-xl border border-border px-5 py-6",
-          // A soft greyscale halo sits behind the CTA; -z-10 keeps it under the
-          // content rather than washing over it.
-          "before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-xl",
-          "before:bg-[radial-gradient(75%_75%_at_50%_50%,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0)_70%)]",
-        )}
-      >
-        <CloudLoginColumn
-          onConnected={onConnected}
-          testIdRoot="add-backend"
-          analyticsSource={source}
-          showBranding={false}
-        />
       </div>
     );
   } else {
@@ -1474,26 +1269,9 @@ function AddBackendChooser({
         aria-label={t(I18nKey.BACKEND$CHOOSER_TITLE)}
         className={cn(
           "grid overflow-hidden rounded-lg border border-border",
-          canUseDigitalOcean ? "grid-cols-3" : "grid-cols-2",
+          canUseDigitalOcean ? "grid-cols-2" : "grid-cols-1",
         )}
       >
-        <BackendOptionTab
-          value="cloud"
-          selectedValue={selectedOption}
-          title={t(I18nKey.BACKEND$CLOUD_TITLE)}
-          description={t(I18nKey.BACKEND$CLOUD_OPTION_DESCRIPTION)}
-          icon={
-            <OpenHandsLogoWhite
-              width={32}
-              height={32}
-              data-testid="add-backend-option-cloud-logo"
-              className="text-contrast [&_path:not([fill=transparent])]:fill-current"
-            />
-          }
-          onSelect={setSelectedOption}
-          panelId={panelId}
-          testId="add-backend-option-cloud"
-        />
         <BackendOptionTab
           value="agent-server"
           selectedValue={selectedOption}
@@ -1548,7 +1326,6 @@ function AddBackendConnectionOptions({
   // (BM-001), so leave any detail page that belongs to the previous backend.
   const redirectAfterAdd = useBackendSwitchRedirect();
   const { trackBackendAdded } = useTracking();
-  const lockedCloudHost = getLockedCloudHost();
 
   const handleConnected = React.useCallback(
     (
@@ -1570,22 +1347,10 @@ function AddBackendConnectionOptions({
     [addBackend, redirectAfterAdd, onClose, trackBackendAdded, source],
   );
 
-  if (lockedCloudHost) {
-    return (
-      <CloudLoginColumn
-        onConnected={handleConnected}
-        testIdRoot="add-backend"
-        lockedHost={lockedCloudHost}
-        analyticsSource={source}
-      />
-    );
-  }
-
   return (
     <AddBackendChooser
       onConnected={handleConnected}
       onSelectProvider={onSelectProvider}
-      source={source}
     />
   );
 }

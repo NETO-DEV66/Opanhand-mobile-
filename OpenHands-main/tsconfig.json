@@ -28,7 +28,8 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "#/*": ["./src/*"]
+      "#/*": ["./src/*"],
+      "test-utils": ["./src/test-utils.tsx"]
     },
     // Vite takes care of building everything, not tsc.
     "noEmit": true

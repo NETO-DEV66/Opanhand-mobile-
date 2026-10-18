@@ -310,11 +310,6 @@ export function RecommendedAutomationsLauncher({
     }
   };
 
-  const handleDeploymentOpenUrl = (url: string) => {
-    setDeploymentChoiceAutomation(null);
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
-
   const handleDeploymentClose = () => {
     setDeploymentChoiceAutomation(null);
   };
@@ -403,7 +398,6 @@ export function RecommendedAutomationsLauncher({
         isPending={isPreparingLocalResponder}
         onClose={handleDeploymentClose}
         onContinueLocal={handleDeploymentContinueLocal}
-        onOpenUrl={handleDeploymentOpenUrl}
       />
     </>
   );

@@ -16,8 +16,6 @@ interface ResponderDeploymentModalProps {
   onClose: () => void;
   /** Fired for the "Continue with local setup" action. */
   onContinueLocal: () => void;
-  /** Fired for an external-URL action (e.g. OpenHands Cloud integrations). */
-  onOpenUrl: (url: string) => void;
 }
 
 export function ResponderDeploymentModal({
@@ -25,7 +23,6 @@ export function ResponderDeploymentModal({
   isPending,
   onClose,
   onContinueLocal,
-  onOpenUrl,
 }: ResponderDeploymentModalProps) {
   const { t } = useTranslation("openhands");
 
@@ -58,7 +55,6 @@ export function ResponderDeploymentModal({
         <div className="flex flex-col gap-3 px-6 pb-6 sm:flex-row">
           {VISIBLE_RESPONDER_DEPLOYMENT_TARGETS.map((target) => {
             const option = resolveResponderDeploymentOption(target);
-            const { action } = option;
             return (
               <div
                 key={option.target}
@@ -79,18 +75,8 @@ export function ResponderDeploymentModal({
                   className="mt-auto"
                   testId={option.primaryActionTestId}
                   isDisabled={isPending}
-                  aria-busy={
-                    isPending && action.kind === "launch-local"
-                      ? true
-                      : undefined
-                  }
-                  onClick={() => {
-                    if (action.kind === "launch-local") {
-                      onContinueLocal();
-                    } else {
-                      onOpenUrl(action.url);
-                    }
-                  }}
+                  aria-busy={isPending ? true : undefined}
+                  onClick={onContinueLocal}
                 >
                   {t(option.primaryActionKey)}
                 </BrandButton>

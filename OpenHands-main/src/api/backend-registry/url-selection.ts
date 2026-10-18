@@ -1,4 +1,3 @@
-import { LOCKED_CLOUD_BACKEND_ID } from "./default-backend";
 import type { Backend, BackendSelection, ResolvedActiveBackend } from "./types";
 
 /**
@@ -83,25 +82,16 @@ export function readBackendSelectionFromUrl(
  * its links into the cloud's Settings — because Canvas locked to that cloud
  * host has a single backend. Anything else (no org, a backend named too, or
  * no locked cloud backend) is left to the other readers.
+ *
+ * This build has no Cloud backend, so no entry can ever be the locked Cloud
+ * backend and the function always returns null. It is kept so
+ * `active-store.ts` need not branch on a build-time capability.
  */
 export function readLockedCloudOrgFromUrl(
-  backends: Backend[],
-  search: string,
+  _backends: Backend[],
+  _search: string,
 ): BackendSelection | null {
-  if (!search) return null;
-  let params: URLSearchParams;
-  try {
-    params = new URLSearchParams(search);
-  } catch {
-    return null;
-  }
-  if (params.has(BACKEND_QUERY_PARAM)) return null;
-  const orgId = params.get(ORG_QUERY_PARAM);
-  if (!orgId) return null;
-  if (!backends.some((backend) => backend.id === LOCKED_CLOUD_BACKEND_ID)) {
-    return null;
-  }
-  return { backendId: LOCKED_CLOUD_BACKEND_ID, orgId };
+  return null;
 }
 
 /** Drop `?org=` from the address bar, keeping every other part of the URL. */

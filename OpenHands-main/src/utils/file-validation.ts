@@ -1,5 +1,7 @@
-const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB maximum file size
-const MAX_TOTAL_SIZE = 3 * 1024 * 1024; // 3MB maximum total size for all files combined
+const MAX_FILE_SIZE_MB = 100;
+const MAX_TOTAL_SIZE_MB = 100;
+const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024; // 100MB maximum file size
+const MAX_TOTAL_SIZE = MAX_TOTAL_SIZE_MB * 1024 * 1024; // 100MB maximum total size for all files combined
 
 export interface FileValidationResult {
   isValid: boolean;
@@ -19,7 +21,7 @@ export function validateIndividualFileSizes(
     const fileNames = oversizedFiles.map((f) => f.name);
     return {
       isValid: false,
-      errorMessage: `Files exceeding 3MB are not allowed: ${fileNames.join(", ")}`,
+      errorMessage: `Files exceeding ${MAX_FILE_SIZE_MB}MB are not allowed: ${fileNames.join(", ")}`,
       oversizedFiles: fileNames,
     };
   }
@@ -45,7 +47,7 @@ export function validateTotalFileSize(
     const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(1);
     return {
       isValid: false,
-      errorMessage: `Total file size would be ${totalSizeMB}MB, exceeding the 3MB limit. Please select fewer or smaller files.`,
+      errorMessage: `Total file size would be ${totalSizeMB}MB, exceeding the ${MAX_TOTAL_SIZE_MB}MB limit. Please select fewer or smaller files.`,
     };
   }
 
