@@ -73,7 +73,7 @@ Optional **Variables** tab:
 Actions → **Build Android APK** → *Run workflow*, or push a tag:
 
 ```bash
-git tag v1.28.1 && git push origin v1.28.1
+git tag v1.28.2 && git push origin v1.28.2
 ```
 
 A tag push creates a GitHub Release and attaches `app-release.apk`. That asset
