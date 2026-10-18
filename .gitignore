@@ -1,0 +1,28 @@
+# Build output and dependencies (CI regenerates these)
+node_modules/
+build/
+.gradle/
+OpenHands-main/android/build/
+OpenHands-main/android/.gradle/
+OpenHands-main/android/app/build/
+OpenHands-main/android/capacitor-cordova-android-plugins/
+OpenHands-main/android/app/src/main/assets/public/
+OpenHands-main/android/app/src/main/assets/capacitor.config.json
+OpenHands-main/android/app/src/main/assets/capacitor.plugins.json
+OpenHands-main/android/app/src/main/res/xml/config.xml
+OpenHands-main/.react-router/
+OpenHands-main/dist/
+__pycache__/
+*.pyc
+
+# Signing material - never commit. CI restores it from the
+# ANDROID_KEYSTORE_BASE64 secret; local builds drop their own copy here.
+*.keystore
+*.jks
+
+# Local APK binaries - distributed through GitHub Releases, not git.
+dl/*.apk
+OpenHands-mobile.zip
+
+# Agent memory / hooks - local working notes, must not be public.
+.openhands/

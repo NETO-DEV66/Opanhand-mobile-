@@ -1,0 +1,10 @@
+# robots.txt for OpenHands Mobile
+# https://NETO-DEV66.github.io/Opanhand-mobile-/
+
+User-agent: *
+Allow: /
+
+# No crawl-delay: the site is a handful of static files.
+# promo/ holds social-media artwork; it is indexable but low priority.
+
+Sitemap: https://NETO-DEV66.github.io/Opanhand-mobile-/sitemap.xml
