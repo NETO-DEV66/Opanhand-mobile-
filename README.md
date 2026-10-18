@@ -68,14 +68,15 @@ Package: dev.openhands.agentcanvas
 Signer:  SHA-256 0B:05:77:B8:11:BD:3D:0E:6D:6E:F5:DA:39:07:D9:4B:91:C0:50:E6:DF:F9:7C:E1:36:0F:F5:31:40:A3:FF:47
 ```
 
-The file's own size and hashes are printed by the build log and shown on the
+The file's own size and hashes change with every build, so the release workflow
+prints them and puts them in the notes on the
 [releases page](https://github.com/NETO-DEV66/Opanhand-mobile-/releases) for
-each version, so compare them there:
+each version. Compare what you downloaded against that version's numbers:
 
 ```
-Size:    <from the release page>
-MD5:     <from the release page>
-SHA-256: <from the release page>
+Size:    6456058 bytes          (v1.27.3)
+MD5:     2fdb058801c1f2052e5262997a8680b7
+SHA-256: 9f4946ea5bc9e4f95387447aa9c7d1cbdcf8513e10ef36e57fa0be287d01fea2
 ```
 
 Check it on your phone or PC:
@@ -346,7 +347,7 @@ APK can never be released by accident.
 | Name | Type | Purpose |
 | --- | --- | --- |
 | `BACKEND_BASE_URL` | Variable | Bakes the agent server URL into the app. |
-| `SIGNING_CERT_SHA256` | Variable | Optional. Overrides the pinned signer fingerprint. Set this only when rotating the key on purpose. |
+| `SIGNING_CERT_SHA256` | Variable | **Set.** The pinned signer fingerprint. The workflow refuses to publish an APK signed with anything else, and fails closed if it cannot read the fingerprint at all. Change it only when rotating the key on purpose. |
 | `ANDROID_KEYSTORE_BASE64` | Secret | The signing keystore, base64-encoded. Required to publish. |
 | `ANDROID_KEYSTORE_PASSWORD` | Secret | Keystore store password. |
 | `ANDROID_KEY_PASSWORD` | Secret | Keystore key password. |
@@ -358,7 +359,7 @@ APK can never be released by accident.
 
 | Problem | Fix |
 | --- | --- |
-| "App not installed" | Uninstall any older copy first, then install again. |
+| "App not installed" | You probably have a copy signed by a different key (an older build from another source). Uninstall that one, then install this APK. Builds from this repo's own releases always install in place. |
 | Play Protect blocks install | Tap **Install anyway**; the APK is not from the Play Store. |
 | App opens but cannot connect | Check the server URL and that the phone can reach it. Use `https://` for remote servers. |
 | Stuck on the loading screen | Confirm the agent server is running, then reopen the app. |

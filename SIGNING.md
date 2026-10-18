@@ -87,10 +87,10 @@ other forced uninstall is a bug in the release process.
 
 ## History
 
-- The certificate above is the one future updates will keep using, so users on
-  a build signed with it update in place. There is no earlier key in play on
-  this repository: it has no published releases yet, so the first release sets
-  the fingerprint and nothing has to be uninstalled.
+- The certificate above is the first and only release key on this repository.
+  **v1.27.3** was the first release signed with it, and every release since uses
+  the same key, so a newer build installs in place over an older one. There is no
+  earlier key in play, so no user has to uninstall anything.
 
 ## Local builds
 
