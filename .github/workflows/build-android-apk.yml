@@ -67,6 +67,10 @@ jobs:
           # let the user enter it in the app on first launch.
           VITE_BACKEND_BASE_URL: ${{ vars.BACKEND_BASE_URL }}
           VITE_MOCK_API: "false"
+          # The README and the landing page promise "no telemetry". Upstream's
+          # default sends an anonymous install event before any consent, so
+          # turn the PostHog client off at build time to make the promise true.
+          VITE_DO_NOT_TRACK: "1"
         run: npm run build:app
 
       - name: Sync Capacitor Android project
@@ -74,6 +78,10 @@ jobs:
 
       - name: Restore release keystore
         id: keystore
+        # Never on a pull_request run. A same-repo PR could otherwise build with
+        # the real release key, and the key would be present in the workspace of
+        # a workflow triggered by unreviewed code. Tag and main runs still sign.
+        if: github.event_name != 'pull_request'
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |

@@ -73,7 +73,7 @@ Optional **Variables** tab:
 Actions → **Build Android APK** → *Run workflow*, or push a tag:
 
 ```bash
-git tag v1.27.3 && git push origin v1.27.3
+git tag v1.28.0 && git push origin v1.28.0
 ```
 
 A tag push creates a GitHub Release and attaches `app-release.apk`. That asset
@@ -122,8 +122,9 @@ them on each release page. Nothing has to be filled in by hand after a release.
 - Push at a human pace on a new account. A burst of commits that mirrors another
   project is what spam heuristics look for.
 - Enable two-factor authentication.
-- The Android `applicationId` is `dev.openhands.agentcanvas`. Change it in
-  `OpenHands-main/android/app/build.gradle` and
-  `OpenHands-main/capacitor.config.ts` if the app must not be confused with the
-  upstream project. Changing it later breaks in-place updates, so decide before
-  the first release.
+- The Android `applicationId` is `dev.netodev66.openhandsmobile`, deliberately
+  distinct from the upstream project so the two can never be confused. It is set
+  in `OpenHands-main/android/app/build.gradle`,
+  `OpenHands-main/capacitor.config.ts` and
+  `OpenHands-main/android/app/src/main/res/values/strings.xml`. Changing it
+  later breaks in-place updates, so treat it as fixed.

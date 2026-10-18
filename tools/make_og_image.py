@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Build the 1200x630 Open Graph social preview card for the landing page."""
 import os
+import sys
+
 from PIL import Image, ImageDraw, ImageFont
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import brand
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, "OpenHands-main", "public", "android-chrome-512x512.png")
 OUT = os.path.join(ROOT, "docs", "assets", "og-image.png")
 
 INK = (8, 8, 10)
@@ -40,9 +44,7 @@ def main():
     d.rounded_rectangle((56, 56, W - 56, H - 56), radius=28, outline=LINE, width=2)
     d.rounded_rectangle((56, 56, 66, H - 56), radius=5, fill=ACCENT)
 
-    logo = Image.open(SRC).convert("RGBA").crop(Image.open(SRC).convert("RGBA").getbbox())
-    lw = 210
-    logo = logo.resize((lw, round(logo.height * lw / logo.width)), Image.LANCZOS)
+    logo = brand.tile(210)
     canvas.paste(logo, (112, 112), logo)
 
     d.text((112, 356), "OpenHands Mobile", font=font(78, True), fill=TEXT)

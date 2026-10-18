@@ -1,4 +1,4 @@
-package dev.openhands.agentcanvas;
+package dev.netodev66.openhandsmobile;
 
 import com.getcapacitor.BridgeActivity;
 

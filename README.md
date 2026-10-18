@@ -6,11 +6,18 @@
 
 Run and supervise your AI coding agents from your phone.
 
+> **Unofficial community build.** This is an independent packaging of
+> [OpenHands Agent Canvas](https://github.com/OpenHands/OpenHands), not an
+> official OpenHands release, and it is not affiliated with or endorsed by All
+> Hands AI. It ships its own name, icon and package id for that reason. All
+> credit for the app itself belongs to the OpenHands project — see
+> [Credits and license](#credits-and-license).
+
 [![OpenHands Mobile — the OpenHands Android app](docs/promo/banner-wide-1600x900.png)](https://neto-dev66.github.io/Opanhand-mobile-/)
 
 [![Download APK](https://img.shields.io/badge/Download-APK-6c5ce7?style=for-the-badge&logo=android&logoColor=white)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)
 [![Website](https://img.shields.io/badge/Website-openhands--app-FF6A3D?style=for-the-badge&logo=githubpages&logoColor=white)](https://neto-dev66.github.io/Opanhand-mobile-/)
-[![Version](https://img.shields.io/badge/version-1.27.3-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.27.3)
+[![Version](https://img.shields.io/badge/version-1.28.0-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.28.0)
 [![Build](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml/badge.svg)](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/blob/main/LICENSE)
 [![Support via UPI](https://img.shields.io/badge/Support-UPI-ff9f1c?style=for-the-badge&logo=buymeacoffee&logoColor=white)](#support-this-project)
@@ -25,7 +32,7 @@ Run and supervise your AI coding agents from your phone.
 
 | Build | Size | Link |
 | --- | --- | --- |
-| **Universal (signed)** | 6.2 MB | **[app-release.apk](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)** |
+| **Universal (signed)** | 5.8 MB | **[app-release.apk](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)** |
 
 All builds: [Releases page](https://github.com/NETO-DEV66/Opanhand-mobile-/releases)
 
@@ -34,10 +41,12 @@ device (arm64, armv7 and x86_64). The web bundle contains no native code, so
 there is nothing to split per architecture, and there is no separate debug
 build to choose between. One download works for everyone.
 
-> **In-place updates.** Every build is signed with the same key, which the
-> release workflow pins and verifies before publishing, so a new version installs
-> straight over the old one — no uninstall, no lost settings. See
-> [SIGNING.md](SIGNING.md) for the certificate fingerprint.
+> **Updating from v1.27.3 or earlier?** Uninstall that build first. v1.28.0
+> changed the package id to `dev.netodev66.openhandsmobile` and gave the app its
+> own name and icon, so Android treats it as a new app. Every release from
+> v1.28.0 onward is signed with the same key and installs straight over the
+> previous one — no uninstall, no lost settings. See [SIGNING.md](SIGNING.md)
+> for the certificate fingerprint.
 
 There is also a landing page with install steps and checksums:
 **<https://neto-dev66.github.io/Opanhand-mobile-/>**
@@ -48,7 +57,7 @@ This app is not on the Play Store. To get notified about new versions, add it to
 [Obtainium](https://github.com/ImranR98/Obtainium) — a free, open-source app that
 installs and updates apps straight from their GitHub releases.
 
-[![Get it on Obtainium](docs/assets/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium%3A%2F%2Fapp%2F%7B%22id%22%3A%22dev.openhands.agentcanvas%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FNETO-DEV66%2FOpanhand-mobile-%22%2C%22author%22%3A%22NETO-DEV66%22%2C%22name%22%3A%22OpenHands%20Mobile%22%7D)
+[![Get it on Obtainium](docs/assets/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium%3A%2F%2Fapp%2F%7B%22id%22%3A%22dev.netodev66.openhandsmobile%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FNETO-DEV66%2FOpanhand-mobile-%22%2C%22author%22%3A%22NETO-DEV66%22%2C%22name%22%3A%22OpenHands%20Mobile%22%7D)
 
 Tap the badge on your phone and Obtainium fills in the details for you. Or add
 this URL by hand:
@@ -64,7 +73,7 @@ is therefore the same for every release:
 
 ```
 File:    app-release.apk
-Package: dev.openhands.agentcanvas
+Package: dev.netodev66.openhandsmobile
 Signer:  SHA-256 0B:05:77:B8:11:BD:3D:0E:6D:6E:F5:DA:39:07:D9:4B:91:C0:50:E6:DF:F9:7C:E1:36:0F:F5:31:40:A3:FF:47
 ```
 
@@ -74,9 +83,9 @@ prints them and puts them in the notes on the
 each version. Compare what you downloaded against that version's numbers:
 
 ```
-Size:    6456058 bytes          (v1.27.3)
-MD5:     2fdb058801c1f2052e5262997a8680b7
-SHA-256: 9f4946ea5bc9e4f95387447aa9c7d1cbdcf8513e10ef36e57fa0be287d01fea2
+Size:    <printed in the release notes>
+MD5:     <printed in the release notes>
+SHA-256: <printed in the release notes>
 ```
 
 Check it on your phone or PC:
@@ -133,6 +142,7 @@ the agent on real hardware, and you get the controls in your pocket.
 | Architecture | Universal — arm64, armv7, x86_64 (no native code) |
 | Permissions | Internet only |
 | Backend | A reachable OpenHands agent server (you provide it) |
+| Telemetry | None. The APK is built with `VITE_DO_NOT_TRACK=1`, so the upstream PostHog client is disabled at compile time and never initialised. |
 
 The app needs network access to your agent server. It does **not** bundle a
 backend, and it does not send your data anywhere by itself.
@@ -141,10 +151,10 @@ backend, and it does not send your data anywhere by itself.
 
 ## Install
 
-> **In-place updates.** Every build is signed with the same key, which the
-> release workflow pins and verifies before publishing. You can download a new
-> version and install it straight over the old one — no uninstall, no lost
-> settings. See [SIGNING.md](SIGNING.md) for the certificate fingerprint.
+> **Updating from v1.27.3 or earlier?** Uninstall that build once. v1.28.0
+> changed the package id, name and icon, so Android sees it as a new app. Every
+> release from v1.28.0 onward installs straight over the previous one — no
+> uninstall, no lost settings. See [SIGNING.md](SIGNING.md) for the fingerprint.
 
 1. On your phone, open the [download link](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk).
 2. If Android asks, allow **install from unknown sources** for your browser or
@@ -152,7 +162,7 @@ backend, and it does not send your data anywhere by itself.
 3. Open the downloaded APK and tap **Install**.
 4. You may see a Play Protect warning because the app is not distributed through
    the Play Store. Tap **Install anyway**.
-5. Launch **OpenHands** from your app drawer.
+5. Launch **OpenHands Mobile** from your app drawer.
 
 ---
 
@@ -359,7 +369,7 @@ APK can never be released by accident.
 
 | Problem | Fix |
 | --- | --- |
-| "App not installed" | You probably have a copy signed by a different key (an older build from another source). Uninstall that one, then install this APK. Builds from this repo's own releases always install in place. |
+| "App not installed" | You have a copy signed by a different key, or the pre-1.28.0 build with the old package id. Uninstall that one, then install this APK. Releases from v1.28.0 onward always install in place. |
 | Play Protect blocks install | Tap **Install anyway**; the APK is not from the Play Store. |
 | App opens but cannot connect | Check the server URL and that the phone can reach it. Use `https://` for remote servers. |
 | Stuck on the loading screen | Confirm the agent server is running, then reopen the app. |
@@ -421,11 +431,12 @@ Not everyone can or should send money. These help just as much:
   built by **All Hands AI** and its contributors, and released under the MIT
   license. The interface, the agent canvas and everything inside the app are
   their work.
-- The launcher icon and logo are the **official OpenHands artwork**, used
-  unchanged (the yellow mark on white). No custom branding is applied.
-- This repository only adds the Android packaging (Capacitor wrapper, icons,
-  splash screen) and the build pipeline. Packaged and maintained by **Sameer**
-  ([@NETO-DEV66](https://github.com/NETO-DEV66)).
+- The launcher icon, splash screen and the "OpenHands Mobile" name are this
+  project's own. The official OpenHands artwork is **not** used, so that the
+  unofficial nature of this build is obvious at a glance.
+- This repository only adds the Android packaging: the Capacitor wrapper, the
+  app's own icon and splash, and the build pipeline. Packaged and maintained by
+  **Sameer** ([@NETO-DEV66](https://github.com/NETO-DEV66)).
 - The Android wrapper is released under the MIT license as well.
 
 This project is not affiliated with or endorsed by the OpenHands team or All

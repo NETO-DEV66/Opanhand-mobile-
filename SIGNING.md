@@ -91,6 +91,13 @@ other forced uninstall is a bug in the release process.
   **v1.27.3** was the first release signed with it, and every release since uses
   the same key, so a newer build installs in place over an older one. There is no
   earlier key in play, so no user has to uninstall anything.
+- **v1.28.0 changed the `applicationId`** from `dev.openhands.agentcanvas` to
+  `dev.netodev66.openhandsmobile`, together with the app's own name and icon.
+  Android identifies an app by its package name, so v1.28.0 is a *different app*
+  to the device: anyone on v1.27.3 or earlier must uninstall that build once,
+  then install v1.28.0. This is the single intentional break in in-place updates
+  and it was made early, before the app had a wide install base. The signing key
+  itself did not change, so every release from v1.28.0 onward updates in place.
 
 ## Local builds
 
