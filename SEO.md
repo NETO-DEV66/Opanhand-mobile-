@@ -1,6 +1,6 @@
 # SEO and discoverability — OpenHands Mobile
 
-This file explains how to get `https://NETO-DEV66.github.io/Opanhand-mobile-/` and the
+This file explains how to get `https://neto-dev66.github.io/Opanhand-mobile-/` and the
 GitHub repo to show up in Google, and what was already done for you.
 
 Nothing here is required for the app to work. It is about being *found*.
@@ -35,7 +35,7 @@ months. With it, often 2-3 days.
 2. Click **Add property** -> choose **URL prefix** (not Domain).
 3. Enter exactly:
    ```
-   https://NETO-DEV66.github.io/Opanhand-mobile-/
+   https://neto-dev66.github.io/Opanhand-mobile-/
    ```
 4. For verification, expand **HTML tag**. You will see something like:
    ```html
@@ -88,7 +88,7 @@ git push
 Wait about a minute, then confirm it is live:
 
 ```
-https://NETO-DEV66.github.io/Opanhand-mobile-/google1a2b3c4d5e6f7g8h.html
+https://neto-dev66.github.io/Opanhand-mobile-/google1a2b3c4d5e6f7g8h.html
 ```
 
 It must return the verification line, not a 404. Then click **Verify**.
@@ -166,7 +166,7 @@ client. Sideload the APK, point it at your backend URL, done.
 
 It's MIT licensed, no account, no telemetry, INTERNET permission only.
 
-- Site + install steps: https://NETO-DEV66.github.io/Opanhand-mobile-/
+- Site + install steps: https://neto-dev66.github.io/Opanhand-mobile-/
 - Source: https://github.com/NETO-DEV66/Opanhand-mobile-
 
 Not affiliated with the OpenHands team, just a community wrapper. Feedback welcome.
@@ -177,7 +177,7 @@ Not affiliated with the OpenHands team, just a community wrapper. Feedback welco
 <https://news.ycombinator.com/submit>
 
 - Title: `Show HN: OpenHands Mobile – run OpenHands coding agents from Android`
-- URL: `https://NETO-DEV66.github.io/Opanhand-mobile-/`
+- URL: `https://neto-dev66.github.io/Opanhand-mobile-/`
 
 Be present in the comments. Answer technical questions honestly, including the
 limitations (agent runs server-side, not on-device).
@@ -197,7 +197,7 @@ The agent still runs on your server — this is the client, in your pocket.
 • MIT, no account, no telemetry
 • Works with any OpenHands backend
 
-https://NETO-DEV66.github.io/Opanhand-mobile-/
+https://neto-dev66.github.io/Opanhand-mobile-/
 ```
 
 Attach the demo video. A video gets far more engagement than a link alone.
@@ -231,7 +231,7 @@ much better.
 | Timeframe | What to expect |
 | --- | --- |
 | 2-3 days | Google Search Console verifies; indexing requested |
-| 1-2 weeks | Homepage appears for `site:NETO-DEV66.github.io` and brand searches |
+| 1-2 weeks | Homepage appears for `site:neto-dev66.github.io` and brand searches |
 | 1-2 months | Appears for long-tail queries like `openhands android app` |
 | 3-6 months | Starts ranking competitively, if backlinks and stars grow |
 

@@ -54,7 +54,7 @@ def main():
     d.rounded_rectangle((114, 512, 114 + tw + 44, 560), radius=24, fill=INK_3, outline=LINE, width=2)
     d.text((136, 526), pill, font=f, fill=ACCENT)
 
-    url = "NETO-DEV66.github.io/Opanhand-mobile-"
+    url = "neto-dev66.github.io/Opanhand-mobile-"
     fu = font(26, True)
     uw = d.textlength(url, font=fu)
     d.text((W - 112 - uw, 524), url, font=fu, fill=FAINT)

@@ -6,10 +6,10 @@
 
 Run and supervise your AI coding agents from your phone.
 
-[![OpenHands Mobile — the OpenHands Android app](docs/promo/banner-wide-1600x900.png)](https://NETO-DEV66.github.io/Opanhand-mobile-/)
+[![OpenHands Mobile — the OpenHands Android app](docs/promo/banner-wide-1600x900.png)](https://neto-dev66.github.io/Opanhand-mobile-/)
 
 [![Download APK](https://img.shields.io/badge/Download-APK-6c5ce7?style=for-the-badge&logo=android&logoColor=white)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)
-[![Website](https://img.shields.io/badge/Website-openhands--app-FF6A3D?style=for-the-badge&logo=githubpages&logoColor=white)](https://NETO-DEV66.github.io/Opanhand-mobile-/)
+[![Website](https://img.shields.io/badge/Website-openhands--app-FF6A3D?style=for-the-badge&logo=githubpages&logoColor=white)](https://neto-dev66.github.io/Opanhand-mobile-/)
 [![Version](https://img.shields.io/badge/version-1.27.3-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.27.3)
 [![Build](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml/badge.svg)](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/blob/main/LICENSE)
@@ -40,7 +40,7 @@ build to choose between. One download works for everyone.
 > [SIGNING.md](SIGNING.md) for the certificate fingerprint.
 
 There is also a landing page with install steps and checksums:
-**<https://NETO-DEV66.github.io/Opanhand-mobile-/>**
+**<https://neto-dev66.github.io/Opanhand-mobile-/>**
 
 ### Get automatic updates with Obtainium
 
