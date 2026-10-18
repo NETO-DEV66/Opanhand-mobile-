@@ -39,15 +39,15 @@ jobs:
       run:
         working-directory: OpenHands-main
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: OpenHands-main/package-lock.json
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
@@ -112,6 +112,7 @@ jobs:
           ./gradlew assembleRelease --no-daemon
 
       - name: Verify the release APK
+        id: verify
         working-directory: OpenHands-main/android
         env:
           KEYSTORE_WAS_RESTORED: ${{ steps.keystore.outputs.signed }}
@@ -196,11 +197,17 @@ jobs:
           sha256sum "$APK"
           ls -l "$APK"
 
+          # Hand the real path to the upload step. A pull-request build has no
+          # keystore, so Gradle names its output app-release-unsigned.apk and a
+          # hardcoded path would miss it.
+          echo "apk=$APK" >> "$GITHUB_OUTPUT"
+
       - name: Upload the universal APK
-        uses: actions/upload-artifact@v4
+        if: steps.keystore.outputs.signed == 'true'
+        uses: actions/upload-artifact@v7
         with:
           name: openhands-universal-apk
-          path: OpenHands-main/android/app/build/outputs/apk/release/app-release.apk
+          path: OpenHands-main/android/${{ steps.verify.outputs.apk }}
           if-no-files-found: error
 
       - name: Attach the APK to the GitHub Release
