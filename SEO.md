@@ -21,7 +21,7 @@ Nothing here is required for the app to work. It is about being *found*.
 | Title / description keyword tuning | done | `docs/index.html` |
 | `og:locale`, `robots`, `keywords` meta | done | `docs/index.html` |
 | README keyword headings + FAQ table | done | `README.md` |
-| GitHub release notes | improved | release `v1.28.2` |
+| GitHub release notes | improved | release `v1.28.3` |
 
 ---
 
