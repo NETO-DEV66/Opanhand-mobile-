@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AgentDeck</string>
+    <string name="title_activity_main">AgentDeck</string>
+    <string name="package_name">dev.netodev66.agentdeck</string>
+    <string name="custom_url_scheme">dev.netodev66.agentdeck</string>
+</resources>

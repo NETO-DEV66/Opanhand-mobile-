@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AgentDeck — Run OpenHands on Android (APK Download)</title>
-<meta name="description" content="Run AI coding agents from your phone. The OpenHands Android app, packaged as a sideloadable APK. Free, MIT licensed, no account, no telemetry.">
-<meta name="keywords" content="OpenHands Android app, OpenHands mobile, OpenHands APK, run OpenHands on phone, AI coding agent Android, OpenHands Agent Canvas, sideload APK, self-hosted AI agent">
+<title>AgentDeck — AI Chat on Android (APK Download)</title>
+<meta name="description" content="Chat with OpenAI, Anthropic, Gemini, Ollama and more from your phone. A standalone Android AI chat app you sideload once. Free, MIT licensed, no account, no server, no telemetry.">
+<meta name="keywords" content="AI chat Android app, ChatGPT client Android, Claude Android APK, Gemini Android app, Ollama Android client, OpenRouter Android, bring your own API key, sideload APK, private AI chat">
 <link rel="canonical" href="https://neto-dev66.github.io/Opanhand-mobile-/">
 <meta name="theme-color" content="#08080A">
 <meta name="color-scheme" content="dark">
@@ -19,14 +19,14 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AgentDeck">
 <meta property="og:url" content="https://neto-dev66.github.io/Opanhand-mobile-/">
-<meta property="og:title" content="AgentDeck — Your AI coding agents, in your pocket.">
-<meta property="og:description" content="OpenHands Agent Canvas packaged as an Android app. Sideload the APK once and drive real coding agents from your phone.">
+<meta property="og:title" content="AgentDeck — Chat with any AI model, in your pocket.">
+<meta property="og:description" content="A standalone Android app for chatting with the AI provider you choose. Paste your API key once and start chatting. No server, no account, no telemetry.">
 <meta property="og:image" content="https://neto-dev66.github.io/Opanhand-mobile-/assets/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="AgentDeck — Your AI coding agents, in your pocket.">
-<meta name="twitter:description" content="OpenHands Agent Canvas packaged as an Android app. Free, MIT licensed, no account, no telemetry.">
+<meta name="twitter:title" content="AgentDeck — Chat with any AI model, in your pocket.">
+<meta name="twitter:description" content="A standalone Android AI chat app. Paste your own API key and talk to OpenAI, Anthropic, Gemini, Ollama and more. Free, MIT licensed, no account, no telemetry.">
 <meta name="twitter:image" content="https://neto-dev66.github.io/Opanhand-mobile-/assets/og-image.png">
 
 <link rel="icon" type="image/png" href="assets/favicon.png">
@@ -41,10 +41,10 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "AgentDeck",
-  "description": "OpenHands Agent Canvas packaged as a native Android app. Runs AI coding agents from a phone against your own OpenHands backend.",
+  "description": "A standalone Android app for chatting with the AI provider of your choice. Bring your own API key and talk to OpenAI, Anthropic, Gemini, OpenRouter, Groq, DeepSeek, Mistral, xAI Grok, Ollama or a custom endpoint. No server, no account.",
   "operatingSystem": "Android 6.0+ (API 23)",
-  "applicationCategory": "DeveloperApplication",
-  "softwareVersion": "1.28.3",
+  "applicationCategory": "UtilitiesApplication",
+  "softwareVersion": "1.29.0",
   "fileSize": "5.7 MB",
   "downloadUrl": "https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk",
   "installUrl": "https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk",
@@ -66,7 +66,7 @@
       "name": "Is it safe to install?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except the backend you configure."
+        "text": "You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except the AI provider whose key you enter."
       }
     },
     {
@@ -82,7 +82,7 @@
       "name": "Is it official?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. This is an independent wrapper built by Sameer (@NETO-DEV66). It is not affiliated with or endorsed by the OpenHands team, and it is not the official OpenHands app. The upstream project is separate and has its own releases."
+        "text": "No. This is an independent app built by Sameer (@NETO-DEV66). It is not affiliated with or endorsed by All Hands AI or the OpenHands project, and it is not the official OpenHands app. The Android shell and web UI are this project's own MIT-licensed work."
       }
     },
     {
@@ -90,7 +90,7 @@
       "name": "Does it work offline?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The app opens and its interface loads without a connection. Anything involving an agent needs a reachable OpenHands backend, so plan on having a network path to your server."
+        "text": "The app opens and its interface loads without a connection. Sending a message needs a network path to your provider's API, so a local model such as Ollama on your own machine works offline while cloud providers need internet."
       }
     },
     {
@@ -138,8 +138,8 @@
     {
       "@type": "HowToStep",
       "position": 4,
-      "name": "Connect your backend",
-      "text": "Open the app, enter your OpenHands server URL, and start a conversation.",
+      "name": "Add your API key",
+      "text": "Open the app, pick your provider, paste the API key, and start chatting.",
       "url": "https://neto-dev66.github.io/Opanhand-mobile-/#install"
     }
   ]
@@ -984,11 +984,11 @@ code,pre{font-family:var(--font-mono)}
         <p class="eyebrow" id="h-eyebrow"><span class="dot" aria-hidden="true"></span>Android · sideload · MIT</p>
 
         <h1 id="hero-title">
-          <span class="hline"><span>Your AI coding agents,</span></span>
+          <span class="hline"><span>Chat with any AI model,</span></span>
           <span class="hline"><span>in your <em class="grad">pocket.</em></span></span>
         </h1>
 
-        <p class="hero-sub" id="h-sub">OpenHands Agent Canvas, packaged as a native Android app. Sideload the APK once and drive real coding agents from your phone. No Play Store, no account, no telemetry.</p>
+        <p class="hero-sub" id="h-sub">AgentDeck is a standalone Android app for chatting with the AI provider you already use. Pick OpenAI, Anthropic, Gemini, OpenRouter, Groq, DeepSeek, Mistral, Grok or Ollama, paste your API key, and start chatting. No server to run, no account, no telemetry.</p>
 
         <div class="hero-cta" id="h-cta">
           <a class="btn btn-primary" href="https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk">
@@ -1002,14 +1002,14 @@ code,pre{font-family:var(--font-mono)}
         </div>
 
         <div class="obtainium" id="h-obt">
-          <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium%3A%2F%2Fapp%2F%7B%22id%22%3A%22dev.netodev66.openhandsmobile%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FNETO-DEV66%2FOpanhand-mobile-%22%2C%22author%22%3A%22NETO-DEV66%22%2C%22name%22%3A%22AgentDeck%22%7D" target="_blank" rel="noopener">
+          <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium%3A%2F%2Fapp%2F%7B%22id%22%3A%22dev.netodev66.agentdeck%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FNETO-DEV66%2FOpanhand-mobile-%22%2C%22author%22%3A%22NETO-DEV66%22%2C%22name%22%3A%22AgentDeck%22%7D" target="_blank" rel="noopener">
             <img src="assets/badge_obtainium.png" width="196" height="44" alt="Get it on Obtainium">
           </a>
           <p>Get automatic update notifications, no Play Store needed.</p>
         </div>
 
         <ul class="chips" id="h-chips">
-          <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v18M3 12h18" opacity=".4"/><circle cx="12" cy="12" r="9"/></svg>v1.28.3</li>
+          <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v18M3 12h18" opacity=".4"/><circle cx="12" cy="12" r="9"/></svg>v1.29.0</li>
           <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>Android 6.0+</li>
           <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8.2 8 9 4.6-.8 8-4 8-9V6l-8-3Z"/></svg>INTERNET only</li>
           <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>No account</li>
@@ -1028,41 +1028,14 @@ code,pre{font-family:var(--font-mono)}
               </div>
 
               <div class="chat" id="chat">
-                <div class="msg user" data-step="user">Fix the failing auth test and open a PR.</div>
+                <div class="msg user" data-step="user">Summarise this changelog in three bullets.</div>
                 <div class="typing" data-step="typing" aria-hidden="true"><i></i><i></i><i></i></div>
-                <div class="msg agent" data-step="agent">On it. Reading the test suite first.</div>
-                <div class="tools" data-step="tools">
-                  <div class="tool" data-tool="0">
-                    <span class="status" aria-hidden="true">
-                      <svg class="ring" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
-                      <svg class="tick" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
-                    </span>
-                    <span class="tool-name">read_file</span><code>tests/test_auth.py</code>
-                  </div>
-                  <div class="tool" data-tool="1">
-                    <span class="status" aria-hidden="true">
-                      <svg class="ring" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
-                      <svg class="tick" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
-                    </span>
-                    <span class="tool-name">run_tests</span><code>pytest -k auth</code>
-                  </div>
-                  <div class="tool" data-tool="2">
-                    <span class="status" aria-hidden="true">
-                      <svg class="ring" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
-                      <svg class="tick" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
-                    </span>
-                    <span class="tool-name">edit_file</span><code>src/auth/token.py</code>
-                  </div>
-                </div>
-                <div class="msg agent" data-step="final"><span id="typed">Found it. The token expiry check used a stale clock. Fixed and pushed.</span><span class="caret is-off" id="caret"></span></div>
-                <div class="pushed" data-step="pushed">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
-                  Pushed
-                </div>
+                <div class="msg agent" data-step="agent">Sure — here's the short version.</div>
+                <div class="msg agent" data-step="final"><span id="typed">New provider picker, saved conversations, and a stop button for streaming replies.</span><span class="caret is-off" id="caret"></span></div>
               </div>
 
               <div class="composer" aria-hidden="true">
-                <span>Ask the agent…</span>
+                <span>Message…</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 12h15m0 0-6-6m6 6-6 6"/></svg>
               </div>
             </div>
@@ -1083,9 +1056,9 @@ code,pre{font-family:var(--font-mono)}
   <div class="container">
     <div class="sec-head reveal">
       <p class="eyebrow"><span class="dot" aria-hidden="true"></span>01 · Overview</p>
-      <h2 id="overview-h">A thin shell around a web app. <span class="muted">Nothing hidden.</span></h2>
-      <p class="lead">OpenHands Agent Canvas is the web interface for OpenHands, an open-source AI software engineer. This project wraps that interface in a Capacitor shell so it installs and opens like any other Android app. You still point it at your own backend.</p>
-      <p class="lead">In short: this is the <strong>OpenHands Android app</strong>. It is a community-built mobile client for OpenHands — not an official release — and it lets you <strong>run OpenHands on your phone</strong> while the agent keeps working on your own server. If you were looking for an <strong>OpenHands APK</strong> to sideload, this is it.</p>
+      <h2 id="overview-h">A standalone chat app. <span class="muted">Nothing hidden.</span></h2>
+      <p class="lead">AgentDeck is a native Android app for talking to the AI provider you already use. There is no backend to run and no account to create: you pick a provider, paste your API key, and the app sends your messages straight to that provider.</p>
+      <p class="lead">In short: this is a <strong>direct-connect AI chat app for Android</strong>. It is an independent project — not affiliated with All Hands AI or OpenHands — and the web UI and Android shell are its own work under the MIT license. If you were looking for a <strong>pocket AI chat APK</strong> to sideload and drive with your own key, this is it.</p>
     </div>
 
     <div class="grid-3 stagger">
@@ -1102,7 +1075,7 @@ code,pre{font-family:var(--font-mono)}
       <article class="card">
         <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8.2 8 9 4.6-.8 8-4 8-9V6l-8-3Z"/></svg></div>
         <h3>Minimal permissions</h3>
-        <p>INTERNET is the only one it asks for. No storage, no camera, no contacts, no location. Telemetry is compiled out, so the app only talks to the backend you configure.</p>
+        <p>INTERNET is the only one it asks for. No storage, no camera, no contacts, no location. There is no analytics code at all, so the app only talks to the provider you configure.</p>
       </article>
       <article class="card">
         <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg></div>
@@ -1117,7 +1090,7 @@ code,pre{font-family:var(--font-mono)}
       <article class="card">
         <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg></div>
         <h3>Honest about its limits</h3>
-        <p>It is a client. Without your own OpenHands server running somewhere, the agent parts do nothing.</p>
+        <p>It is a chat client, not a coding agent. It needs an API key and a working connection to your chosen provider.</p>
       </article>
     </div>
   </div>
@@ -1129,48 +1102,48 @@ code,pre{font-family:var(--font-mono)}
     <div class="caps">
       <div class="caps-head reveal">
         <p class="eyebrow"><span class="dot" aria-hidden="true"></span>02 · Capabilities</p>
-        <h2 id="features-h">Everything the web UI does, <span class="muted">on a phone.</span></h2>
-        <p class="lead">The app is the same interface you already use on a desktop, laid out for a small screen and a thumb.</p>
+        <h2 id="features-h">Everything a chat client needs, <span class="muted">on a phone.</span></h2>
+        <p class="lead">A clean, fast chat UI built for a small screen and a thumb — with your key held on the device, not on someone else's server.</p>
       </div>
 
       <div class="rows stagger">
         <article class="row">
           <span class="row-num" aria-hidden="true">01</span>
           <div class="row-body">
-            <h3>Agent conversations</h3>
-            <p>Chat with the agent, watch it plan, and steer it while a task is still running.</p>
+            <h3>Streaming chat</h3>
+            <p>Replies appear token by token as the model writes them, with a stop button for when you have seen enough.</p>
           </div>
           <span class="row-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></span>
         </article>
         <article class="row">
           <span class="row-num" aria-hidden="true">02</span>
           <div class="row-body">
-            <h3>Live code diffs</h3>
-            <p>See every edit as it lands, file by file, with the added and removed lines marked.</p>
+            <h3>Saved conversations</h3>
+            <p>Every chat is stored on your device. Start as many as you like and pick up an old one where you left off.</p>
           </div>
           <span class="row-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></span>
         </article>
         <article class="row">
           <span class="row-num" aria-hidden="true">03</span>
           <div class="row-body">
-            <h3>Terminal output</h3>
-            <p>Read command output and test results as they stream in, without leaving the app.</p>
+            <h3>Switch provider or model</h3>
+            <p>Change provider and model any time in Settings. The next message just goes to the new one.</p>
           </div>
           <span class="row-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></span>
         </article>
         <article class="row">
           <span class="row-num" aria-hidden="true">04</span>
           <div class="row-body">
-            <h3>Session history</h3>
-            <p>Reopen an earlier conversation and pick it up where you stopped.</p>
+            <h3>Ten providers, one app</h3>
+            <p>OpenAI, Anthropic, Gemini, OpenRouter, Groq, DeepSeek, Mistral, xAI Grok, Ollama and a custom endpoint.</p>
           </div>
           <span class="row-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></span>
         </article>
         <article class="row">
           <span class="row-num" aria-hidden="true">05</span>
           <div class="row-body">
-            <h3>Your own backend</h3>
-            <p>Point it at your OpenHands server. The URL and any credentials stay on your device.</p>
+            <h3>Your key stays on the device</h3>
+            <p>The API key is kept in local storage and sent only to the provider you chose. Disconnect at any time to clear it.</p>
           </div>
           <span class="row-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></span>
         </article>
@@ -1178,7 +1151,7 @@ code,pre{font-family:var(--font-mono)}
           <span class="row-num" aria-hidden="true">06</span>
           <div class="row-body">
             <h3>Launches offline</h3>
-            <p>The shell opens without a network connection. The agent itself still needs your server.</p>
+            <p>The interface opens without a network connection. Sending a message still needs your provider to be reachable.</p>
           </div>
           <span class="row-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></span>
         </article>
@@ -1193,56 +1166,28 @@ code,pre{font-family:var(--font-mono)}
     <div class="sec-head reveal">
       <p class="eyebrow"><span class="dot" aria-hidden="true"></span>03 · Screens</p>
       <h2 id="screens-h">The real setup flow, <span class="muted">start to finish.</span></h2>
-      <p class="lead">These are actual captures of the app, not mockups. The first launch walks you through four steps and then hands you a working conversation.</p>
+      <p class="lead">First launch is two short steps and then you are in a working conversation. No host to type in, no server to configure, no account to create.</p>
     </div>
 
-    <div class="shots stagger">
-        <figure class="shot">
-          <div class="shot-frame">
-            <img src="assets/screens/01-backend.webp" width="742" height="1484" loading="lazy" decoding="async"
-                 alt="Add a backend screen with fields for a friendly name, the agent server URL, a Local/Cloud type toggle, and an API key.">
-          </div>
-          <figcaption>
-            <b>1 · Connect</b>
-            <span>Point it at your own agent server — local or remote. A friendly name is enough to start.</span>
-          </figcaption>
-        </figure>
-
-        <figure class="shot">
-          <div class="shot-frame">
-            <img src="assets/screens/02-agent.webp" width="742" height="1484" loading="lazy" decoding="async"
-                 alt="Choose your agent screen listing OpenHands, Claude Code, Codex, Gemini CLI, Pi and OpenCode.">
-          </div>
-          <figcaption>
-            <b>2 · Pick an agent</b>
-            <span>OpenHands by default, or bring Claude Code, Codex, Gemini CLI, Pi or OpenCode.</span>
-          </figcaption>
-        </figure>
-
-        <figure class="shot">
-          <div class="shot-frame">
-            <img src="assets/screens/03-llm.webp" width="742" height="1484" loading="lazy" decoding="async"
-                 alt="Set up your LLM screen for choosing a model provider and model, with a pre-selected default.">
-          </div>
-          <figcaption>
-            <b>3 · Choose a model</b>
-            <span>Pick a provider and model. A sensible default is pre-selected for you.</span>
-          </figcaption>
-        </figure>
-
-        <figure class="shot">
-          <div class="shot-frame">
-            <img src="assets/screens/04-hello.webp" width="742" height="1484" loading="lazy" decoding="async"
-                 alt="Say hello screen with a first-message box and a list of ready-made workflow templates.">
-          </div>
-          <figcaption>
-            <b>4 · Start working</b>
-            <span>Send a first message, or open a proven workflow with its prompt and MCPs already set up.</span>
-          </figcaption>
-        </figure>
+    <div class="grid-3 stagger">
+      <article class="card">
+        <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
+        <h3>1 · Pick a provider</h3>
+        <p>Choose from OpenAI, Anthropic, Gemini, OpenRouter, Groq, DeepSeek, Mistral, xAI Grok, Ollama or a custom endpoint.</p>
+      </article>
+      <article class="card">
+        <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 10h10M7 14h6"/></svg></div>
+        <h3>2 · Paste your API key</h3>
+        <p>Enter the key for that provider and tap connect. Ollama and the custom endpoint also let you set a base URL.</p>
+      </article>
+      <article class="card">
+        <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5Z"/></svg></div>
+        <h3>Then chat</h3>
+        <p>Send a message and watch the reply stream in. Your conversations and key stay on the device.</p>
+      </article>
     </div>
 
-    <p class="shot-note reveal"><b>A note on these images.</b> They are real screen captures of the app's first-run wizard, taken frame by frame as each step loads. The backend details shown are placeholders, not a live server. Your own setup will carry your server, your model and your conversations.</p>
+    <p class="shot-note reveal"><b>Where the key goes.</b> The app stores your API key in local storage and sends it straight to the provider you picked. Nothing passes through a server run by this project, because there is not one.</p>
   </div>
 </section>
 
@@ -1285,8 +1230,8 @@ code,pre{font-family:var(--font-mono)}
         <div class="step" data-step="4">
           <span class="step-dot" aria-hidden="true">4</span>
           <div class="step-body">
-            <h3>Connect your backend</h3>
-            <p>Open the app, enter your OpenHands server URL, and start a conversation.</p>
+            <h3>Add your API key</h3>
+            <p>Open the app, pick your provider, paste the API key, and start chatting.</p>
           </div>
         </div>
       </div>
@@ -1377,7 +1322,7 @@ code,pre{font-family:var(--font-mono)}
             <span class="cb-text">Copy</span>
           </button>
         </div>
-        <p class="panel-note">Expect <code>package: name='dev.netodev66.openhandsmobile'</code> and <code>versionName='1.28.3'</code>.</p>
+        <p class="panel-note">Expect <code>package: name='dev.netodev66.agentdeck'</code> and <code>versionName='1.29.0'</code>.</p>
       </div>
     </div>
   </div>
@@ -1393,8 +1338,8 @@ code,pre{font-family:var(--font-mono)}
 
     <div class="specgrid reveal" id="specgrid">
       <div class="spec"><span class="spec-k">Android version</span><span class="spec-v"><span data-count="6.0" data-decimals="1">6.0</span> (API 23) or newer</span></div>
-      <div class="spec"><span class="spec-k">Version</span><span class="spec-v">1.28.3</span></div>
-      <div class="spec"><span class="spec-k">Package</span><span class="spec-v"><code>dev.netodev66.openhandsmobile</code></span></div>
+      <div class="spec"><span class="spec-k">Version</span><span class="spec-v">1.29.0</span></div>
+      <div class="spec"><span class="spec-k">Package</span><span class="spec-v"><code>dev.netodev66.agentdeck</code></span></div>
       <div class="spec"><span class="spec-k">Architecture</span><span class="spec-v">Universal, all ABIs</span></div>
       <div class="spec"><span class="spec-k">Permissions</span><span class="spec-v">INTERNET only</span></div>
       <div class="spec"><span class="spec-k">Download size</span><span class="spec-v"><span data-count="5.7" data-decimals="1">5.7</span> MB</span></div>
@@ -1415,7 +1360,7 @@ code,pre{font-family:var(--font-mono)}
     <div class="faq reveal">
       <details>
         <summary>Is it safe to install?<span class="pm" aria-hidden="true"></span></summary>
-        <div class="ans"><div class="ans-in">You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except the backend you configure.</div></div>
+        <div class="ans"><div class="ans-in">You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except the AI provider whose key you enter.</div></div>
       </details>
       <details>
         <summary>Why does Play Protect warn?<span class="pm" aria-hidden="true"></span></summary>
@@ -1423,11 +1368,11 @@ code,pre{font-family:var(--font-mono)}
       </details>
       <details>
         <summary>Is it official?<span class="pm" aria-hidden="true"></span></summary>
-        <div class="ans"><div class="ans-in">No. This is an independent wrapper built by Sameer (@NETO-DEV66). It is not affiliated with or endorsed by the OpenHands team, and it is not the official OpenHands app. The upstream project is separate and has its own releases.</div></div>
+        <div class="ans"><div class="ans-in">No. This is an independent app built by Sameer (@NETO-DEV66). It is not affiliated with or endorsed by All Hands AI or the OpenHands project, and it is not the official OpenHands app. The Android shell and web UI are this project's own MIT-licensed work.</div></div>
       </details>
       <details>
         <summary>Does it work offline?<span class="pm" aria-hidden="true"></span></summary>
-        <div class="ans"><div class="ans-in">The app opens and its interface loads without a connection. Anything involving an agent needs a reachable OpenHands backend, so plan on having a network path to your server.</div></div>
+        <div class="ans"><div class="ans-in">The app opens and its interface loads without a connection. Sending a message needs a network path to your provider's API, so a local model such as Ollama on your own machine works offline while cloud providers need internet.</div></div>
       </details>
       <details>
         <summary>Do I need a Play Store account?<span class="pm" aria-hidden="true"></span></summary>
@@ -1502,14 +1447,14 @@ code,pre{font-family:var(--font-mono)}
           </span>
           <span>AgentDeck</span>
         </a>
-        <p class="footer-desc">An independent Android wrapper for the OpenHands Agent Canvas web interface. MIT licensed, free, and built in the open.</p>
+        <p class="footer-desc">A standalone Android app for chatting with the AI provider of your choice. MIT licensed, free, and built in the open.</p>
       </div>
 
       <div class="footer-cols">
         <div class="footer-col">
           <h4>Source</h4>
           <a href="https://github.com/NETO-DEV66/Opanhand-mobile-" target="_blank" rel="noopener">Repository</a>
-          <a href="https://github.com/NETO-DEV66/Opanhand-mobile-/tree/main/OpenHands-main" target="_blank" rel="noopener">App source</a>
+          <a href="https://github.com/NETO-DEV66/Opanhand-mobile-/tree/main/agentdeck" target="_blank" rel="noopener">App source</a>
         </div>
         <div class="footer-col">
           <h4>Releases</h4>
@@ -1530,14 +1475,14 @@ code,pre{font-family:var(--font-mono)}
     </div>
 
     <div class="footer-bottom">
-      <p class="disclaimer-line"><strong>Not an official release.</strong> This project is not affiliated with or endorsed by the OpenHands team.</p>
+      <p class="disclaimer-line"><strong>Not an official release.</strong> This project is not affiliated with or endorsed by All Hands AI or the OpenHands project.</p>
       <p class="copyright">© 2026 Sameer (@NETO-DEV66). MIT License.</p>
     </div>
   </div>
 </footer>
 
 <div class="stickybar" id="stickybar">
-  <div class="bar-meta"><span>v1.28.3 · 5.7 MB</span><span>Android 6.0+</span></div>
+  <div class="bar-meta"><span>v1.29.0 · 5.7 MB</span><span>Android 6.0+</span></div>
   <a class="btn btn-primary" href="https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk">
     Download APK
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
@@ -1730,23 +1675,21 @@ code,pre{font-family:var(--font-mono)}
   });
 
   /* ---------------------------------------------------------
-     Chat loop: user, typing, reply, tool spinners to checks,
-     letter-by-letter reply, Pushed badge, fade, restart
+     Chat loop: user, typing, reply, letter-by-letter reply,
+     fade, restart
      --------------------------------------------------------- */
   guard("chat", function () {
     var chat = $("#chat");
     if (!chat) return;
     var step = {};
     $$("[data-step]", chat).forEach(function (el) { step[el.getAttribute("data-step")] = el; });
-    var tools = $$(".tool", chat);
     var typed = $("#typed");
     var caret = $("#caret");
-    var FINAL = "Found it. The token expiry check used a stale clock. Fixed and pushed.";
+    var FINAL = "New provider picker, saved conversations, and a stop button for streaming replies.";
 
     function reset() {
       chat.classList.remove("is-clearing");
       $$(".is-in", chat).forEach(function (el) { el.classList.remove("is-in"); });
-      tools.forEach(function (t) { t.classList.remove("is-done"); });
       if (typed) typed.textContent = "";
       if (caret) caret.classList.add("is-off");
     }
@@ -1757,7 +1700,6 @@ code,pre{font-family:var(--font-mono)}
       Object.keys(step).forEach(function (k) {
         if (step[k] && k !== "typing") step[k].classList.add("is-in");
       });
-      tools.forEach(function (t) { t.classList.add("is-done"); });
       if (typed) typed.textContent = FINAL;
       return;
     }
@@ -1797,17 +1739,9 @@ code,pre{font-family:var(--font-mono)}
         if (step.typing) step.typing.classList.remove("is-in");
         mark(step.agent);
       });
-      at(1850, function () { mark(step.tools); });
-      tools.forEach(function (t, i) {
-        var base = 2000 + i * 480;
-        at(base, function () { t.classList.add("is-in"); });
-        at(base + 400, function () { t.classList.add("is-done"); });
-      });
-      at(4900, function () {
+      at(1850, function () {
         mark(step.final);
-        typeFinal(function () {
-          mark(step.pushed);
-        });
+        typeFinal(function () {});
       });
       at(8600, function () { chat.classList.add("is-clearing"); });
       at(9200, cycle);

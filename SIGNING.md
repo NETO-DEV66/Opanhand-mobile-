@@ -22,6 +22,12 @@ SHA-256 : 0B:05:77:B8:11:BD:3D:0E:6D:6E:F5:DA:39:07:D9:4B:91:C0:50:E6:DF:F9:7C:E
 SHA-1   : 22:9F:42:E0:9C:93:B3:AE:91:8D:DC:78:0E:71:82:4C:CB:49:D1:D8
 ```
 
+The subject still carries the project's pre-rebrand name. A certificate's
+distinguished name is baked into the key at creation time, so it cannot be
+reworded without generating a new key — and changing the key would force every
+existing user to uninstall. The DN is cosmetic; the SHA-256 fingerprint above is
+what identifies the app, and it is unchanged.
+
 This is a self-signed certificate. It is **not** a Play Store upload key and it
 is not trusted by a certificate authority, which is expected for an app that is
 installed by sideloading.
@@ -64,7 +70,7 @@ The keystore is **not** in this repository. It exists in exactly two places:
 | `ANDROID_KEYSTORE_BASE64` | `base64 -w0 release.keystore` |
 | `ANDROID_KEYSTORE_PASSWORD` | store password |
 | `ANDROID_KEY_PASSWORD` | key password |
-| `ANDROID_KEY_ALIAS` | alias, e.g. `openhands` |
+| `ANDROID_KEY_ALIAS` | alias stored in the keystore, e.g. `openhands` |
 
 Keep the backup outside this repository and never serve it from a web directory.
 A safe bundle holds the keystore, its public certificate (`release-cert.pem`),
@@ -95,22 +101,27 @@ other forced uninstall is a bug in the release process.
   `dev.netodev66.openhandsmobile`, together with the app's own name and icon.
   Android identifies an app by its package name, so v1.28.0 is a *different app*
   to the device: anyone on v1.27.3 or earlier must uninstall that build once,
-  then install v1.28.0. This is the single intentional break in in-place updates
-  and it was made early, before the app had a wide install base. The signing key
-  itself did not change, so every release from v1.28.0 onward updates in place.
+  then install v1.28.0.
+- **v1.29.0 changed the `applicationId` again**, from
+  `dev.netodev66.openhandsmobile` to `dev.netodev66.agentdeck`, to finish the
+  rebrand. This is the same kind of break: anyone on v1.28.x must uninstall that
+  build once, then install v1.29.0.
+- The signing key did not change at either step, so every release from v1.29.0
+  onward updates in place. Both package-id changes were made early, before the
+  app had a wide install base; there are no further renames planned.
 
 ## Local builds
 
 A local build reads the same names from the environment:
 
 ```bash
-export OPENHANDS_KEYSTORE_PASSWORD=...
-export OPENHANDS_KEY_PASSWORD=...
-export OPENHANDS_KEY_ALIAS=openhands
-# drop the keystore at OpenHands-main/android/app/release.keystore
+export AGENTDECK_KEYSTORE_PASSWORD=...
+export AGENTDECK_KEY_PASSWORD=...
+export AGENTDECK_KEY_ALIAS=openhands
+# drop the keystore at agentdeck/android/app/release.keystore
 ```
 
-`OpenHands-main/android/app/build.gradle` signs only when the keystore file is
+`agentdeck/android/app/build.gradle` signs only when the keystore file is
 present, and logs a warning otherwise. A local unsigned build is fine for
 testing, but it cannot be published and cannot update an installed copy.
 

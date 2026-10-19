@@ -1,0 +1,35 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+
+/* Cool grey scale. tailwind.css maps these onto the --oh-* theme tokens the
+   app's utility classes (bg-surface, text-contrast, ...) resolve to. */
+:root {
+  --cool-grey-50: #f7f9fc;
+  --cool-grey-100: #eef2f7;
+  --cool-grey-200: #dce3ee;
+  --cool-grey-300: #c3cddc;
+  --cool-grey-400: #a3b0c4;
+  --cool-grey-500: #7e8a9e;
+  --cool-grey-600: #626d82;
+  --cool-grey-700: #4b5468;
+  --cool-grey-800: #383f50;
+  --cool-grey-900: #2c313f;
+  --cool-grey-925: #21252f;
+  --cool-grey-950: #0b0e14;
+  --cool-grey-975: #05070a;
+}
+
+body {
+  margin: 0;
+  background-color: var(--cool-grey-950);
+  font-family:
+    -apple-system, "SF Pro", BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}

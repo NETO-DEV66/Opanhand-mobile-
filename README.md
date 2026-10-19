@@ -2,22 +2,21 @@
 
 # AgentDeck
 
-**The OpenHands Agent Canvas, packaged as an Android app.**
+**A standalone Android app for chatting with your favourite AI models.**
 
-Run and supervise your AI coding agents from your phone.
+Pick a provider, paste your API key, and start chatting — no server to run.
 
-> **Unofficial community build.** This is an independent packaging of
-> [OpenHands Agent Canvas](https://github.com/OpenHands/OpenHands), not an
-> official OpenHands release, and it is not affiliated with or endorsed by All
-> Hands AI. It ships its own name, icon and package id for that reason. All
-> credit for the app itself belongs to the OpenHands project — see
-> [Credits and license](#credits-and-license).
+> **Independent project.** AgentDeck is not affiliated with or endorsed by All
+> Hands AI or the OpenHands project. The Android shell and the web UI are this
+> project's own work, released under the MIT license. There is no backend to run
+> and nothing to sign in to: the app talks directly to the model provider you
+> choose. See [Credits and license](#credits-and-license).
 
-[![AgentDeck — the OpenHands Android app](docs/promo/banner-wide-1600x900.png)](https://neto-dev66.github.io/Opanhand-mobile-/)
+[![AgentDeck — AI chat on Android](docs/promo/banner-wide-1600x900.png)](https://neto-dev66.github.io/Opanhand-mobile-/)
 
 [![Download APK](https://img.shields.io/badge/Download-APK-6c5ce7?style=for-the-badge&logo=android&logoColor=white)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)
-[![Website](https://img.shields.io/badge/Website-openhands--app-FF6A3D?style=for-the-badge&logo=githubpages&logoColor=white)](https://neto-dev66.github.io/Opanhand-mobile-/)
-[![Version](https://img.shields.io/badge/version-1.28.3-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.28.3)
+[![Website](https://img.shields.io/badge/Website-agentdeck-FF6A3D?style=for-the-badge&logo=githubpages&logoColor=white)](https://neto-dev66.github.io/Opanhand-mobile-/)
+[![Version](https://img.shields.io/badge/version-1.29.0-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.29.0)
 [![Build](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml/badge.svg)](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/blob/main/LICENSE)
 [![Support via UPI](https://img.shields.io/badge/Support-UPI-ff9f1c?style=for-the-badge&logo=buymeacoffee&logoColor=white)](#support-this-project)
@@ -41,12 +40,12 @@ device (arm64, armv7 and x86_64). The web bundle contains no native code, so
 there is nothing to split per architecture, and there is no separate debug
 build to choose between. One download works for everyone.
 
-> **Updating from v1.27.3 or earlier?** Uninstall that build first. v1.28.0
-> changed the package id to `dev.netodev66.openhandsmobile` and gave the app its
-> own name and icon, so Android treats it as a new app. Every release from
-> v1.28.0 onward is signed with the same key and installs straight over the
-> previous one — no uninstall, no lost settings. See [SIGNING.md](SIGNING.md)
-> for the certificate fingerprint.
+> **Updating from v1.28.x or earlier?** Uninstall that build first. v1.29.0
+> completes the rebrand: the package id is now `dev.netodev66.agentdeck`
+> (previously `dev.netodev66.openhandsmobile`), so Android treats it as a new
+> app and the old copy must go. The signing key itself has not changed, so from
+> v1.29.0 onward every release installs straight over the previous one — no
+> uninstall, no lost settings. See [SIGNING.md](SIGNING.md) for the fingerprint.
 
 There is also a landing page with install steps and checksums:
 **<https://neto-dev66.github.io/Opanhand-mobile-/>**
@@ -57,7 +56,7 @@ This app is not on the Play Store. To get notified about new versions, add it to
 [Obtainium](https://github.com/ImranR98/Obtainium) — a free, open-source app that
 installs and updates apps straight from their GitHub releases.
 
-[![Get it on Obtainium](docs/assets/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium%3A%2F%2Fapp%2F%7B%22id%22%3A%22dev.netodev66.openhandsmobile%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FNETO-DEV66%2FOpanhand-mobile-%22%2C%22author%22%3A%22NETO-DEV66%22%2C%22name%22%3A%22AgentDeck%22%7D)
+[![Get it on Obtainium](docs/assets/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium%3A%2F%2Fapp%2F%7B%22id%22%3A%22dev.netodev66.agentdeck%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FNETO-DEV66%2FOpanhand-mobile-%22%2C%22author%22%3A%22NETO-DEV66%22%2C%22name%22%3A%22AgentDeck%22%7D)
 
 Tap the badge on your phone and Obtainium fills in the details for you. Or add
 this URL by hand:
@@ -73,7 +72,7 @@ is therefore the same for every release:
 
 ```
 File:    app-release.apk
-Package: dev.netodev66.openhandsmobile
+Package: dev.netodev66.agentdeck
 Signer:  SHA-256 0B:05:77:B8:11:BD:3D:0E:6D:6E:F5:DA:39:07:D9:4B:91:C0:50:E6:DF:F9:7C:E1:36:0F:F5:31:40:A3:FF:47
 ```
 
@@ -102,34 +101,36 @@ certificate above — `apksigner verify --print-certs app-release.apk`.
 
 ## What is AgentDeck?
 
-[OpenHands Agent Canvas](https://github.com/OpenHands/OpenHands) is a web UI for
-running AI coding agents. This project wraps that web app in a native Android
-shell using [Capacitor](https://capacitorjs.com/), so you can launch it, watch
-runs, and approve actions from a phone.
+AgentDeck is a standalone Android app for chatting with AI models. On first
+launch you pick a provider, paste an API key, and you are chatting. There is no
+account to create, no server to run, and no sign-in of any kind.
 
-The app contains **the same UI as the browser version** (`@openhands/agent-canvas`
-v1.27.1). It is a client — it talks to an OpenHands agent server that you run
-yourself, on your laptop, a server, or in the cloud.
+The app talks **directly to the provider you choose** — OpenAI, Anthropic,
+Google Gemini, OpenRouter, Groq, DeepSeek, Mistral, xAI Grok, Ollama, or any
+OpenAI-compatible endpoint. Your API key is stored on the device and sent only
+to that provider; nothing passes through a middleman.
 
-**This is a community packaging, not an official OpenHands release.**
+The web UI and the Android shell are this project's own work, built with
+[Capacitor](https://capacitorjs.com/) and a React Router 7 single-page app. The
+app is **not** the OpenHands Agent Canvas, and it is **not** affiliated with or
+endorsed by All Hands AI. See [Credits and license](#credits-and-license).
 
-### Run OpenHands on Android, without a laptop
+### Chat with any model, straight from your phone
 
-OpenHands has no official mobile app. The Agent Canvas needs Docker and Node.js,
-so it does not run on a phone by itself. This project is the missing piece: it
-takes the Canvas that is already running on your machine and puts a real Android
-app in front of it.
+There is no desktop prerequisite. The app needs one thing: a network path to a
+model provider, and an API key for a hosted one. Local models work too — point
+Ollama at a machine on your network and the phone becomes the client.
 
-If you searched for **"OpenHands Android app"**, **"OpenHands mobile"**,
-**"OpenHands APK"**, or **"run OpenHands on my phone"** — this is that. You keep
-the agent on real hardware, and you get the controls in your pocket.
+If you searched for a **"ChatGPT Android app"**, an **"AI chat APK"**, or a way
+to **"use an API key on your phone"** without a laptop in the loop — this is
+that.
 
 | Question | Answer |
 | --- | --- |
-| Is there an official OpenHands mobile app? | No. This is an independent, community-built Android wrapper. |
-| Does the agent run on the phone? | No. The agent runs on your server; the phone is the client. |
+| Do I need to run a server? | No. The app connects straight to the provider's API. |
+| Do I need an account? | No account with this project. You do need an API key from your chosen provider. |
 | Do I need a Play Store account? | No. You sideload the APK. |
-| Is it free? | Yes — MIT licensed, no account, no telemetry. |
+| Is it free? | Yes — MIT licensed, no telemetry. You pay the provider for usage, if anything. |
 | Which Android versions? | 6.0 (Marshmallow, API 23) and newer. |
 
 ---
@@ -141,20 +142,22 @@ the agent on real hardware, and you get the controls in your pocket.
 | Android version | 6.0 (Marshmallow, API 23) or newer |
 | Architecture | Universal — arm64, armv7, x86_64 (no native code) |
 | Permissions | Internet only |
-| Backend | A reachable OpenHands agent server (you provide it) |
-| Telemetry | None. The APK is built with `VITE_DO_NOT_TRACK=1`, so the upstream PostHog client is disabled at compile time and never initialised. |
+| API key | One from any supported provider: OpenAI, Anthropic, Google Gemini, OpenRouter, Groq, DeepSeek, Mistral or xAI Grok. Ollama and the Custom (OpenAI-compatible) entry need no key. |
+| Telemetry | None. The app contains no analytics code at all. |
 
-The app needs network access to your agent server. It does **not** bundle a
-backend, and it does not send your data anywhere by itself.
+The app needs network access to the provider you choose. It does **not** bundle
+a backend and it does **not** proxy your requests: your key and your messages go
+straight from the device to the provider.
 
 ---
 
 ## Install
 
-> **Updating from v1.27.3 or earlier?** Uninstall that build once. v1.28.0
-> changed the package id, name and icon, so Android sees it as a new app. Every
-> release from v1.28.0 onward installs straight over the previous one — no
-> uninstall, no lost settings. See [SIGNING.md](SIGNING.md) for the fingerprint.
+> **Updating from v1.28.x or earlier?** Uninstall that build once. v1.29.0
+> changed the package id to `dev.netodev66.agentdeck`, so Android sees it as a
+> new app. The signing key is unchanged, so from v1.29.0 onward every release
+> installs straight over the previous one — no uninstall, no lost settings. See
+> [SIGNING.md](SIGNING.md) for the fingerprint.
 
 1. On your phone, open the [download link](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk).
 2. If Android asks, allow **install from unknown sources** for your browser or
@@ -168,53 +171,47 @@ backend, and it does not send your data anywhere by itself.
 
 ## First launch
 
-The app does not know where your agent server lives. On first launch it shows a
-four-step setup wizard:
+There is nothing to configure on a server. On first launch the app asks for two
+things and then drops you into a conversation:
 
-| 1 · Connect | 2 · Pick an agent |
-| :---: | :---: |
-| <img src="docs/assets/screens/01-backend.webp" alt="Add a backend screen with a friendly name, host URL, a Local/Cloud type toggle, and an API key" width="300"> | <img src="docs/assets/screens/02-agent.webp" alt="Choose your agent screen listing OpenHands, Claude Code, Codex, Gemini CLI, Pi and OpenCode" width="300"> |
+1. **Pick a provider** — OpenAI, Anthropic, Google Gemini, OpenRouter, Groq,
+   DeepSeek, Mistral, xAI Grok, Ollama, or Custom for any OpenAI-compatible
+   endpoint. Each entry shows the models it knows about.
+2. **Paste your API key** — for a hosted provider, paste a key from your
+   account. Ollama and Custom need no key; both show an editable base URL field
+   instead (Ollama defaults to `http://localhost:11434/v1`).
 
-| 3 · Choose a model | 4 · Start working |
-| :---: | :---: |
-| <img src="docs/assets/screens/03-llm.webp" alt="Set up your LLM screen for choosing a provider and model" width="300"> | <img src="docs/assets/screens/04-hello.webp" alt="Say hello screen with a first-message box and ready-made workflow templates" width="300"> |
+Then start chatting. A sensible default model is pre-selected for each provider,
+and you can change the provider, model, key or base URL later from **Settings**
+inside the app.
 
-1. **Connect** — the address of your OpenHands agent server, for example
-   `https://my-server.example.com` or `http://192.168.1.10:3000` on your home
-   network. Use `https://` for anything reachable over the internet. There is no
-   hosted account to sign in to: this build talks only to a server you run, so
-   there is nothing to log into and nothing to approve.
-2. **Pick an agent** — OpenHands by default, or bring your own Claude Code,
-   Codex, Gemini CLI, Pi or OpenCode agent.
-3. **Choose a model** — pick a provider and model. A sensible default is
-   pre-selected.
-4. **Start working** — send a first message, or open a proven workflow template
-   with its prompt and MCPs already set up.
+Your key, base URL, model choice and conversations are stored on the device. The
+app sends your key only to the provider it belongs to.
 
-These captures come from the app with no backend attached, so every field is
-blank. Your own setup will carry your server, your model and your conversations.
-
-Your settings are stored on the device. To change them later, open
-**Settings** inside the app.
-
-> Tip: to bake the server URL into the APK so users skip this step, set the
-> repository variable `BACKEND_BASE_URL` before building. See
-> [Building from source](#building-from-source).
+> Ollama runs on a computer, not on the phone. On Android, `localhost` is the
+> phone itself — set the base URL to the LAN address of the machine running
+> Ollama (for example `http://192.168.1.10:11434/v1`) and make sure that machine
+> is reachable.
 
 ---
 
 ## Features
 
-Everything the Agent Canvas web UI offers, adapted for a touch screen:
+What the app actually does today:
 
-- **Conversations** — start a task, watch the agent work, read the diff.
-- **Multiple backends** — connect to any number of agent servers you run.
-- **Agent profiles and settings** — pick the model, tools, and prompt.
-- **Automations** — schedule recurring agent tasks and review their runs.
-- **Skills and extensions** — manage reusable agent capabilities.
-- **Files, commits, browser and terminal tabs** — inspect what the agent did.
-- **MCP and LLM settings** — configure tool servers and model providers.
-- **Secrets management** — store credentials for your agents.
+- **Streaming chat** — replies appear token by token, and you can stop a
+  response while it is still arriving.
+- **Saved conversations** — every chat is kept on the device. Start a new one,
+  reopen an earlier one, rename it or delete it.
+- **Ten providers, one app** — OpenAI, Anthropic, Google Gemini, OpenRouter,
+  Groq, DeepSeek, Mistral, xAI Grok, Ollama and any OpenAI-compatible endpoint.
+- **Switch provider, model and key in Settings** — change any of it at any time,
+  or disconnect entirely and clear the stored key.
+- **Your key stays on the device** — it is held in local storage and sent only to
+  the provider you selected.
+- **Local models** — point Ollama (or a Custom OpenAI-compatible server) at a
+  machine on your network and chat with it from the phone.
+- **No telemetry** — no analytics, no tracking, no phone-home.
 
 ---
 
@@ -225,14 +222,12 @@ You need Node.js 24+, JDK 21, and the Android SDK.
 ```bash
 # 1. Get the code
 git clone https://github.com/NETO-DEV66/Opanhand-mobile-.git
-cd Opanhand-mobile-/OpenHands-main
+cd Opanhand-mobile-/agentdeck
 
 # 2. Install dependencies
 npm ci
-npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
 
 # 3. Build the web bundle
-#    Leave VITE_BACKEND_BASE_URL unset to show the in-app setup screen.
 npm run build:app
 
 # 4. Copy the web bundle into the Android project
@@ -245,28 +240,24 @@ cd android
 
 The APK lands in `android/app/build/outputs/apk/release/app-release.apk`.
 
-To bake in your own server URL, set it before step 3:
-
-```bash
-VITE_BACKEND_BASE_URL=https://my-server.example.com npm run build:app
-```
+There is no server URL to bake in — the app asks the user for a provider and key
+on first launch, and stores them on the device.
 
 ### Running the tests
 
-The web app has a Vitest suite (unit and component tests). It runs in two
-projects: DOM-free suites in a fast Node environment, everything else in jsdom
-with the shared MSW handlers answering network calls.
+The test suite is **not maintained in this fork**. The UI was rewritten for
+direct-connect mode, the old mocks and fixtures were removed with it, and no
+replacement suite was written, so `npm test` is not a meaningful check here.
 
-```bash
-npm test              # one-shot run
-npm run test:watch    # re-run on change
-npm run test:coverage # with a coverage report
-```
-
-Type-checking and linting are separate:
+The check that matters is the type checker:
 
 ```bash
 npm run typecheck
+```
+
+Linting is available too:
+
+```bash
 npm run lint
 ```
 
@@ -295,16 +286,16 @@ Then add four repository secrets (Settings → Secrets and variables → Actions
 | `ANDROID_KEYSTORE_BASE64` | `base64 -w0 release.keystore` |
 | `ANDROID_KEYSTORE_PASSWORD` | the store password you chose |
 | `ANDROID_KEY_PASSWORD` | the key password you chose |
-| `ANDROID_KEY_ALIAS` | the alias, e.g. `openhands` |
+| `ANDROID_KEY_ALIAS` | the alias stored in the keystore, e.g. `openhands` |
 
 CI writes `release.keystore` from the secret, signs, and verifies the result.
 A local build reads the same names from the environment:
 
 ```bash
-export OPENHANDS_KEYSTORE_PASSWORD=...
-export OPENHANDS_KEY_PASSWORD=...
-export OPENHANDS_KEY_ALIAS=openhands
-# drop release.keystore at OpenHands-main/android/app/release.keystore
+export AGENTDECK_KEYSTORE_PASSWORD=...
+export AGENTDECK_KEY_PASSWORD=...
+export AGENTDECK_KEY_ALIAS=openhands
+# drop release.keystore at agentdeck/android/app/release.keystore
 ```
 
 Never commit the keystore. `.gitignore` already excludes `*.keystore` and `*.jks`.
@@ -359,12 +350,12 @@ release APK with the secret key and attaches it to the GitHub Release.
 ### Cutting a new release
 
 1. Bump `versionCode` and `versionName` in
-   `OpenHands-main/android/app/build.gradle`.
+   `agentdeck/android/app/build.gradle`.
 2. Commit, then tag and push:
 
 ```bash
-git tag v1.28.3
-git push origin v1.28.3
+git tag v1.29.0
+git push origin v1.29.0
 ```
 
 GitHub Actions builds and publishes the APK. The `releases/latest/download`
@@ -376,7 +367,6 @@ APK can never be released by accident.
 
 | Name | Type | Purpose |
 | --- | --- | --- |
-| `BACKEND_BASE_URL` | Variable | Bakes the agent server URL into the app. |
 | `SIGNING_CERT_SHA256` | Variable | **Set.** The pinned signer fingerprint. The workflow refuses to publish an APK signed with anything else, and fails closed if it cannot read the fingerprint at all. Change it only when rotating the key on purpose. |
 | `ANDROID_KEYSTORE_BASE64` | Secret | The signing keystore, base64-encoded. Required to publish. |
 | `ANDROID_KEYSTORE_PASSWORD` | Secret | Keystore store password. |
@@ -389,11 +379,13 @@ APK can never be released by accident.
 
 | Problem | Fix |
 | --- | --- |
-| "App not installed" | You have a copy signed by a different key, or the pre-1.28.0 build with the old package id. Uninstall that one, then install this APK. Releases from v1.28.0 onward always install in place. |
+| "App not installed" | You have a copy signed by a different key, or a build from v1.28.x or earlier with the old package id. Uninstall that one, then install this APK. Releases from v1.29.0 onward always install in place. |
 | Play Protect blocks install | Tap **Install anyway**; the APK is not from the Play Store. |
-| App opens but cannot connect | Check the server URL and that the phone can reach it. Use `https://` for remote servers. |
-| Stuck on the loading screen | Confirm the agent server is running, then reopen the app. |
-| Blank screen after an update | Clear app data in Android settings and reconnect. |
+| API key rejected (401/403) | The key is wrong, expired, or not enabled for the model you picked. Re-check it in **Settings**, and confirm the key belongs to the provider you selected. |
+| "Could not reach the provider" / CORS or network error | The provider refused a direct browser-origin request. Some providers block these; a different network, a VPN, or a provider that permits browser calls (or a Custom base URL you control) usually works. |
+| Model not found (404) | The model id is not available on your account, or the provider renamed it. Choose a different model in **Settings**. |
+| Ollama does nothing | Ollama is not running, or the base URL points at the phone. On Android, `localhost` is the phone itself — use the LAN address of the machine running Ollama, e.g. `http://192.168.1.10:11434/v1`, and check that machine allows the connection. |
+| Blank screen after an update | Clear app data in Android settings and set the provider up again. |
 
 ---
 
@@ -438,26 +430,22 @@ Not everyone can or should send money. These help just as much:
 - **Star this repository** so more people can find it.
 - **Report a bug** or suggest an improvement in
   [Issues](https://github.com/NETO-DEV66/Opanhand-mobile-/issues).
-- **Tell someone** who would find a mobile OpenHands client useful.
+- **Tell someone** who would find a pocket AI chat client useful.
 - **Contribute** a fix or a feature through a pull request.
 
 ---
 
 ## Credits and license
 
-**All credit for the application belongs to the OpenHands project.**
+AgentDeck is an independent project.
 
-- The app is [OpenHands Agent Canvas](https://github.com/OpenHands/OpenHands),
-  built by **All Hands AI** and its contributors, and released under the MIT
-  license. The interface, the agent canvas and everything inside the app are
-  their work.
-- The launcher icon, splash screen and the "AgentDeck" name are this
-  project's own. The official OpenHands artwork is **not** used, so that the
-  unofficial nature of this build is obvious at a glance.
-- This repository only adds the Android packaging: the Capacitor wrapper, the
-  app's own icon and splash, and the build pipeline. Packaged and maintained by
-  **Sameer** ([@NETO-DEV66](https://github.com/NETO-DEV66)).
-- The Android wrapper is released under the MIT license as well.
+- The Android shell, the web UI and the "AgentDeck" name are this project's own
+  work, released under the MIT license. There is no OpenHands code in the app.
+- AgentDeck is **not** affiliated with, endorsed by, or derived from All Hands AI
+  or the [OpenHands](https://github.com/OpenHands/OpenHands) project. The name
+  and concept of OpenHands are credited to them, but no part of their app, their
+  agent canvas or their artwork ships here.
+- Packaged and maintained by **Sameer** ([@NETO-DEV66](https://github.com/NETO-DEV66)).
 
 This project is not affiliated with or endorsed by the OpenHands team or All
 Hands AI. If you want the official product, see

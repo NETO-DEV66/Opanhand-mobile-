@@ -65,7 +65,6 @@ Optional **Variables** tab:
 
 | Variable | Value |
 | --- | --- |
-| `BACKEND_BASE_URL` | the agent server the phone should talk to; leave unset to let the user type it on first launch |
 | `SIGNING_CERT_SHA256` | set after the first release (see step 5) |
 
 ## 4. Run the build
@@ -73,7 +72,7 @@ Optional **Variables** tab:
 Actions → **Build Android APK** → *Run workflow*, or push a tag:
 
 ```bash
-git tag v1.28.3 && git push origin v1.28.3
+git tag v1.29.0 && git push origin v1.29.0
 ```
 
 A tag push creates a GitHub Release and attaches `app-release.apk`. That asset
@@ -118,13 +117,13 @@ them on each release page. Nothing has to be filled in by hand after a release.
 ## Keeping the account healthy
 
 - Do not commit keystores, tokens or `.env` files. `.gitignore` already excludes
-  `*.keystore`, `*.jks` and `.openhands/`.
+  `*.keystore` and `*.jks`.
 - Push at a human pace on a new account. A burst of commits that mirrors another
   project is what spam heuristics look for.
 - Enable two-factor authentication.
-- The Android `applicationId` is `dev.netodev66.openhandsmobile`, deliberately
+- The Android `applicationId` is `dev.netodev66.agentdeck`, deliberately
   distinct from the upstream project so the two can never be confused. It is set
-  in `OpenHands-main/android/app/build.gradle`,
-  `OpenHands-main/capacitor.config.ts` and
-  `OpenHands-main/android/app/src/main/res/values/strings.xml`. Changing it
+  in `agentdeck/android/app/build.gradle`,
+  `agentdeck/capacitor.config.ts` and
+  `agentdeck/android/app/src/main/res/values/strings.xml`. Changing it
   later breaks in-place updates, so treat it as fixed.
