@@ -1,4 +1,4 @@
-# SEO and discoverability — OpenHands Mobile
+# SEO and discoverability — AgentDeck
 
 This file explains how to get `https://neto-dev66.github.io/Opanhand-mobile-/` and the
 GitHub repo to show up in Google, and what was already done for you.
@@ -176,7 +176,7 @@ Not affiliated with the OpenHands team, just a community wrapper. Feedback welco
 
 <https://news.ycombinator.com/submit>
 
-- Title: `Show HN: OpenHands Mobile – run OpenHands coding agents from Android`
+- Title: `Show HN: AgentDeck – run OpenHands coding agents from Android`
 - URL: `https://neto-dev66.github.io/Opanhand-mobile-/`
 
 Be present in the comments. Answer technical questions honestly, including the

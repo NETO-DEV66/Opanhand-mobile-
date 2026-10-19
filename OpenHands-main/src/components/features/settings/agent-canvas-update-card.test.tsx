@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   AGENT_CANVAS_RELEASE_NOTES_URL,
   AGENT_CANVAS_UPDATE_COMMANDS,
@@ -12,19 +12,13 @@ import {
 } from "#/components/shared/modals/modal-body";
 import { AgentCanvasUpdateCard } from "./agent-canvas-update-card";
 
-const { fetchLatestVersionMock, getLockedCloudHostMock } = vi.hoisted(() => ({
+const { fetchLatestVersionMock } = vi.hoisted(() => ({
   fetchLatestVersionMock: vi.fn(),
-  getLockedCloudHostMock: vi.fn(),
 }));
 
 vi.mock("#/api/agent-canvas-updates", async (importOriginal) => ({
   ...(await importOriginal<typeof import("#/api/agent-canvas-updates")>()),
   fetchLatestAgentCanvasVersion: fetchLatestVersionMock,
-}));
-
-vi.mock("#/api/agent-server-config", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("#/api/agent-server-config")>()),
-  getLockedCloudHost: getLockedCloudHostMock,
 }));
 
 function renderCard() {
@@ -35,10 +29,6 @@ function renderCard() {
     </QueryClientProvider>,
   );
 }
-
-beforeEach(() => {
-  getLockedCloudHostMock.mockReturnValue(null);
-});
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -193,17 +183,5 @@ describe("AgentCanvasUpdateCard", () => {
     fireEvent.click(screen.getByTestId("copy-to-clipboard"));
 
     expect(writeText).toHaveBeenCalledWith(AGENT_CANVAS_UPDATE_COMMANDS.npm);
-  });
-
-  it("renders nothing and skips the check when locked to a cloud deployment", () => {
-    getLockedCloudHostMock.mockReturnValue("https://app.openhands.dev");
-    fetchLatestVersionMock.mockResolvedValue(AGENT_CANVAS_CLIENT_VERSION);
-
-    renderCard();
-
-    expect(
-      screen.queryByTestId("agent-canvas-update-card"),
-    ).not.toBeInTheDocument();
-    expect(fetchLatestVersionMock).not.toHaveBeenCalled();
   });
 });

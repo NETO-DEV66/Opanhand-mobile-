@@ -36,7 +36,6 @@
  */
 
 import type { BootstrapConfig, CaptureResult, PostHog } from "posthog-js";
-import { getLockedCloudAuthMode } from "#/api/agent-server-config";
 
 import packageJson from "../../package.json";
 import {
@@ -491,10 +490,6 @@ export function getTelemetryConsent(): TelemetryConsent {
   // Check environment variable for opt-out
   if (isDoNotTrackEnabled()) {
     return "denied";
-  }
-
-  if (getLockedCloudAuthMode() === "cookie") {
-    return "granted";
   }
 
   try {

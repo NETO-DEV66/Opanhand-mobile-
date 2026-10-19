@@ -32,7 +32,6 @@ vi.mock("../backend-registry/active-store", () => ({
       host: "https://cloud.example.test",
       apiKey: "",
       kind: "cloud",
-      authMode: "cookie",
     },
     orgId: "org-1",
   }),

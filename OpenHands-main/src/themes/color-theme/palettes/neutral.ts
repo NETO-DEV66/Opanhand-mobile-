@@ -1,4 +1,4 @@
-// Shared neutral palette used by the OpenHands-Neutral and -Neo themes.
+// Shared neutral palette used by the AgentDeck-Neutral and -Neo themes.
 
 // HSL channel strings for the neutral grey palette (H=0, S=0%, L=hex/255*100)
 // prettier-ignore

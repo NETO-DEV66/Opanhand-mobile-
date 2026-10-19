@@ -21,8 +21,6 @@ import {
   getInterfaceCopy,
   hasAutomationInterface,
 } from "#/manifests/automation-interface";
-import { getLockedCloudHost } from "#/api/agent-server-config";
-import { LOCKED_CLOUD_SETTINGS_NAV_PATH } from "#/constants/settings-nav";
 import { isApplePlatform } from "#/utils/utils";
 
 const ICON_SIZE = 18;
@@ -251,15 +249,5 @@ export const createCommandMenuItems = ({
     },
   ];
 
-  // Locked-to-Cloud (SaaS / self-hosted OHE) lists only the Application page;
-  // the OHE settings shell owns the rest (OHE-3168).
-  const isLockedToCloud = getLockedCloudHost() !== null;
-
-  return items.filter(
-    (item) =>
-      !isLockedToCloud ||
-      item.group !== "settings" ||
-      item.to === COMMAND_MENU_ROUTE.settings ||
-      item.to === LOCKED_CLOUD_SETTINGS_NAV_PATH,
-  );
+  return items;
 };

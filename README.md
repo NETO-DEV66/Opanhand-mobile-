@@ -1,6 +1,6 @@
 <div align="center">
 
-# OpenHands Mobile
+# AgentDeck
 
 **The OpenHands Agent Canvas, packaged as an Android app.**
 
@@ -13,7 +13,7 @@ Run and supervise your AI coding agents from your phone.
 > credit for the app itself belongs to the OpenHands project — see
 > [Credits and license](#credits-and-license).
 
-[![OpenHands Mobile — the OpenHands Android app](docs/promo/banner-wide-1600x900.png)](https://neto-dev66.github.io/Opanhand-mobile-/)
+[![AgentDeck — the OpenHands Android app](docs/promo/banner-wide-1600x900.png)](https://neto-dev66.github.io/Opanhand-mobile-/)
 
 [![Download APK](https://img.shields.io/badge/Download-APK-6c5ce7?style=for-the-badge&logo=android&logoColor=white)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)
 [![Website](https://img.shields.io/badge/Website-openhands--app-FF6A3D?style=for-the-badge&logo=githubpages&logoColor=white)](https://neto-dev66.github.io/Opanhand-mobile-/)
@@ -57,7 +57,7 @@ This app is not on the Play Store. To get notified about new versions, add it to
 [Obtainium](https://github.com/ImranR98/Obtainium) — a free, open-source app that
 installs and updates apps straight from their GitHub releases.
 
-[![Get it on Obtainium](docs/assets/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium%3A%2F%2Fapp%2F%7B%22id%22%3A%22dev.netodev66.openhandsmobile%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FNETO-DEV66%2FOpanhand-mobile-%22%2C%22author%22%3A%22NETO-DEV66%22%2C%22name%22%3A%22OpenHands%20Mobile%22%7D)
+[![Get it on Obtainium](docs/assets/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium%3A%2F%2Fapp%2F%7B%22id%22%3A%22dev.netodev66.openhandsmobile%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FNETO-DEV66%2FOpanhand-mobile-%22%2C%22author%22%3A%22NETO-DEV66%22%2C%22name%22%3A%22AgentDeck%22%7D)
 
 Tap the badge on your phone and Obtainium fills in the details for you. Or add
 this URL by hand:
@@ -100,7 +100,7 @@ certificate above — `apksigner verify --print-certs app-release.apk`.
 
 ---
 
-## What is OpenHands Mobile?
+## What is AgentDeck?
 
 [OpenHands Agent Canvas](https://github.com/OpenHands/OpenHands) is a web UI for
 running AI coding agents. This project wraps that web app in a native Android
@@ -162,7 +162,7 @@ backend, and it does not send your data anywhere by itself.
 3. Open the downloaded APK and tap **Install**.
 4. You may see a Play Protect warning because the app is not distributed through
    the Play Store. Tap **Install anyway**.
-5. Launch **OpenHands Mobile** from your app drawer.
+5. Launch **AgentDeck** from your app drawer.
 
 ---
 
@@ -451,7 +451,7 @@ Not everyone can or should send money. These help just as much:
   built by **All Hands AI** and its contributors, and released under the MIT
   license. The interface, the agent canvas and everything inside the app are
   their work.
-- The launcher icon, splash screen and the "OpenHands Mobile" name are this
+- The launcher icon, splash screen and the "AgentDeck" name are this
   project's own. The official OpenHands artwork is **not** used, so that the
   unofficial nature of this build is obvious at a glance.
 - This repository only adds the Android packaging: the Capacitor wrapper, the

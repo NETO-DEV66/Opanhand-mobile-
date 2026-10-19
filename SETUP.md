@@ -10,7 +10,7 @@ Create an empty repository on the new account (do **not** initialise it with a
 README), then:
 
 ```bash
-cd openhands-mobile
+cd Opanhand-mobile-
 git remote set-url origin https://github.com/<NEW_USER>/<NEW_REPO>.git
 git push -u origin main
 ```

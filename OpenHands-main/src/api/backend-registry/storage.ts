@@ -2,22 +2,13 @@ import {
   SEEDED_DEFAULT_BACKEND_ID,
   makeDefaultLocalBackend,
 } from "./default-backend";
-import type {
-  Backend,
-  BackendAuthMode,
-  BackendKind,
-  BackendSelection,
-} from "./types";
+import type { Backend, BackendKind, BackendSelection } from "./types";
 
 export const BACKENDS_STORAGE_KEY = "openhands-backends";
 export const ACTIVE_BACKEND_STORAGE_KEY = "openhands-active-backend";
 
 function isValidKind(value: unknown): value is BackendKind {
   return value === "local" || value === "cloud";
-}
-
-function isValidAuthMode(value: unknown): value is BackendAuthMode {
-  return value === undefined || value === "api-key" || value === "cookie";
 }
 
 function isValidBackend(value: unknown): value is Backend {
@@ -30,7 +21,6 @@ function isValidBackend(value: unknown): value is Backend {
     typeof v.host === "string" &&
     typeof v.apiKey === "string" &&
     isValidKind(v.kind) &&
-    isValidAuthMode(v.authMode) &&
     (v.connectionRevision === undefined ||
       (typeof v.connectionRevision === "number" &&
         Number.isSafeInteger(v.connectionRevision) &&

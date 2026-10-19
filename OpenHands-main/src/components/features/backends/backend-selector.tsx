@@ -4,7 +4,6 @@ import { useMatch, useNavigate } from "react-router";
 import { Plus, Settings } from "lucide-react";
 import { Dropdown } from "#/ui/dropdown/dropdown";
 import { DropdownOption } from "#/ui/dropdown/types";
-import { getLockedCloudHost } from "#/api/agent-server-config";
 import { isNoBackend } from "#/api/backend-registry/active-store";
 import { useActiveBackendContext } from "#/contexts/active-backend-context";
 import { useAllCloudOrganizations } from "#/hooks/query/use-cloud-organizations";
@@ -227,12 +226,6 @@ export function BackendSelector({
     setManageBackendsModalOpen(true);
   }, [onOpenManageBackends, onSelectOption]);
 
-  const isLockedToCloud = getLockedCloudHost() !== null;
-  // A cookie-auth (OHE-hosted) Canvas has nothing to add, manage, or
-  // reconnect — its single locked backend is owned by the main-app session.
-  const hideBackendFooter =
-    isLockedToCloud && active.backend.authMode === "cookie";
-
   const preventDropdownMenuClose = React.useCallback(
     (event: React.SyntheticEvent<HTMLButtonElement>) => {
       event.preventDefault();
@@ -273,27 +266,25 @@ export function BackendSelector({
     [openManageBackendsModal, preventDropdownMenuClose],
   );
 
-  const addBackendFooter = hideBackendFooter ? undefined : (
+  const addBackendFooter = (
     <div className={dropdownMenuListClassName}>
-      {isLockedToCloud ? null : (
-        <button
-          type="button"
-          data-testid="add-backend-menu-item"
-          onMouseDown={preventDropdownMenuClose}
-          onTouchStart={preventDropdownMenuClose}
-          onTouchEnd={handleAddBackendTouchEnd}
-          onClick={handleAddBackendClick}
-          className={cn(
-            dropdownFooterActionClassName,
-            "cursor-pointer rounded-md",
-          )}
-        >
-          <span className={dropdownMenuRowIconWrapperClassName} aria-hidden>
-            <Plus width={16} height={16} />
-          </span>
-          {t(I18nKey.BACKEND$ADD)}
-        </button>
-      )}
+      <button
+        type="button"
+        data-testid="add-backend-menu-item"
+        onMouseDown={preventDropdownMenuClose}
+        onTouchStart={preventDropdownMenuClose}
+        onTouchEnd={handleAddBackendTouchEnd}
+        onClick={handleAddBackendClick}
+        className={cn(
+          dropdownFooterActionClassName,
+          "cursor-pointer rounded-md",
+        )}
+      >
+        <span className={dropdownMenuRowIconWrapperClassName} aria-hidden>
+          <Plus width={16} height={16} />
+        </span>
+        {t(I18nKey.BACKEND$ADD)}
+      </button>
       <button
         type="button"
         data-testid="manage-backends-menu-item"
@@ -309,11 +300,7 @@ export function BackendSelector({
         <span className={dropdownMenuRowIconWrapperClassName} aria-hidden>
           <Settings width={16} height={16} />
         </span>
-        {t(
-          isLockedToCloud
-            ? I18nKey.BACKEND$RECONNECT_CLOUD
-            : I18nKey.BACKEND$MANAGE,
-        )}
+        {t(I18nKey.BACKEND$MANAGE)}
       </button>
     </div>
   );
@@ -395,8 +382,8 @@ export function BackendSelector({
             {active.backend.kind === "cloud" ? (
               <a
                 href={`${active.backend.host.replace(/\/+$/, "")}/settings${cloudSettingsOrgQuery}`}
-                target={isLockedToCloud ? undefined : "_blank"}
-                rel={isLockedToCloud ? undefined : "noopener noreferrer"}
+                target="_blank"
+                rel="noopener noreferrer"
                 data-testid="backend-selector-settings-link"
                 aria-label={settingsLabel}
                 className={cn(
