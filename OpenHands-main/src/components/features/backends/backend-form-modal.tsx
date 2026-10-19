@@ -28,7 +28,6 @@ import { useBackendsHealth } from "#/hooks/query/use-backends-health";
 import { useTracking } from "#/hooks/use-tracking";
 import type { CloudConnectionSource } from "#/services/cloud-funnel-analytics";
 import { getAgentServerClientOptions } from "#/api/agent-server-client-options";
-import { isOpenHandsCloudHost } from "#/api/device-flow-client";
 import {
   getDisplayAgentServerVersion,
   validateLocalBackend,
@@ -65,17 +64,12 @@ interface BackendFormModalProps {
 }
 
 /**
- * Seed the default backend kind from the host. Uses proper hostname-suffix
- * matching (via {@link isOpenHandsCloudHost}) rather than a substring test, so
- * a look-alike host such as `all-hands-testing.dev` isn't misread as cloud.
- *
- * This is only a *default*: a self-hosted OpenHands Cloud/Enterprise instance
- * on a truly custom domain is indistinguishable from a local agent-server by
- * host alone, so the manual add form lets the user override the kind
- * explicitly (see the Type selector in ManualConnectionColumn).
+ * Seed the default backend kind from the host. AgentDeck talks only to an
+ * agent server the user runs themselves, so every backend is a local-kind
+ * entry; there is no hosted-cloud classification to infer.
  */
-function inferKindFromHost(host: string): BackendKind {
-  return isOpenHandsCloudHost(host) ? "cloud" : "local";
+function inferKindFromHost(_host: string): BackendKind {
+  return "local";
 }
 
 /**
@@ -152,16 +146,16 @@ function isValidHostUrl(host: string): boolean {
 }
 
 const LOCAL_BACKEND_COMMAND = "agent-canvas --backend-only --port 8001";
+// Setup guides live with the app's own repo, so the in-app help never points
+// users at a third-party product.
 const LOCAL_AGENT_SERVER_DOCS_URL =
-  "https://github.com/OpenHands/OpenHands/blob/main/docs/DEVELOPMENT.md#alternative-development-workflows";
+  "https://github.com/NETO-DEV66/Opanhand-mobile-#quick-start";
 const REMOTE_AGENT_SERVER_DOCS_URL =
-  "https://github.com/OpenHands/OpenHands/blob/main/docs/SELF_HOSTING.md";
-const DEPLOYMENT_OPTIONS_URL =
-  "https://docs.openhands.dev/overview/introduction";
-export type BackendConnectionMethod = "manual" | "cloud_login";
+  "https://github.com/NETO-DEV66/Opanhand-mobile-#quick-start";
+export type BackendConnectionMethod = "manual";
 
 export type BackendAddedSource = CloudConnectionSource;
-type AddBackendOption = "cloud" | "agent-server" | "providers";
+type AddBackendOption = "agent-server" | "providers";
 type AgentServerLocation = "local" | "remote";
 
 function getConnectionTestFailedTitle(
@@ -350,15 +344,8 @@ function useBackendForm({
     null,
   );
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [kindOverride, setKindOverride] = React.useState<BackendKind | null>(
-    null,
-  );
 
-  // Kind follows host inference until the user explicitly picks a type, then
-  // respects that choice. A custom-domain OHE can't be distinguished from a
-  // custom-domain local agent-server by host alone, so ManualConnectionColumn
-  // exposes `setKind` (a Type selector) to let the user declare it.
-  const kind = fixedKind ?? kindOverride ?? inferKindFromHost(host);
+  const kind = fixedKind ?? inferKindFromHost(host);
   const needsApiKey = requireApiKey || kind !== "local";
   const canSubmit =
     name.trim().length > 0 &&
@@ -427,7 +414,6 @@ function useBackendForm({
     setConnectionError,
     isSubmitting,
     kind,
-    setKind: setKindOverride,
     canSubmit,
     handleSubmit,
   };
@@ -772,7 +758,6 @@ interface ManualConnectionColumnProps {
   submittingLabel: React.ReactNode;
   submitTestId?: string;
   fixedKind?: BackendKind;
-  showKindSelector?: boolean;
 }
 
 /**
@@ -788,7 +773,6 @@ function ManualConnectionColumn({
   submittingLabel,
   submitTestId,
   fixedKind,
-  showKindSelector = true,
 }: ManualConnectionColumnProps) {
   const { t } = useTranslation("openhands");
 
@@ -803,7 +787,6 @@ function ManualConnectionColumn({
     setConnectionError,
     isSubmitting,
     kind,
-    setKind,
     canSubmit,
     handleSubmit,
   } = useBackendForm({
@@ -864,22 +847,6 @@ function ManualConnectionColumn({
         placeholder="http://localhost:8000"
         className="w-full"
       />
-
-      {showKindSelector ? (
-        <div className="flex flex-col items-start gap-2.5">
-          <span className="text-sm">{t(I18nKey.BACKEND$KIND_LABEL)}</span>
-          <SegmentedToggle<BackendKind>
-            value={kind}
-            options={[
-              { value: "local", label: t(I18nKey.BACKEND$KIND_LOCAL) },
-              { value: "cloud", label: t(I18nKey.BACKEND$KIND_CLOUD) },
-            ]}
-            onChange={(value) => setKind(value)}
-            ariaLabel={t(I18nKey.BACKEND$KIND_LABEL)}
-            testId={`${testIdRoot}-kind`}
-          />
-        </div>
-      ) : null}
 
       <SettingsInput
         testId={`${testIdRoot}-api-key`}
@@ -1255,7 +1222,6 @@ function AddBackendChooser({
             submitLabel={t(I18nKey.BACKEND$CONNECT)}
             submittingLabel={t(I18nKey.ONBOARDING$BACKEND_STATUS_CHECKING)}
             fixedKind="local"
-            showKindSelector={false}
           />
         </div>
       </div>
@@ -1404,21 +1370,7 @@ function AddBackendAddModeBody({
                 className="mt-2 text-sm leading-6 text-muted"
                 data-testid="add-backend-description"
               >
-                {t(I18nKey.BACKEND$CHOOSER_DESCRIPTION)}{" "}
-                <a
-                  href={DEPLOYMENT_OPTIONS_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={t(I18nKey.BACKEND$DEPLOYMENT_OPTIONS)}
-                  data-testid="add-backend-deployment-options-link"
-                  className="text-primary hover:underline"
-                >
-                  {t(I18nKey.CTA$LEARN_MORE)}
-                  <ExternalLinkIcon
-                    className="ml-1 inline size-3.5 align-[-0.125em]"
-                    aria-hidden
-                  />
-                </a>
+                {t(I18nKey.BACKEND$CHOOSER_DESCRIPTION)}
               </p>
             </div>
           )}

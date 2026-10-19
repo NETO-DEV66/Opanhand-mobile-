@@ -1,7 +1,7 @@
 import type { ColorThemeDefinition } from "../types";
 
 export const openhandsDeepsea: ColorThemeDefinition = {
-  label: "OpenHands-DeepSea",
+  label: "AgentDeck-DeepSea",
   appearance: "dark",
   // Matches the values already set by index.css; included so switching back
   // from another theme restores the original palette explicitly.

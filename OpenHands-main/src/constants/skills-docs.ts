@@ -1,5 +1,5 @@
 export const ADD_SKILL_DOCS_URL =
-  "https://docs.openhands.dev/overview/skills/adding#adding-new-skills";
+  "https://github.com/NETO-DEV66/Opanhand-mobile-#quick-start";
 
 export const ADD_SKILL_SKILL_NAME = "add-skill";
 

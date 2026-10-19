@@ -5,8 +5,7 @@ import { trackEvent } from "#/services/telemetry";
 export type CloudConnectionSource =
   | "onboarding"
   | "add_backend_modal"
-  | "manage_backends_modal"
-  | "cloud_auto_connect";
+  | "manage_backends_modal";
 
 const CLOUD_CONVERSATION_READY_INSERT_ID_PREFIX = `${AGENT_CANVAS_CLIENT_SOURCE}:cloud_conversation_ready`;
 
@@ -17,36 +16,9 @@ function trackCloudFunnelEvent(
   void trackEvent(event, properties);
 }
 
-function cloudLoginBackendContext() {
-  return getBackendTelemetryProperties({
-    backendKind: "cloud",
-    connectionMethod: "cloud_login",
-  });
-}
-
 function cloudConversationBackendContext() {
   return getBackendTelemetryProperties({
     backendKind: "cloud",
-  });
-}
-
-export function trackCloudDeviceAuthorizationStarted(
-  _host: string,
-  source?: CloudConnectionSource,
-): void {
-  trackCloudFunnelEvent("cloud_device_authorization_started", {
-    ...cloudLoginBackendContext(),
-    source,
-  });
-}
-
-export function trackCloudDeviceAuthorizationSucceeded(
-  _host: string,
-  source?: CloudConnectionSource,
-): void {
-  trackCloudFunnelEvent("cloud_device_authorization_succeeded", {
-    ...cloudLoginBackendContext(),
-    source,
   });
 }
 

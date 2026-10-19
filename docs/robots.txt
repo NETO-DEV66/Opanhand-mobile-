@@ -1,4 +1,4 @@
-# robots.txt for OpenHands Mobile
+# robots.txt for AgentDeck
 # https://neto-dev66.github.io/Opanhand-mobile-/
 
 User-agent: *

@@ -1,9 +1,8 @@
 import { useTranslation } from "react-i18next";
-import { Pencil, RefreshCw, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 import { type Backend } from "#/api/backend-registry/types";
 import {
-  isCloudBackendLoggedOutHealthError,
   isInvalidBackendApiKeyHealthError,
   type BackendHealth,
 } from "#/hooks/query/use-backends-health";
@@ -11,9 +10,7 @@ import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
 import { BackendStatusDot } from "./backend-status-dot";
 import { BackendVersion } from "./backend-version";
-import { DeviceFlowAuth } from "./device-flow-auth";
 import { getBackendStatusLabel } from "./backend-status-label";
-import { getLockedCloudHost } from "#/api/agent-server-config";
 
 const ROW_ACTION_BUTTON_CLASS =
   "inline-flex cursor-pointer items-center justify-center rounded-md p-1 text-muted transition-colors hover:bg-interactive-hover hover:text-contrast";
@@ -25,7 +22,6 @@ interface BackendRowProps {
   onSelect: () => void;
   onEdit: () => void;
   onRemove: () => void;
-  onLogin?: (apiKey: string) => void;
 }
 
 export function BackendRow({
@@ -35,23 +31,14 @@ export function BackendRow({
   onSelect,
   onEdit,
   onRemove,
-  onLogin,
 }: BackendRowProps) {
   const { t } = useTranslation("openhands");
   const isInvalidApiKey = isInvalidBackendApiKeyHealthError(health?.lastError);
-  const isCloudLoggedOut =
-    backend.kind === "cloud" &&
-    isCloudBackendLoggedOutHealthError(health?.lastError);
   const statusDetail =
-    !isInvalidApiKey &&
-    !isCloudLoggedOut &&
-    health?.isConnected === false &&
-    health.lastError
+    !isInvalidApiKey && health?.isConnected === false && health.lastError
       ? health.lastError
       : null;
-  const statusLabel = isCloudLoggedOut
-    ? t(I18nKey.BACKEND$LOGGED_OUT)
-    : getBackendStatusLabel(t, backend, health);
+  const statusLabel = getBackendStatusLabel(t, backend, health);
   const statusClassName =
     health?.isConnected === true
       ? "text-feedback-success"
@@ -59,7 +46,6 @@ export function BackendRow({
         ? "text-feedback-error"
         : "text-muted";
   const dotStatus = isInvalidApiKey ? false : (health?.isConnected ?? null);
-  const lockedCloudHost = getLockedCloudHost();
   // The host is a tunnel's loopback port, owned by the Managed Agents screen.
   const isMarsSession = Boolean(backend.marsSessionId);
   // A MARS session reads offline whenever its tunnel is gone (e.g. after a
@@ -128,23 +114,7 @@ export function BackendRow({
         </span>
       </button>
       <div className="flex shrink-0 items-center gap-2 px-3 py-3">
-        {isCloudLoggedOut && onLogin ? (
-          <DeviceFlowAuth
-            host={backend.host}
-            onSuccess={onLogin}
-            testIdRoot={`manage-backends-login-${backend.id}`}
-            idleButtonLabel={t(I18nKey.BACKEND$LOG_BACK_IN)}
-            idleButtonContent={
-              <RefreshCw className="size-4" strokeWidth={2} aria-hidden />
-            }
-            className="w-auto"
-            buttonVariant="unstyled"
-            buttonClassName={ROW_ACTION_BUTTON_CLASS}
-            statusDisplay="modal"
-            analyticsSource="manage_backends_modal"
-          />
-        ) : null}
-        {!lockedCloudHost && !isMarsSession && (
+        {!isMarsSession && (
           <button
             type="button"
             onClick={onEdit}
@@ -155,7 +125,7 @@ export function BackendRow({
             <Pencil aria-hidden className="size-4" strokeWidth={2} />
           </button>
         )}
-        {!lockedCloudHost && (
+        {
           <button
             type="button"
             onClick={onRemove}
@@ -165,7 +135,7 @@ export function BackendRow({
           >
             <Trash2 aria-hidden className="size-4" strokeWidth={2} />
           </button>
-        )}
+        }
       </div>
     </li>
   );

@@ -47,7 +47,7 @@ def main():
     logo = brand.tile(210)
     canvas.paste(logo, (112, 112), logo)
 
-    d.text((112, 356), "OpenHands Mobile", font=font(78, True), fill=TEXT)
+    d.text((112, 356), "AgentDeck", font=font(78, True), fill=TEXT)
     d.text((114, 452), "Run AI coding agents from your phone", font=font(36), fill=FAINT)
 
     pill = "FREE  ·  OPEN SOURCE  ·  ANDROID 6.0+"

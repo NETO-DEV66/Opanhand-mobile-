@@ -489,7 +489,6 @@ export function buildMarsBackendInput({
     host,
     apiKey,
     kind: "local",
-    authMode: "api-key",
     marsSessionId: sessionId,
     ...(configId ? { marsConfigId: configId } : {}),
   };

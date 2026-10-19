@@ -5,7 +5,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 // Backend URL is NOT stored here: set VITE_BACKEND_BASE_URL at build time.
 const config: CapacitorConfig = {
   appId: "dev.netodev66.openhandsmobile",
-  appName: "OpenHands Mobile",
+  appName: "AgentDeck",
   webDir: "build",
   server: {
     androidScheme: "https",

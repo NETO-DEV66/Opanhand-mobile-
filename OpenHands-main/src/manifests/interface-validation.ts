@@ -28,7 +28,12 @@ import {
 /** Copy must never be able to inject markup into the host. */
 const MARKUP_PATTERN = /<[A-Za-z/!]/;
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-/** The one URL the manifest may state, pinned to the product documentation. */
+/**
+ * The one URL the manifest may state, pinned to the product documentation.
+ * The pinned extensions package still points at the upstream docs site, so
+ * admission keeps accepting that origin; the host rewrites it to its own docs
+ * before rendering (see `getAutomationsDocsUrl`).
+ */
 const DOCS_URL_PREFIX = "https://docs.openhands.dev/";
 const FILE_KIND_PATTERN = /^[a-z][a-z-]*$/;
 const FILENAME_SUFFIX_PATTERN = /^\.[a-z][a-z.]*json$/;

@@ -2,7 +2,6 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 
-import { getLockedCloudHost } from "#/api/agent-server-config";
 import { type Backend } from "#/api/backend-registry/types";
 import { getMarsBridge } from "#/api/mars/mars-tunnel-backend";
 import { BrandButton } from "#/components/features/settings/brand-button";
@@ -22,7 +21,6 @@ import { cn } from "#/utils/utils";
 import { modalTitleLgClassName } from "#/utils/modal-classes";
 import { BackendFormModal } from "./backend-form-modal";
 import { BackendRow } from "./backend-row";
-import { DeviceFlowAuth } from "./device-flow-auth";
 import { ManagedAgentsView } from "./managed-agents/managed-agents-view";
 import { MarsBackendRemovalModal } from "./managed-agents/mars-backend-removal-modal";
 import { useBackendSwitchRedirect } from "./use-backend-switch-redirect";
@@ -75,7 +73,7 @@ export function ManageBackendsModal({
   initialView = "backends",
 }: ManageBackendsModalProps) {
   const { t } = useTranslation("openhands");
-  const { backends, active, removeBackend, setActive, updateBackend } =
+  const { backends, active, removeBackend, setActive } =
     useActiveBackendContext();
   const healthByBackendId = useBackendsHealth(backends, {
     probeDisabledOnce: true,
@@ -83,21 +81,7 @@ export function ManageBackendsModal({
   const cloudOrgs = useAllCloudOrganizations();
   const currentUserIds = useCloudCurrentUserId();
   const personalWorkspaceLabel = t(I18nKey.BACKEND$PERSONAL_WORKSPACE);
-  const lockedCloudHost = getLockedCloudHost();
-  const isLockedToCloud = lockedCloudHost !== null;
-  // Cookie-auth (OHE-hosted) backends have no API key to refresh — re-auth is
-  // the main-app login, so the device-flow reconnect controls don't apply.
-  const isCookieAuthBackend = active.backend.authMode === "cookie";
-  const lockedCloudBackend =
-    isLockedToCloud && !isCookieAuthBackend && active.backend.kind === "cloud"
-      ? active.backend
-      : null;
-  const lockedCloudReconnectHost =
-    lockedCloudHost ?? lockedCloudBackend?.host ?? "";
-  const modalTitle =
-    isLockedToCloud && !isCookieAuthBackend
-      ? t(I18nKey.BACKEND$RECONNECT_CLOUD_TITLE)
-      : t(I18nKey.BACKEND$MANAGE_TITLE);
+  const modalTitle = t(I18nKey.BACKEND$MANAGE_TITLE);
   const [pendingRemoval, setPendingRemoval] =
     React.useState<PendingRemoval | null>(null);
   const [editingBackend, setEditingBackend] = React.useState<Backend | null>(
@@ -106,7 +90,7 @@ export function ManageBackendsModal({
   const [showAddForm, setShowAddForm] = React.useState(false);
   // The tunnel lives in the Electron main process, so the browser and library
   // builds have nothing to offer here.
-  const showManagedAgents = getMarsBridge() !== null && !isLockedToCloud;
+  const showManagedAgents = getMarsBridge() !== null;
   const [view, setView] = React.useState<ManageBackendsView>(
     showManagedAgents ? initialView : "backends",
   );
@@ -128,21 +112,6 @@ export function ManageBackendsModal({
       onClose();
     },
     [active.backend.id, active.orgId, onClose, redirectAfterSwitch, setActive],
-  );
-
-  const handleCloudLogin = React.useCallback(
-    (backend: Backend, apiKey: string) => {
-      updateBackend(backend.id, { apiKey });
-    },
-    [updateBackend],
-  );
-
-  const handleLockedCloudReconnect = React.useCallback(
-    (apiKey: string) => {
-      if (!lockedCloudBackend) return;
-      updateBackend(lockedCloudBackend.id, { apiKey });
-    },
-    [lockedCloudBackend, updateBackend],
   );
 
   // A removal confirmation on top owns Escape and outside clicks; closing this
@@ -214,11 +183,6 @@ export function ManageBackendsModal({
                               marsSessionId: backend.marsSessionId,
                             })
                           }
-                          onLogin={
-                            backend.authMode === "cookie"
-                              ? undefined
-                              : (apiKey) => handleCloudLogin(backend, apiKey)
-                          }
                         />
                       ))}
                     </ul>
@@ -227,29 +191,15 @@ export function ManageBackendsModal({
               </div>
 
               <div className="flex justify-end gap-2 p-5">
-                {isLockedToCloud ? (
-                  lockedCloudBackend ? (
-                    <DeviceFlowAuth
-                      host={lockedCloudReconnectHost}
-                      onSuccess={handleLockedCloudReconnect}
-                      testIdRoot="manage-backends-reconnect-cloud"
-                      idleButtonLabel={t(I18nKey.BACKEND$RECONNECT_CLOUD)}
-                      className="w-full sm:w-auto"
-                      buttonClassName="w-full sm:w-auto"
-                      statusDisplay="modal"
-                    />
-                  ) : null
-                ) : (
-                  <BrandButton
-                    type="button"
-                    variant={recoveryMode ? "primary" : "secondary"}
-                    onClick={() => setShowAddForm(true)}
-                    testId="manage-backends-add"
-                    startContent={<Plus width={14} height={14} />}
-                  >
-                    {t(I18nKey.BACKEND$ADD)}
-                  </BrandButton>
-                )}
+                <BrandButton
+                  type="button"
+                  variant={recoveryMode ? "primary" : "secondary"}
+                  onClick={() => setShowAddForm(true)}
+                  testId="manage-backends-add"
+                  startContent={<Plus width={14} height={14} />}
+                >
+                  {t(I18nKey.BACKEND$ADD)}
+                </BrandButton>
                 {recoveryMode ? null : (
                   <BrandButton
                     type="button"

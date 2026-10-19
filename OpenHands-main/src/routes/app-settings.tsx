@@ -25,7 +25,6 @@ import { useLlmProfiles } from "#/hooks/query/use-llm-profiles";
 import { useFreeModels } from "#/hooks/query/use-free-models";
 import { useActiveBackend } from "#/contexts/active-backend-context";
 import { formatModelNameForDisplay } from "#/utils/format-model-name";
-import { getLockedCloudHost } from "#/api/agent-server-config";
 
 const AUTOMATIC_TITLE_LLM_PROFILE_KEY = "__automatic__";
 
@@ -264,15 +263,12 @@ function AppSettingsForm() {
                 );
               }}
             />
-            {/* Locked-to-Cloud blocks the Canvas LLM page (OHE-3457). */}
-            {getLockedCloudHost() === null && (
-              <NavigationLink
-                to="/settings/llm"
-                className="mt-3 inline-block text-sm text-primary hover:underline"
-              >
-                {t(I18nKey.SETTINGS$MANAGE_LLM_PROFILES)}
-              </NavigationLink>
-            )}
+            <NavigationLink
+              to="/settings/llm"
+              className="mt-3 inline-block text-sm text-primary hover:underline"
+            >
+              {t(I18nKey.SETTINGS$MANAGE_LLM_PROFILES)}
+            </NavigationLink>
           </div>
 
           <VoiceInputSettings />

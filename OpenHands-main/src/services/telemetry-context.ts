@@ -4,7 +4,7 @@ export const UNKNOWN_TELEMETRY_VERSION = "unknown";
 
 export type DeploymentKind = "local" | "remote";
 
-export type BackendConnectionMethod = "manual" | "cloud_login" | "cloud_cookie";
+export type BackendConnectionMethod = "manual";
 
 export interface CloudTelemetryContextInput {
   userId?: string | null;
