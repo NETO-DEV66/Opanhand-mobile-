@@ -1,0 +1,8 @@
+<svg width="47" height="30" viewBox="0 0 148 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>AgentDeck</title>
+  <!-- AgentDeck mark: a console/deck window with a prompt caret and an
+       underscore cursor. A single evenodd path keeps the mark monochrome, so
+       consumers can recolor the whole logo with `currentColor` through a
+       `path[fill=white]` selector without filling in the negative space. -->
+  <path fill-rule="evenodd" clip-rule="evenodd" fill="white" d="M12 12h124a8 8 0 0 1 8 8v60a8 8 0 0 1-8 8H12a8 8 0 0 1-8-8V20a8 8 0 0 1 8-8Zm20 26.5v9.2l9.4 7.3-9.4 7.3v9.2L52 55 32 38.5ZM62 60h40v7H62v-7Z"/>
+</svg>

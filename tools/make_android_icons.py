@@ -13,7 +13,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import brand
 
-ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "agentdeck")
+ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "OpenHands-main")
 RES = os.path.join(ROOT, "android", "app", "src", "main", "res")
 
 DENSITIES = {"mdpi": 48, "hdpi": 72, "xhdpi": 96, "xxhdpi": 144, "xxxhdpi": 192}

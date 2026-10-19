@@ -21,7 +21,7 @@ Nothing here is required for the app to work. It is about being *found*.
 | Title / description keyword tuning | done | `docs/index.html` |
 | `og:locale`, `robots`, `keywords` meta | done | `docs/index.html` |
 | README keyword headings + FAQ table | done | `README.md` |
-| GitHub release notes | improved | release `v1.29.0` |
+| GitHub release notes | improved | release `v1.28.3` |
 
 ---
 
@@ -112,26 +112,22 @@ Two reasons, both normal:
 2 months to index a brand-new site, and 3-6 months to rank it. This is not a bug
 in your setup.
 
-**The repo slug still says "Opanhand-mobile-".** The repository folder is named
-after the app's origin, but the shipped product is **AgentDeck** — an independent
-direct-connect AI chat app. The old name only matters because it is in the URL.
-The word "OpenHands" also belongs to a much bigger project with a large audience
-(`github.com/OpenHands/OpenHands`, `openhands.dev`). Searching "openhands" will
-always surface them first — they have years of authority and thousands of
-backlinks, and AgentDeck is not related to them.
+**The name collides with a much bigger project.** "OpenHands" is an existing
+open-source project with a large audience (`github.com/OpenHands/OpenHands`,
+`openhands.dev`). Searching the bare word "openhands" will always surface them
+first — they have years of authority and thousands of backlinks.
 
 **So do not compete on "openhands". Compete on intent.**
 
 ### Keywords to target (lower competition, real demand)
 
-- `ai chat android app`
-- `chatgpt client android apk`
-- `bring your own api key android`
-- `claude gemini android app`
-- `ollama android client`
-- `openrouter android app`
-- `private ai chat no account`
-- `sideload ai chat apk`
+- `openhands android app`
+- `openhands mobile`
+- `openhands apk`
+- `run openhands on phone`
+- `openhands agent canvas android`
+- `ai coding agent android app`
+- `sideload ai agent apk`
 
 These are already woven into the page title, description, README headings and the
 overview copy.
@@ -155,40 +151,36 @@ and be honest that you built it. Do not paste the same text everywhere.
 
 Title options:
 
-- `I built an Android app for chatting with any AI model using my own API key`
-- `There was no simple BYO-key AI chat app for Android, so I made one`
+- `I built an Android app for OpenHands so I can supervise my coding agent from my phone`
+- `OpenHands had no mobile app, so I packaged the Agent Canvas as a sideloadable APK`
 
 Body:
 
 ```
-I wanted a plain chat client on my phone for the models I already pay for, and
-everything I found wanted an account, a subscription, or a backend of its own.
+OpenHands runs agents great on a laptop, but there was no way to check on a run
+from my phone. The Agent Canvas needs Docker and Node, so it can't run on-device.
 
-So I built AgentDeck: a standalone Android app where you pick a provider, paste
-your own API key, and chat. It talks straight to OpenAI, Anthropic, Gemini,
-OpenRouter, Groq, DeepSeek, Mistral, xAI or a local Ollama — no server in the
-middle and nothing to sign in to.
+So I packaged the existing Agent Canvas web UI in a Capacitor shell and shipped it
+as an Android app. The agent still runs on your own server — the phone is just the
+client. Sideload the APK, point it at your backend URL, done.
 
-It's MIT licensed, no account, no telemetry, INTERNET permission only. The key
-and your conversations stay on the device.
+It's MIT licensed, no account, no telemetry, INTERNET permission only.
 
 - Site + install steps: https://neto-dev66.github.io/Opanhand-mobile-/
 - Source: https://github.com/NETO-DEV66/Opanhand-mobile-
 
-Not affiliated with any of the model providers, just a client for them. Feedback
-welcome.
+Not affiliated with the OpenHands team, just a community wrapper. Feedback welcome.
 ```
 
 ### Hacker News (Show HN)
 
 <https://news.ycombinator.com/submit>
 
-- Title: `Show HN: AgentDeck – a bring-your-own-key AI chat app for Android`
+- Title: `Show HN: AgentDeck – run OpenHands coding agents from Android`
 - URL: `https://neto-dev66.github.io/Opanhand-mobile-/`
 
 Be present in the comments. Answer technical questions honestly, including the
-limitations (it is a chat client, not a coding agent, and it needs a reachable
-provider).
+limitations (agent runs server-side, not on-device).
 
 ### Product Hunt
 
@@ -197,13 +189,13 @@ Launch with the banner and the demo video. Category: Developer Tools.
 ### X / Twitter
 
 ```
-Most AI chat apps want an account. AgentDeck doesn't.
+OpenHands had no mobile app. So I built one.
 
-Standalone Android app. Pick a provider, paste your own API key, chat.
+The agent still runs on your server — this is the client, in your pocket.
 
-• OpenAI, Anthropic, Gemini, OpenRouter, Groq, DeepSeek, Mistral, xAI, Ollama
-• Sideloadable APK, 3.1 MB
+• Sideloadable APK, 6 MB
 • MIT, no account, no telemetry
+• Works with any OpenHands backend
 
 https://neto-dev66.github.io/Opanhand-mobile-/
 ```
@@ -240,7 +232,7 @@ much better.
 | --- | --- |
 | 2-3 days | Google Search Console verifies; indexing requested |
 | 1-2 weeks | Homepage appears for `site:neto-dev66.github.io` and brand searches |
-| 1-2 months | Appears for long-tail queries like `ai chat android app` |
+| 1-2 months | Appears for long-tail queries like `openhands android app` |
 | 3-6 months | Starts ranking competitively, if backlinks and stars grow |
 
 There is no way to make this faster except backlinks and traffic. Anyone selling

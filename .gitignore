@@ -2,16 +2,16 @@
 node_modules/
 build/
 .gradle/
-agentdeck/android/build/
-agentdeck/android/.gradle/
-agentdeck/android/app/build/
-agentdeck/android/capacitor-cordova-android-plugins/
-agentdeck/android/app/src/main/assets/public/
-agentdeck/android/app/src/main/assets/capacitor.config.json
-agentdeck/android/app/src/main/assets/capacitor.plugins.json
-agentdeck/android/app/src/main/res/xml/config.xml
-agentdeck/.react-router/
-agentdeck/dist/
+OpenHands-main/android/build/
+OpenHands-main/android/.gradle/
+OpenHands-main/android/app/build/
+OpenHands-main/android/capacitor-cordova-android-plugins/
+OpenHands-main/android/app/src/main/assets/public/
+OpenHands-main/android/app/src/main/assets/capacitor.config.json
+OpenHands-main/android/app/src/main/assets/capacitor.plugins.json
+OpenHands-main/android/app/src/main/res/xml/config.xml
+OpenHands-main/.react-router/
+OpenHands-main/dist/
 __pycache__/
 *.pyc
 

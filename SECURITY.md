@@ -14,35 +14,30 @@ is a volunteer project.
 
 ## Scope
 
-This repository packages **AgentDeck**, a standalone direct-connect AI chat app
-for Android, as an APK. It contains no server-side code and no backend of its
-own.
+This repository packages the OpenHands Agent Canvas web app as an Android APK.
+It contains no server-side code of its own.
 
 In scope:
 
-- The Android wrapper: `agentdeck/android/`, `agentdeck/capacitor.config.ts`
-- The app's own web UI: `agentdeck/src/`
+- The Android wrapper: `OpenHands-main/android/`, `OpenHands-main/capacitor.config.ts`
 - The build and release pipeline: `.github/workflows/build-android-apk.yml`
-- The download tooling and static site: `tools/`, `docs/`
+- The download tooling and static site: `dl/`, `docs/`
 
 Out of scope:
 
-- The AI providers the app talks to (OpenAI, Anthropic, Google, OpenRouter,
-  Groq, DeepSeek, Mistral, xAI, Ollama). Report issues to those providers.
-- Your API keys, your provider account, or your own Ollama/self-run endpoint.
+- The OpenHands Agent Canvas application itself. Report those upstream at
+  <https://github.com/OpenHands/OpenHands/security>.
+- Your own agent server, its configuration, or its credentials.
 - Anything that requires a rooted or physically compromised device.
 
 ## What this app does with your data
 
-- The app talks only to the model provider you choose. It ships no default
-  backend, no default provider credentials and no API keys.
-- There is **no telemetry of any kind**. The rewritten UI contains no analytics
-  or tracking code, so nothing is reported back to this project or anyone else.
-- Your API key, base URL, model choice and conversations are stored on the
-  device in the app's private web storage. `allowBackup` is off, so that storage
-  is not copied into device backups.
-- Your key and messages are sent only to the provider they belong to. Nothing
-  passes through a server run by this project, because there is not one.
+- The APK talks only to the agent server URL you enter. It ships no default
+  backend and no API keys.
+- Telemetry is disabled at build time (`VITE_DO_NOT_TRACK=1`), so the PostHog
+  client is never initialised and makes no network requests.
+- The app stores its configuration in app-private storage. `allowBackup` is off,
+  so that storage is not copied into device backups.
 - The signing keystore is never committed. It exists only as an encrypted GitHub
   Actions secret and in the maintainer's own offline backup. See
   [SIGNING.md](SIGNING.md).

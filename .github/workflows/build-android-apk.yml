@@ -13,14 +13,11 @@ name: Build Android APK
 #   ANDROID_KEYSTORE_BASE64    base64 of the release.keystore (PKCS12/JKS)
 #   ANDROID_KEYSTORE_PASSWORD  store password
 #   ANDROID_KEY_PASSWORD       key password
-#   ANDROID_KEY_ALIAS          key alias (defaults to the keystore's alias)
+#   ANDROID_KEY_ALIAS          key alias (defaults to "openhands")
 #
 # Optional repository variable:
+#   BACKEND_BASE_URL           baked into the web bundle as VITE_BACKEND_BASE_URL
 #   SIGNING_CERT_SHA256        pins the signer fingerprint (see SIGNING.md)
-#
-# The app is a direct-connect client: it has no server of its own and asks the
-# user only for a model-provider API key on first launch. There is nothing to
-# bake in at build time.
 
 on:
   workflow_dispatch:
@@ -29,7 +26,7 @@ on:
     tags: ["v*"]
   pull_request:
     paths:
-      - "agentdeck/**"
+      - "OpenHands-main/**"
       - ".github/workflows/build-android-apk.yml"
 
 permissions:
@@ -40,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: agentdeck
+        working-directory: OpenHands-main
     steps:
       - uses: actions/checkout@v7
 
@@ -48,7 +45,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: agentdeck/package-lock.json
+          cache-dependency-path: OpenHands-main/package-lock.json
 
       - uses: actions/setup-java@v6
         with:
@@ -58,9 +55,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Capacitor toolchain
+        # The Capacitor packages are not in package.json; install them at the
+        # same major version the android/ project was generated with.
+        run: npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
+
       - name: Build web bundle
-        # No server URL and no telemetry switch: the direct-connect client has
-        # no server of its own and contains no analytics code at all.
+        env:
+          # Public URL of the OpenHands agent server the phone talks to.
+          # Set repo variable BACKEND_BASE_URL to bake it in; leave unset to
+          # let the user enter it in the app on first launch.
+          VITE_BACKEND_BASE_URL: ${{ vars.BACKEND_BASE_URL }}
+          VITE_MOCK_API: "false"
+          # The README and the landing page promise "no telemetry". Upstream's
+          # default sends an anonymous install event before any consent, so
+          # turn the PostHog client off at build time to make the promise true.
+          VITE_DO_NOT_TRACK: "1"
         run: npm run build:app
 
       - name: Sync Capacitor Android project
@@ -90,11 +100,11 @@ jobs:
           echo "signed=true" >> "$GITHUB_OUTPUT"
 
       - name: Build the universal release APK
-        working-directory: agentdeck/android
+        working-directory: OpenHands-main/android
         env:
-          AGENTDECK_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          AGENTDECK_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          AGENTDECK_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          OPENHANDS_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          OPENHANDS_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          OPENHANDS_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           chmod +x gradlew
           # assembleRelease produces the single universal APK. ABI splits are
@@ -103,7 +113,7 @@ jobs:
 
       - name: Verify the release APK
         id: verify
-        working-directory: agentdeck/android
+        working-directory: OpenHands-main/android
         env:
           KEYSTORE_WAS_RESTORED: ${{ steps.keystore.outputs.signed }}
         run: |
@@ -196,8 +206,8 @@ jobs:
         if: steps.keystore.outputs.signed == 'true'
         uses: actions/upload-artifact@v7
         with:
-          name: agentdeck-universal-apk
-          path: agentdeck/android/${{ steps.verify.outputs.apk }}
+          name: openhands-universal-apk
+          path: OpenHands-main/android/${{ steps.verify.outputs.apk }}
           if-no-files-found: error
 
       - name: Attach the APK to the GitHub Release
@@ -218,7 +228,7 @@ jobs:
           # printf, not a heredoc: a heredoc body would inherit this step's YAML
           # indentation and render as a code block on the release page.
           printf '%s\n' \
-            'AgentDeck - a direct-connect Android client for AI chat, packaged with Capacitor.' \
+            'Android build of the OpenHands Agent Canvas UI, packaged with Capacitor.' \
             '' \
             '**One universal APK.** A single file for every phone - arm64, armv7 and' \
             'x86_64. The web bundle carries no native code, so there is nothing to' \
@@ -228,7 +238,7 @@ jobs:
             '**Install**' \
             '1. Allow install from unknown sources for your browser or file manager.' \
             '2. Open the APK on the phone and install it.' \
-            '3. On first launch, pick a model provider and paste your API key. The key stays on the device.' \
+            '3. On first launch, add your agent server host and API key.' \
             '' \
             '**Verify the download**' \
             '' \
