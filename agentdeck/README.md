@@ -41,8 +41,13 @@ The Android project itself lives in `android/` (see the repository root README).
 ## Checks
 
 ```sh
-npm run typecheck      # the check that matters
+npm run typecheck   # tsc over the whole project
+npm run lint        # typecheck + eslint + prettier
+npm test            # end-to-end chat test (see below)
+npm run build:app   # production bundle
 ```
 
-The Vitest suite inherited from the pre-rewrite code base is not maintained in
-this fork; `npm run typecheck` is the check that counts.
+`npm test` runs `e2e-chat.test.ts`. It starts a local mock provider on
+`127.0.0.1:8791` and drives the real `streamChat` code over real HTTP, so it
+covers the OpenAI, Anthropic and Gemini wire formats, the error paths, request
+cancellation and local storage. No network access or API key is needed.

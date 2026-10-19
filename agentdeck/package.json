@@ -29,7 +29,8 @@
     "start": "sirv build --single",
     "preview": "vite preview",
     "typecheck": "react-router typegen && tsc",
-    "lint": "npm run typecheck && eslint src && prettier --check src/**/*.{ts,tsx}",
+    "test": "vite-node e2e-chat.test.ts",
+    "lint": "npm run typecheck && eslint src e2e-chat.test.ts && prettier --check src/**/*.{ts,tsx} e2e-chat.test.ts",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\""
   },
   "devDependencies": {
