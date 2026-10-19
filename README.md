@@ -31,7 +31,7 @@ Pick a provider, paste your API key, and start chatting — no server to run.
 
 | Build | Size | Link |
 | --- | --- | --- |
-| **Universal (signed)** | 5.7 MB | **[app-release.apk](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)** |
+| **Universal (signed)** | 3.1 MB | **[app-release.apk](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)** |
 
 All builds: [Releases page](https://github.com/NETO-DEV66/Opanhand-mobile-/releases)
 

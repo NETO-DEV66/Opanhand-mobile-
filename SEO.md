@@ -202,7 +202,7 @@ Most AI chat apps want an account. AgentDeck doesn't.
 Standalone Android app. Pick a provider, paste your own API key, chat.
 
 • OpenAI, Anthropic, Gemini, OpenRouter, Groq, DeepSeek, Mistral, xAI, Ollama
-• Sideloadable APK, 5.7 MB
+• Sideloadable APK, 3.1 MB
 • MIT, no account, no telemetry
 
 https://neto-dev66.github.io/Opanhand-mobile-/
