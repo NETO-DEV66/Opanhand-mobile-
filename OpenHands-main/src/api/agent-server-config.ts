@@ -134,17 +134,22 @@ export function getAgentServerFormDefaults(): AgentServerFormDefaults {
 }
 
 /**
- * This build has no OpenHands Cloud backend. Locking the app to a single
- * hosted Cloud origin is what pulls in the Cloud device-flow login and the
- * main-app cookie session, so it is disabled outright: the app can only talk
- * to an agent-server the user configures (local or self-hosted).
+ * Hosted Cloud origin this build is locked to, or null for an unlocked build.
  *
- * Kept as a function (rather than deleted) because `root.tsx`,
- * `onboarding-modal.tsx` and `default-backend.ts` branch on it. Always
- * returning null makes every one of those branches take the non-Cloud path.
+ * `VITE_LOCK_TO_CLOUD` is baked in at build time (the Android release build
+ * sets it to OpenHands Cloud). When it is set, the app is a hosted-Cloud
+ * client: first launch shows the provider login page and the self-hosted
+ * backend form is hidden. When it is unset the app is fully self-hosted —
+ * the user configures an agent-server themselves.
+ *
+ * Every locked-to-Cloud branch across the app keys off this one function, so
+ * leaving it unset keeps all of them on the non-Cloud path.
  */
 export function getLockedCloudHost(): string | null {
-  return null;
+  const configured = trimToNull(import.meta.env.VITE_LOCK_TO_CLOUD);
+  if (!configured || configured.toLowerCase() === "off") return null;
+
+  return normalizeCloudHost(configured);
 }
 
 /**
