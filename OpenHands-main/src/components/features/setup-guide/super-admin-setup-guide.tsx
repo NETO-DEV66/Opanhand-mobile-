@@ -10,6 +10,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { ArrowUpRight, Check, ClipboardList, X } from "lucide-react";
 import { getLockedCloudHost } from "#/api/agent-server-config";
+import { isNativeShell } from "#/api/native-shell";
 import { NavigationLink } from "#/components/shared/navigation-link";
 import { useNavigation } from "#/context/navigation-context";
 import { useActiveBackend } from "#/contexts/active-backend-context";
@@ -120,8 +121,11 @@ export default function SuperAdminSetupGuide() {
 
   const cloudHost = backend.host.replace(/\/+$/, "");
   // Locked-to-Cloud serves the canvas on the cloud host itself, so enterprise
-  // pages open in this tab; standalone / Electron keep a new tab.
+  // pages open in this tab; standalone / Electron keep a new tab. The native
+  // shell runs at the local shell origin, where following the link would leave
+  // the app for the system browser, so enterprise-only steps are not offered.
   const isLockedToCloud = getLockedCloudHost() !== null;
+  const canOpenCloudPages = isLockedToCloud && !isNativeShell();
 
   // When the guide's next step is done, open the step after it the way Start
   // does. A step finished out of order, or not confirmed by the server, only
@@ -149,7 +153,7 @@ export default function SuperAdminSetupGuide() {
         } else {
           navigate(destination.path);
         }
-      } else if (isLockedToCloud) {
+      } else if (canOpenCloudPages) {
         window.location.assign(
           cloudPageUrl(
             cloudHost,
@@ -174,7 +178,7 @@ export default function SuperAdminSetupGuide() {
     startTour,
     cloudHost,
     guideOrgId,
-    isLockedToCloud,
+    canOpenCloudPages,
   ]);
 
   // A page opened from the enterprise guide names the step whose tour to
@@ -240,6 +244,9 @@ export default function SuperAdminSetupGuide() {
   };
   // A step row and Start open the same page for a step, with the step's tour
   // for a Canvas step. Start also asks the enterprise guide for its tour.
+  // Enterprise (cloud) steps have no in-app page, so where the Cloud host is
+  // not reachable from here (the native shell) they render as plain rows: the
+  // checklist still shows progress, but nothing navigates out of the app.
   const renderStepLink = (
     step: SuperAdminSetupStep,
     testId: string,
@@ -257,7 +264,7 @@ export default function SuperAdminSetupGuide() {
       >
         {children}
       </NavigationLink>
-    ) : (
+    ) : canOpenCloudPages ? (
       <a
         href={cloudUrl(
           step.destination.path,
@@ -271,6 +278,10 @@ export default function SuperAdminSetupGuide() {
       >
         {children}
       </a>
+    ) : (
+      <span data-testid={testId} className={className}>
+        {children}
+      </span>
     );
 
   const title = t(I18nKey.ONBOARDING$SETUP_GUIDE_TITLE);
@@ -294,16 +305,22 @@ export default function SuperAdminSetupGuide() {
               {title}
             </p>
             <div className="flex shrink-0 items-center gap-0.5">
-              <a
-                href={cloudUrl(SUPER_ADMIN_SETUP_GUIDE_PAGE_PATH, false)}
-                {...cloudLinkProps}
-                data-testid="super-admin-setup-guide-page"
-                aria-label={title}
-                title={title}
-                className={ICON_BUTTON_CLASS}
-              >
-                <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden />
-              </a>
+              {canOpenCloudPages ? (
+                <a
+                  href={cloudUrl(SUPER_ADMIN_SETUP_GUIDE_PAGE_PATH, false)}
+                  {...cloudLinkProps}
+                  data-testid="super-admin-setup-guide-page"
+                  aria-label={title}
+                  title={title}
+                  className={ICON_BUTTON_CLASS}
+                >
+                  <ArrowUpRight
+                    className="size-4"
+                    strokeWidth={2}
+                    aria-hidden
+                  />
+                </a>
+              ) : null}
               <button
                 type="button"
                 aria-label={t(I18nKey.BUTTON$CLOSE)}

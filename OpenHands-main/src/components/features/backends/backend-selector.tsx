@@ -5,6 +5,7 @@ import { Plus, Settings } from "lucide-react";
 import { Dropdown } from "#/ui/dropdown/dropdown";
 import { DropdownOption } from "#/ui/dropdown/types";
 import { getLockedCloudHost } from "#/api/agent-server-config";
+import { isNativeShell } from "#/api/native-shell";
 import { isNoBackend } from "#/api/backend-registry/active-store";
 import { useActiveBackendContext } from "#/contexts/active-backend-context";
 import { useAllCloudOrganizations } from "#/hooks/query/use-cloud-organizations";
@@ -392,7 +393,7 @@ export function BackendSelector({
             placement={settingsTooltipPlacement}
             offset={10}
           >
-            {active.backend.kind === "cloud" ? (
+            {active.backend.kind === "cloud" && !isNativeShell() ? (
               <a
                 href={`${active.backend.host.replace(/\/+$/, "")}/settings${cloudSettingsOrgQuery}`}
                 target={isLockedToCloud ? undefined : "_blank"}

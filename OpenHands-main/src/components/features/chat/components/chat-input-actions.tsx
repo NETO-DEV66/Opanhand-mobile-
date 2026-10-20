@@ -26,7 +26,7 @@ import { useActiveBackend } from "#/contexts/active-backend-context";
 import { useAgentProfiles } from "#/hooks/query/use-agent-profiles";
 import { useChatInputModelState } from "#/hooks/use-chat-input-model-state";
 import { useChatInputLlmProfileState } from "#/hooks/use-chat-input-llm-profile-state";
-import { getLockedCloudHost } from "#/api/agent-server-config";
+import { shouldDeferSettingsToCloudShell } from "#/api/agent-server-config";
 import { useConversationStore } from "#/stores/conversation-store";
 import { useAgentState } from "#/hooks/use-agent-state";
 import { AgentState } from "#/types/agent-state";
@@ -244,7 +244,8 @@ export function ChatInputActions({
         (!llmProfileState.canSwitchProfile &&
           Boolean(llmProfileState.currentProfileName));
   const showOverflowModel =
-    !showModelInline && (getLockedCloudHost() === null || hasModelMenuRows);
+    !showModelInline &&
+    (!shouldDeferSettingsToCloudShell() || hasModelMenuRows);
 
   const hasOverflowItems =
     !showAddFileInline ||

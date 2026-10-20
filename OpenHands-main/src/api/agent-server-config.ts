@@ -1,3 +1,5 @@
+import { isNativeShell } from "./native-shell";
+
 export const DEFAULT_WORKING_DIR = "workspace/project";
 
 export type LockedCloudAuthMode = "api-key" | "cookie";
@@ -174,6 +176,24 @@ export function isSameCloudHost(
 
 export function getLockedCloudAuthMode(): LockedCloudAuthMode {
   return getCookieAuthCloudHost() ? "cookie" : "api-key";
+}
+
+/**
+ * Whether the settings UI should defer to the Cloud host's own settings shell.
+ *
+ * The hosted product serves its settings pages at `<cloud host>/settings`, so
+ * a locked-to-Cloud deployment that runs *inside* that host can hand the user
+ * over to it. The shipped Android build is locked to Cloud but runs in the
+ * Capacitor WebView, whose origin is the local shell — every off-origin
+ * navigation there is handed to the system browser, so deferring would open a
+ * browser instead of showing settings in the app.
+ *
+ * Defer only when both hold: locked to a Cloud host, and *not* running in the
+ * native shell. In the native shell the app keeps its own in-app settings
+ * pages, which is the whole point of the phone build.
+ */
+export function shouldDeferSettingsToCloudShell(): boolean {
+  return getLockedCloudHost() !== null && !isNativeShell();
 }
 
 export function getAgentServerBaseUrl(): string | null {

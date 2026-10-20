@@ -14,6 +14,10 @@
  * approves the pending code and the app's polling picks up the token.
  */
 
+import { isNativeShell } from "./native-shell";
+
+export { isNativeShell };
+
 export type CloudLoginProvider = "github" | "gitlab" | "bitbucket";
 
 const KEYCLOAK_REALM = "allhands";
@@ -84,25 +88,6 @@ export function deviceVerifyPathFromVerificationUrl(
   } catch {
     return verificationUrl;
   }
-}
-
-/**
- * Whether this page is running inside the Capacitor native shell.
- *
- * On Android the shell registers a `WebViewClient` that hands every
- * off-origin navigation to the system browser (`Intent.ACTION_VIEW`) and
- * cancels the in-WebView load. That makes a top-level `location.assign()` the
- * reliable way to open a URL externally; `window.open` depends on multiple
- * windows being supported, which the shell does not enable.
- */
-export function isNativeShell(): boolean {
-  if (typeof window === "undefined") return false;
-  const capacitor = (
-    window as unknown as {
-      Capacitor?: { isNativePlatform?: () => boolean };
-    }
-  ).Capacitor;
-  return capacitor?.isNativePlatform?.() === true;
 }
 
 /**

@@ -5,7 +5,7 @@ import { useNavigation } from "#/context/navigation-context";
 import { useLlmConfigured } from "#/hooks/use-llm-configured";
 import { BrandButton } from "#/components/features/settings/brand-button";
 import { Typography } from "#/ui/typography";
-import { getLockedCloudHost } from "#/api/agent-server-config";
+import { shouldDeferSettingsToCloudShell } from "#/api/agent-server-config";
 
 /**
  * Warns the user on the home screen when the active agent has no usable LLM —
@@ -43,7 +43,7 @@ export function LlmNotConfiguredBanner() {
       </div>
 
       {/* Locked-to-Cloud blocks the Canvas LLM page (OHE-3457). */}
-      {getLockedCloudHost() === null && (
+      {!shouldDeferSettingsToCloudShell() && (
         <BrandButton
           testId="home-llm-not-configured-action"
           type="button"

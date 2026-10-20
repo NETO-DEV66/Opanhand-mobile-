@@ -21,7 +21,7 @@ import {
   getInterfaceCopy,
   hasAutomationInterface,
 } from "#/manifests/automation-interface";
-import { getLockedCloudHost } from "#/api/agent-server-config";
+import { shouldDeferSettingsToCloudShell } from "#/api/agent-server-config";
 import { LOCKED_CLOUD_SETTINGS_NAV_PATH } from "#/constants/settings-nav";
 import { isApplePlatform } from "#/utils/utils";
 
@@ -251,13 +251,14 @@ export const createCommandMenuItems = ({
     },
   ];
 
-  // Locked-to-Cloud (SaaS / self-hosted OHE) lists only the Application page;
-  // the OHE settings shell owns the rest (OHE-3168).
-  const isLockedToCloud = getLockedCloudHost() !== null;
+  // Locked-to-Cloud inside the Cloud host (SaaS / self-hosted OHE) lists only
+  // the Application page; the OHE settings shell owns the rest (OHE-3168).
+  // The native shell keeps the full in-app list.
+  const isLockedToCloudShell = shouldDeferSettingsToCloudShell();
 
   return items.filter(
     (item) =>
-      !isLockedToCloud ||
+      !isLockedToCloudShell ||
       item.group !== "settings" ||
       item.to === COMMAND_MENU_ROUTE.settings ||
       item.to === LOCKED_CLOUD_SETTINGS_NAV_PATH,

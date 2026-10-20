@@ -12,7 +12,7 @@ import { Divider } from "#/ui/divider";
 import { Typography } from "#/ui/typography";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
-import { getLockedCloudHost } from "#/api/agent-server-config";
+import { shouldDeferSettingsToCloudShell } from "#/api/agent-server-config";
 import { chatInputPillButtonClassName } from "#/utils/form-control-classes";
 import { useFreeModels } from "#/hooks/query/use-free-models";
 import { formatModelPillLabel } from "#/utils/format-model-name";
@@ -62,7 +62,7 @@ export function ChatInputLlmProfileMenuContent({
   const showProfileList = canSwitchProfile && profiles.length > 0;
   const readOnlyProfileName = canSwitchProfile ? null : currentProfileName;
   // Locked-to-Cloud blocks the Canvas LLM page this links to (OHE-3457).
-  const showSettingsLink = getLockedCloudHost() === null;
+  const showSettingsLink = !shouldDeferSettingsToCloudShell();
 
   const handleSelect = (profileName: string) => {
     selectProfile(profileName);
