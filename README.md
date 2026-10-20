@@ -17,7 +17,7 @@ Run and supervise your AI coding agents from your phone.
 
 [![Download APK](https://img.shields.io/badge/Download-APK-6c5ce7?style=for-the-badge&logo=android&logoColor=white)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)
 [![Website](https://img.shields.io/badge/Website-openhands--app-FF6A3D?style=for-the-badge&logo=githubpages&logoColor=white)](https://neto-dev66.github.io/Opanhand-mobile-/)
-[![Version](https://img.shields.io/badge/version-1.29.0-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.29.0)
+[![Version](https://img.shields.io/badge/version-1.30.0-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.30.0)
 [![Build](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml/badge.svg)](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/blob/main/LICENSE)
 [![Support via UPI](https://img.shields.io/badge/Support-UPI-ff9f1c?style=for-the-badge&logo=buymeacoffee&logoColor=white)](#support-this-project)
@@ -107,7 +107,8 @@ shell using [Capacitor](https://capacitorjs.com/), so you can launch it, watch
 runs, and approve actions from a phone.
 
 The app contains **the same UI as the browser version** (`@openhands/agent-canvas`
-v1.27.1). It is a client — it talks to an OpenHands agent server that you run
+v1.27.1). It is a client. The shipped build signs in to hosted OpenHands Cloud
+with your Git provider; a self-hosted build talks to an agent server you run
 yourself, on your laptop, a server, or in the cloud.
 
 **This is a community packaging, not an official OpenHands release.**
@@ -128,7 +129,7 @@ the agent on real hardware, and you get the controls in your pocket.
 | Is there an official OpenHands mobile app? | No. This is an independent, community-built Android wrapper. |
 | Does the agent run on the phone? | No. The agent runs on your server; the phone is the client. |
 | Do I need a Play Store account? | No. You sideload the APK. |
-| Is it free? | Yes — MIT licensed, no account, no telemetry. |
+| Is it free? | Yes — MIT licensed, no telemetry. |
 | Which Android versions? | 6.0 (Marshmallow, API 23) and newer. |
 
 ---
@@ -140,11 +141,11 @@ the agent on real hardware, and you get the controls in your pocket.
 | Android version | 6.0 (Marshmallow, API 23) or newer |
 | Architecture | Universal — arm64, armv7, x86_64 (no native code) |
 | Permissions | Internet only |
-| Backend | A reachable OpenHands agent server (you provide it) |
+| Backend | OpenHands Cloud (built in), or a reachable agent server you provide |
 | Telemetry | None. The APK is built with `VITE_DO_NOT_TRACK=1`, so the upstream PostHog client is disabled at compile time and never initialised. |
 
-The app needs network access to your agent server. It does **not** bundle a
-backend, and it does not send your data anywhere by itself.
+The app needs network access to OpenHands Cloud, or to the agent server you
+point it at. It does not send your data anywhere by itself.
 
 ---
 
@@ -167,22 +168,17 @@ backend, and it does not send your data anywhere by itself.
 
 ## First launch
 
-The app does not know where your agent server lives. On first launch it shows a
-four-step setup wizard:
+The shipped build is a **hosted OpenHands Cloud client**. On first launch it
+shows a sign-in page with one button per Git provider:
 
-| 1 · Connect | 2 · Pick an agent |
-| :---: | :---: |
-| <img src="docs/assets/screens/01-backend.webp" alt="Add a backend screen with a friendly name, host URL, a Local/Cloud type toggle, and an API key" width="300"> | <img src="docs/assets/screens/02-agent.webp" alt="Choose your agent screen listing OpenHands, Claude Code, Codex, Gemini CLI, Pi and OpenCode" width="300"> |
+| 1 · Sign in with a Git provider |
+| :---: |
+| <img src="docs/assets/screens/01-backend.webp" alt="Cloud sign-in screen with Log in with GitHub, GitLab and Bitbucket buttons" width="300"> |
 
-| 3 · Choose a model | 4 · Start working |
-| :---: | :---: |
-| <img src="docs/assets/screens/03-llm.webp" alt="Set up your LLM screen for choosing a provider and model" width="300"> | <img src="docs/assets/screens/04-hello.webp" alt="Say hello screen with a first-message box and ready-made workflow templates" width="300"> |
-
-1. **Connect** — the address of your OpenHands agent server, for example
-   `https://my-server.example.com` or `http://192.168.1.10:3000` on your home
-   network. Use `https://` for anything reachable over the internet. There is no
-   hosted account to sign in to: this build talks only to a server you run, so
-   there is nothing to log into and nothing to approve.
+1. **Sign in** — tap **Log in with GitHub**, **GitLab** or **Bitbucket**. The
+   app opens that provider's consent screen in your browser and shows an
+   eight-character code. Approve the code in the browser, and the app signs in
+   and connects to OpenHands Cloud.
 2. **Pick an agent** — OpenHands by default, or bring your own Claude Code,
    Codex, Gemini CLI, Pi or OpenCode agent.
 3. **Choose a model** — pick a provider and model. A sensible default is
@@ -190,14 +186,13 @@ four-step setup wizard:
 4. **Start working** — send a first message, or open a proven workflow template
    with its prompt and MCPs already set up.
 
-These captures come from the app with no backend attached, so every field is
-blank. Your own setup will carry your server, your model and your conversations.
-
-Your settings are stored on the device. To change them later, open
+The captures below come from the self-hosted flow; the sign-in step is the one
+difference. Your settings are stored on the device. To change them later, open
 **Settings** inside the app.
 
-> Tip: to bake the server URL into the APK so users skip this step, set the
-> repository variable `BACKEND_BASE_URL` before building. See
+> **Self-hosted build.** To ship an APK that talks only to an agent server you
+> run — no Cloud account, first launch is the four-step setup wizard — set the
+> repository variable `CLOUD_BASE_URL` to `off` before building. See
 > [Building from source](#building-from-source).
 
 ---
@@ -362,8 +357,8 @@ release APK with the secret key and attaches it to the GitHub Release.
 2. Commit, then tag and push:
 
 ```bash
-git tag v1.29.0
-git push origin v1.29.0
+git tag v1.30.0
+git push origin v1.30.0
 ```
 
 GitHub Actions builds and publishes the APK. The `releases/latest/download`
@@ -375,6 +370,7 @@ APK can never be released by accident.
 
 | Name | Type | Purpose |
 | --- | --- | --- |
+| `CLOUD_BASE_URL` | Variable | The Cloud origin the app is locked to. Unset means hosted OpenHands Cloud (`https://app.all-hands.dev`). Set it to another origin for a self-hosted Cloud, or to `off` to ship the unlocked, self-hosted build. |
 | `BACKEND_BASE_URL` | Variable | Bakes the agent server URL into the app. |
 | `SIGNING_CERT_SHA256` | Variable | **Set.** The pinned signer fingerprint. The workflow refuses to publish an APK signed with anything else, and fails closed if it cannot read the fingerprint at all. Change it only when rotating the key on purpose. |
 | `ANDROID_KEYSTORE_BASE64` | Secret | The signing keystore, base64-encoded. Required to publish. |
