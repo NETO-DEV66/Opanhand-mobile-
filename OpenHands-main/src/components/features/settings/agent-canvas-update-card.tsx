@@ -13,6 +13,7 @@ import {
   AGENT_CANVAS_UPDATE_COMMANDS,
 } from "#/api/agent-canvas-updates";
 import { compareAgentServerVersions } from "#/api/agent-server-compatibility";
+import { getLockedCloudHost } from "#/api/agent-server-config";
 import { AGENT_CANVAS_CLIENT_VERSION } from "#/api/client-source";
 import { BrandButton } from "#/components/features/settings/brand-button";
 import { BaseModalTitle } from "#/components/shared/modals/confirmation-modals/base-modal";
@@ -285,7 +286,12 @@ export function AgentCanvasUpdateCard({
 }: AgentCanvasUpdateCardProps) {
   const { t } = useTranslation("openhands");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const latestVersionQuery = useLatestAgentCanvasVersion();
+  const isLockedToCloud = getLockedCloudHost() !== null;
+  const latestVersionQuery = useLatestAgentCanvasVersion({
+    enabled: !isLockedToCloud,
+  });
+
+  if (isLockedToCloud) return null;
 
   const latestVersion = latestVersionQuery.data;
   const comparison =

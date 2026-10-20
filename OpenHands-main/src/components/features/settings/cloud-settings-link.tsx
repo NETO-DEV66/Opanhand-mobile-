@@ -3,6 +3,7 @@ import { Cloud, ExternalLink } from "lucide-react";
 import { I18nKey } from "#/i18n/declaration";
 import { useActiveBackendContext } from "#/contexts/active-backend-context";
 import { isNoBackend } from "#/api/backend-registry/active-store";
+import { getLockedCloudHost } from "#/api/agent-server-config";
 import { cn } from "#/utils/utils";
 import {
   SIDEBAR_ICON_SLOT_CLASS,
@@ -24,6 +25,8 @@ export function CloudSettingsLink() {
 
   if (isNoBackend(backend) || backend.kind !== "cloud") return null;
 
+  const isLockedToCloud = getLockedCloudHost() !== null;
+
   // `org` is consumed by the cloud settings loader so the page opens on the
   // org that is active here instead of the cloud's last-used org.
   const orgQuery = orgId ? `?org=${encodeURIComponent(orgId)}` : "";
@@ -33,8 +36,8 @@ export function CloudSettingsLink() {
     <a
       data-testid="settings-cloud-link"
       href={cloudSettingsUrl}
-      target="_blank"
-      rel="noopener noreferrer"
+      target={isLockedToCloud ? undefined : "_blank"}
+      rel={isLockedToCloud ? undefined : "noopener noreferrer"}
       className={cn(
         sidebarNavRowClassName({ collapsed: false }),
         SIDEBAR_ROW_INTERACTIVE_CLASS.idle,
@@ -46,7 +49,9 @@ export function CloudSettingsLink() {
       <span className={cn(sidebarNavLabelClassName(false), "flex-1")}>
         {t(I18nKey.SETTINGS$CLOUD_SETTINGS_LINK)}
       </span>
-      <ExternalLink className="size-4 shrink-0 text-muted" aria-hidden />
+      {!isLockedToCloud && (
+        <ExternalLink className="size-4 shrink-0 text-muted" aria-hidden />
+      )}
     </a>
   );
 }

@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowUpCircle, CheckCircle2 } from "lucide-react";
 import { compareAgentServerVersions } from "#/api/agent-server-compatibility";
+import { getLockedCloudHost } from "#/api/agent-server-config";
 import { AGENT_CANVAS_CLIENT_VERSION } from "#/api/client-source";
 import { useLatestAgentCanvasVersion } from "#/hooks/query/use-latest-agent-canvas-version";
 import { I18nKey } from "#/i18n/declaration";
@@ -25,7 +26,12 @@ export function AgentCanvasVersionTile({
 }: AgentCanvasVersionTileProps) {
   const { t } = useTranslation("openhands");
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const latestVersionQuery = useLatestAgentCanvasVersion();
+  const isLockedToCloud = getLockedCloudHost() !== null;
+  const latestVersionQuery = useLatestAgentCanvasVersion({
+    enabled: !isLockedToCloud,
+  });
+
+  if (isLockedToCloud) return null;
 
   const installedVersion = AGENT_CANVAS_CLIENT_VERSION;
   const latestVersion = latestVersionQuery.data ?? null;

@@ -51,6 +51,9 @@ export function useAllCloudOrganizations() {
         // exist. Only an explicit `false` hides an org: an app-server that
         // predates the field omits it, and those orgs stay visible.
         const visible = orgs.items.filter((o) => o.is_visible !== false);
+        if (backend.authMode === "cookie") {
+          return { ...orgs, items: visible };
+        }
 
         const key = await getCurrentCloudApiKey(backend);
         if (key.isLegacyKey || key.orgId === null) {

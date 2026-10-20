@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { isNoBackend } from "#/api/backend-registry/active-store";
+import { getLockedCloudHost, isSameCloudHost } from "#/api/agent-server-config";
 import {
   readSidebarOnboardingChecklistDismissed,
   writeSidebarOnboardingChecklistDismissed,
@@ -151,8 +152,22 @@ export function OnboardingModal({
   const healthByBackendId = useBackendsHealth(
     noBackendSelected ? [] : [backend],
   );
+  // In locked-to-Cloud mode the backend slide may only be skipped when the
+  // active backend IS the configured locked Cloud host. A reachable stale
+  // Local backend (or a Cloud backend on a different host) must keep
+  // `CheckBackendStep` visible so the user can log into Cloud and replace
+  // the stale backend — otherwise they would continue as Local despite
+  // `VITE_LOCK_TO_CLOUD`. Outside locked mode the existing behavior
+  // (skip once the active backend is healthy) is unchanged.
+  const lockedCloudHost = getLockedCloudHost();
+  const isActiveLockedCloudBackend =
+    lockedCloudHost !== null &&
+    backend.kind === "cloud" &&
+    isSameCloudHost(backend.host, lockedCloudHost);
   const skipBackendStep =
-    !noBackendSelected && healthByBackendId[backend.id]?.isConnected === true;
+    !noBackendSelected &&
+    healthByBackendId[backend.id]?.isConnected === true &&
+    (lockedCloudHost === null || isActiveLockedCloudBackend);
 
   const slideOrder = skipBackendStep
     ? PHASE_ORDER_WITHOUT_BACKEND
@@ -200,6 +215,7 @@ export function OnboardingModal({
     healthByBackendId[backend.id]?.isConnected !== undefined;
 
   const isOpenHands = selectedAgentId === "openhands";
+  const hideSkip = currentStep === 0 && getLockedCloudHost() !== null;
   const goNext = React.useCallback(() => {
     setPhase((prev) => {
       const order = slideOrder;
@@ -324,7 +340,7 @@ export function OnboardingModal({
                   index={slideOrder.indexOf("backend")}
                   currentStep={currentStep}
                 >
-                  <CheckBackendStep onNext={goNext} />
+                  <CheckBackendStep onNext={goNext} onClose={onClose} />
                 </Slide>
               )}
               <Slide
@@ -367,7 +383,7 @@ export function OnboardingModal({
           </div>
         </section>
 
-        {currentStep < totalSteps - 1 ? (
+        {currentStep < totalSteps - 1 && !hideSkip ? (
           <button
             type="button"
             data-testid="onboarding-skip"

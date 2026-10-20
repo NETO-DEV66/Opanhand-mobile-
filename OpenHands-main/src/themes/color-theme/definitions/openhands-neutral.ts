@@ -2,7 +2,7 @@ import type { ColorThemeDefinition } from "../types";
 import { NEUTRAL_SCALE, NEUTRAL_HEROUI } from "../palettes/neutral";
 
 export const openhandsNeutral: ColorThemeDefinition = {
-  label: "AgentDeck-Neutral",
+  label: "OpenHands-Neutral",
   appearance: "dark",
   scale: NEUTRAL_SCALE,
   // Each stop follows the same positional mapping as hero.ts:

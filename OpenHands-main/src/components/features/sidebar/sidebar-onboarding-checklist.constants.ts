@@ -5,11 +5,10 @@ import type {
 } from "#/hooks/use-tracking";
 
 const SCHEDULED_TASKS_DOCS_URL =
-  "https://github.com/NETO-DEV66/Opanhand-mobile-#quick-start";
+  "https://docs.openhands.dev/openhands/usage/agent-canvas/prebuilt-automations";
 
 /** Canonical Slack invite redirect from openhands.dev. */
-export const OPENHANDS_SLACK_COMMUNITY_URL =
-  "https://github.com/NETO-DEV66/Opanhand-mobile-/discussions";
+export const OPENHANDS_SLACK_COMMUNITY_URL = "https://openhands.dev/joinslack";
 
 export const SIDEBAR_ONBOARDING_CHECKLIST_DISMISSED_STORAGE_KEY =
   "openhands-sidebar-onboarding-checklist-dismissed";
@@ -136,14 +135,14 @@ export const SIDEBAR_ONBOARDING_CHECKLIST_DOCS_URLS: Record<
   string
 > = {
   "configure-llm":
-    "https://github.com/NETO-DEV66/Opanhand-mobile-#bring-your-own-llm-key",
+    "https://docs.openhands.dev/openhands/usage/settings/llm-settings#llm-profiles",
   "start-conversation":
-    "https://github.com/NETO-DEV66/Opanhand-mobile-#quick-start",
+    "https://docs.openhands.dev/openhands/usage/agent-canvas/backends",
   "schedule-task": SCHEDULED_TASKS_DOCS_URL,
   "customize-agent":
-    "https://github.com/NETO-DEV66/Opanhand-mobile-#quick-start",
-  "connect-mcp": "https://github.com/NETO-DEV66/Opanhand-mobile-#quick-start",
-  "join-slack": "https://github.com/NETO-DEV66/Opanhand-mobile-/discussions",
+    "https://docs.openhands.dev/openhands/usage/agent-canvas/customize-and-settings",
+  "connect-mcp": "https://docs.openhands.dev/overview/model-context-protocol",
+  "join-slack": "https://docs.openhands.dev/overview/community",
 };
 
 export function isCustomizeChecklistPath(path: string): boolean {

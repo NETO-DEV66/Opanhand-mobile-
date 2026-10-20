@@ -23,7 +23,7 @@ export const FIELD_HELP_LINKS: Record<
   "llm.api_key": {
     textKey: "SCHEMA$LLM$API_KEY$HELP_TEXT",
     linkTextKey: "SCHEMA$LLM$API_KEY$HELP_LINK_TEXT",
-    href: "https://github.com/NETO-DEV66/Opanhand-mobile-#bring-your-own-llm-key",
+    href: "https://docs.openhands.dev/usage/local-setup#getting-an-api-key",
   },
   // Mirror the hint shown under the LLM provider's API key field when
   // OpenHands is selected as the active provider; the SDK reuses that active
@@ -32,7 +32,7 @@ export const FIELD_HELP_LINKS: Record<
     textKey: "SCHEMA$VERIFICATION$CRITIC_API_KEY$HELP_TEXT",
     linkTextKey: "SETTINGS$OPENHANDS_API_KEY_HELP_LINK",
     suffixKey: "SCHEMA$VERIFICATION$CRITIC_API_KEY$HELP_SUFFIX",
-    href: "https://github.com/NETO-DEV66/Opanhand-mobile-#bring-your-own-llm-key",
+    href: "https://docs.openhands.dev/usage/local-setup#getting-an-api-key",
     hideDescription: true,
   },
 };

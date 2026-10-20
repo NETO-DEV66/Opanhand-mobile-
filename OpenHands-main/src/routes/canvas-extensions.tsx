@@ -36,7 +36,7 @@ type PendingAction =
   | { type: "uninstall"; extension: InstalledCanvasExtensionInfo };
 
 const CANVAS_EXTENSIONS_DOCS_URL =
-  "https://github.com/NETO-DEV66/Opanhand-mobile-#quick-start";
+  "https://docs.openhands.dev/openhands/usage/agent-canvas/canvas-extensions";
 
 // @spec WN-001 — Apps trust notice uses theme-aware warning feedback
 export default function CanvasExtensionsScreen() {

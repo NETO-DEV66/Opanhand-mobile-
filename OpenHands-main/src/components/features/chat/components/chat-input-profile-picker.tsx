@@ -8,6 +8,7 @@ import { Divider } from "#/ui/divider";
 import { Typography } from "#/ui/typography";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
+import { getLockedCloudHost } from "#/api/agent-server-config";
 
 interface ChatInputProfileMenuContentProps {
   onClose: () => void;
@@ -38,7 +39,9 @@ export function ChatInputProfileMenuContent({
     isSwitching,
     selectProfile,
   } = useChatInputProfileState();
-  const showSettingsLink = true;
+  // Locked-to-Cloud blocks the Canvas agent profiles page this links to
+  // (OHE-3457).
+  const showSettingsLink = getLockedCloudHost() === null;
 
   const handleSelect = (profile: (typeof profiles)[number]) => {
     selectProfile(profile);
