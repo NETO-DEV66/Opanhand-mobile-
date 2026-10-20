@@ -14,6 +14,7 @@ import {
   sidebarNavRowClassName,
 } from "#/components/features/sidebar/sidebar-layout";
 import { EXTENSIONS_NAV_ITEMS } from "./extensions-navigation";
+import { isNativeShell } from "#/api/native-shell";
 
 /** Only the Skills item points to a cloud-hosted page today. */
 const CLOUD_LINKED_EXTENSION_PATH = "/skills";
@@ -37,7 +38,15 @@ export function ExtensionsMobileHub() {
           (item) =>
             !(CLOUD_HIDDEN_EXTENSION_PATHS.has(item.to) && isCloudBackend),
         ).map((item) => {
-          if (item.to === CLOUD_LINKED_EXTENSION_PATH && isCloudBackend) {
+          // Cloud serves Skills at `<cloud host>/settings/skills`. The native
+          // shell runs at the local shell origin, so following that link would
+          // leave the app for the system browser; its own `/skills` page reads
+          // the same cloud catalog (`fetchCloudSkills`), so it stays in-app.
+          if (
+            item.to === CLOUD_LINKED_EXTENSION_PATH &&
+            isCloudBackend &&
+            !isNativeShell()
+          ) {
             const cloudSkillsUrl = `${backend.host.replace(/\/+$/, "")}/settings/skills`;
             return (
               <a
