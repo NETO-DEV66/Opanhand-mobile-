@@ -14,6 +14,7 @@ import {
 import { I18nKey } from "#/i18n/declaration";
 import { useActiveBackendContext } from "#/contexts/active-backend-context";
 import { isNoBackend } from "#/api/backend-registry/active-store";
+import { isNativeShell } from "#/api/native-shell";
 
 /** Only the Skills item points to a cloud-hosted page today. */
 const CLOUD_LINKED_EXTENSION_PATH = "/skills";
@@ -103,7 +104,12 @@ function ExtensionsNavigationLinks() {
           !(CLOUD_HIDDEN_EXTENSION_PATHS.has(item.to) && isCloudBackend),
       ).map((item) => {
         const isCloudSkillsLink =
-          item.to === CLOUD_LINKED_EXTENSION_PATH && isCloudBackend;
+          item.to === CLOUD_LINKED_EXTENSION_PATH &&
+          isCloudBackend &&
+          // The native shell runs at the local shell origin, so the cloud
+          // host's Skills page would leave the app for the system browser.
+          // Its own `/skills` page reads the same cloud catalog.
+          !isNativeShell();
         const baseRow = (
           <span className="shrink-0 flex items-center justify-center">
             {item.icon}
