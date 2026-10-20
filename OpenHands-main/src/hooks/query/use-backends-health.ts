@@ -2,7 +2,10 @@ import React from "react";
 import axios from "axios";
 import { useQueries } from "@tanstack/react-query";
 import { HttpError } from "@openhands/typescript-client";
-import { getCurrentCloudApiKey } from "#/api/cloud/organization-service.api";
+import {
+  getCloudOrganizations,
+  getCurrentCloudApiKey,
+} from "#/api/cloud/organization-service.api";
 import {
   isDefinitiveLocalBackendError,
   validateLocalBackend,
@@ -56,7 +59,11 @@ export function isCloudBackendApiKeyOrNetworkHealthError(
 }
 
 function hasMissingBackendApiKey(backend: Backend): boolean {
-  return backend.kind === "cloud" && !backend.apiKey.trim();
+  return (
+    backend.kind === "cloud" &&
+    backend.authMode !== "cookie" &&
+    !backend.apiKey.trim()
+  );
 }
 
 export function isCloudBackendLoggedOutHealthError(
@@ -83,12 +90,16 @@ export function isCloudBackendLoggedOutHealthError(
  */
 async function probeBackend(backend: Backend): Promise<true> {
   if (backend.kind === "cloud") {
-    if (!backend.apiKey?.trim()) {
+    if (backend.authMode !== "cookie" && !backend.apiKey?.trim()) {
       throw new Error(MISSING_BACKEND_API_KEY_ERROR);
     }
 
     try {
-      await getCurrentCloudApiKey(backend);
+      if (backend.authMode === "cookie") {
+        await getCloudOrganizations(backend);
+      } else {
+        await getCurrentCloudApiKey(backend);
+      }
     } catch (error) {
       if (
         (axios.isAxiosError(error) && error.response?.status === 401) ||

@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { getLockedCloudHost } from "#/api/agent-server-config";
 import { useActiveBackend } from "#/contexts/active-backend-context";
 import type { Backend } from "#/api/backend-registry/types";
 import { useSaveSettings } from "#/hooks/mutation/use-save-settings";
@@ -121,7 +122,7 @@ export function TelemetryConsentBanner({
 }: TelemetryConsentBannerProps) {
   const { backend } = useActiveBackend();
 
-  if (backend.kind !== "local") return null;
+  if (getLockedCloudHost() !== null || backend.kind !== "local") return null;
 
   return <LocalTelemetryConsentBanner backend={backend} onChoice={onChoice} />;
 }

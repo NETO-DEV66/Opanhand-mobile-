@@ -1,4 +1,4 @@
-package dev.netodev66.openhandsmobile;
+package dev.openhandsmobile.com;
 
 import com.getcapacitor.BridgeActivity;
 

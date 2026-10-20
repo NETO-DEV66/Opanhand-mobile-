@@ -47,7 +47,7 @@ const MOUNTED_ROUTES = {
  * `importExport` block has no docs field.
  */
 export const AUTOMATION_FILE_FORMAT_DOCS_URL =
-  "https://github.com/NETO-DEV66/Opanhand-mobile-#quick-start";
+  "https://docs.openhands.dev/openhands/usage/agent-canvas/managing-automations#exported-file-format";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -182,10 +182,7 @@ export function getImportExportSpec(): InterfaceImportExport {
 }
 
 export function getAutomationsDocsUrl(): string {
-  // The pinned extensions manifest still points its docsUrl at the upstream
-  // docs site. AgentDeck has no affiliation with it, so the surface links to
-  // this project's own documentation instead.
-  return AUTOMATION_FILE_FORMAT_DOCS_URL;
+  return requireInterface().docsUrl;
 }
 
 export function getFeaturedAutomationIds(): readonly string[] {

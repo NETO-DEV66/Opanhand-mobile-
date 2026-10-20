@@ -10,7 +10,7 @@ Create an empty repository on the new account (do **not** initialise it with a
 README), then:
 
 ```bash
-cd Opanhand-mobile-
+cd openhands-mobile
 git remote set-url origin https://github.com/<NEW_USER>/<NEW_REPO>.git
 git push -u origin main
 ```
@@ -73,7 +73,7 @@ Optional **Variables** tab:
 Actions → **Build Android APK** → *Run workflow*, or push a tag:
 
 ```bash
-git tag v1.28.3 && git push origin v1.28.3
+git tag v1.29.0 && git push origin v1.29.0
 ```
 
 A tag push creates a GitHub Release and attaches `app-release.apk`. That asset
@@ -122,7 +122,7 @@ them on each release page. Nothing has to be filled in by hand after a release.
 - Push at a human pace on a new account. A burst of commits that mirrors another
   project is what spam heuristics look for.
 - Enable two-factor authentication.
-- The Android `applicationId` is `dev.netodev66.openhandsmobile`, deliberately
+- The Android `applicationId` is `dev.openhandsmobile.com`, deliberately
   distinct from the upstream project so the two can never be confused. It is set
   in `OpenHands-main/android/app/build.gradle`,
   `OpenHands-main/capacitor.config.ts` and

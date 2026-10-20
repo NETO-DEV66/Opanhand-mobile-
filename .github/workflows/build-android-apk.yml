@@ -261,7 +261,7 @@ jobs:
             'This release was produced by an AI agent (OpenHands) on behalf of the repository owner.' \
             > /tmp/notes.md
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" \
-            --title "AgentDeck $TAG" \
+            --title "OpenHands Mobile $TAG" \
             --notes-file /tmp/notes.md
           gh release upload "$TAG" \
             "$APK#app-release.apk" \

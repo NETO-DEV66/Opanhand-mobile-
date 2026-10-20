@@ -32,6 +32,7 @@ const cloudBackend: Backend = {
   host: "https://cloud.example.test",
   apiKey: "",
   kind: "cloud",
+  authMode: "cookie",
 };
 
 describe("callCloudProxy", () => {

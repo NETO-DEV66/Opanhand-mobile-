@@ -110,10 +110,10 @@ function OpenHandsApiKeyHelp({ testId }: OpenHandsApiKeyHelpProps) {
       testId={testId}
       text={t(I18nKey.SETTINGS$OPENHANDS_API_KEY_HELP_TEXT)}
       linkText={t(I18nKey.SETTINGS$OPENHANDS_API_KEY_HELP_LINK)}
-      href="https://github.com/NETO-DEV66/Opanhand-mobile-#bring-your-own-llm-key"
+      href="https://docs.openhands.dev/usage/local-setup#getting-an-api-key"
       suffix={` ${t(I18nKey.SETTINGS$OPENHANDS_API_KEY_HELP_SUFFIX)}`}
       suffixLinkText={t(I18nKey.SETTINGS$SEE_HERE_FOR_MORE_DETAILS)}
-      suffixLinkHref="https://github.com/NETO-DEV66/Opanhand-mobile-#bring-your-own-llm-key"
+      suffixLinkHref="https://docs.openhands.dev/usage/local-setup#getting-an-api-key"
       trailing="."
     />
   );
@@ -345,7 +345,7 @@ export function LlmSettingsScreen({
               testId={helpTestId}
               text={t(I18nKey.SETTINGS$DONT_KNOW_API_KEY)}
               linkText={t(I18nKey.SETTINGS$CLICK_FOR_INSTRUCTIONS)}
-              href="https://github.com/NETO-DEV66/Opanhand-mobile-#bring-your-own-llm-key"
+              href="https://docs.openhands.dev/usage/local-setup#getting-an-api-key"
             />
           )}
         </>

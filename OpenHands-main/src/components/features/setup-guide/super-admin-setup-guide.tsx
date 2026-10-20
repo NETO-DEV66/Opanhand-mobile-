@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowUpRight, Check, ClipboardList, X } from "lucide-react";
+import { getLockedCloudHost } from "#/api/agent-server-config";
 import { NavigationLink } from "#/components/shared/navigation-link";
 import { useNavigation } from "#/context/navigation-context";
 import { useActiveBackend } from "#/contexts/active-backend-context";
@@ -118,6 +119,9 @@ export default function SuperAdminSetupGuide() {
   }, [currentPath, visible, refetch]);
 
   const cloudHost = backend.host.replace(/\/+$/, "");
+  // Locked-to-Cloud serves the canvas on the cloud host itself, so enterprise
+  // pages open in this tab; standalone / Electron keep a new tab.
+  const isLockedToCloud = getLockedCloudHost() !== null;
 
   // When the guide's next step is done, open the step after it the way Start
   // does. A step finished out of order, or not confirmed by the server, only
@@ -145,6 +149,15 @@ export default function SuperAdminSetupGuide() {
         } else {
           navigate(destination.path);
         }
+      } else if (isLockedToCloud) {
+        window.location.assign(
+          cloudPageUrl(
+            cloudHost,
+            destination.path,
+            destination.withOrg ? guideOrgId : null,
+            after.id,
+          ),
+        );
       } else {
         // A new tab opened after a save is blocked, so point at Start instead.
         setOpen(true);
@@ -161,6 +174,7 @@ export default function SuperAdminSetupGuide() {
     startTour,
     cloudHost,
     guideOrgId,
+    isLockedToCloud,
   ]);
 
   // A page opened from the enterprise guide names the step whose tour to
@@ -194,8 +208,8 @@ export default function SuperAdminSetupGuide() {
   }
 
   const cloudLinkProps = {
-    target: "_blank",
-    rel: "noopener noreferrer",
+    target: isLockedToCloud ? undefined : "_blank",
+    rel: isLockedToCloud ? undefined : "noopener noreferrer",
   };
   const cloudUrl = (
     path: string,
