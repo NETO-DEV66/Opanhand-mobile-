@@ -82,11 +82,11 @@ const OnboardingModal = React.lazy(() =>
   })),
 );
 
-// Rendered for first-run in locked-to-Cloud mode; shows Cloud login directly
-// without the onboarding progress bars.
-const BackendFormModal = React.lazy(() =>
-  import("#/components/features/backends/backend-form-modal").then((m) => ({
-    default: m.BackendFormModal,
+// Rendered for first-run in locked-to-Cloud mode; shows the Cloud login page
+// (one button per Git provider) instead of the onboarding progress bars.
+const CloudLoginScreen = React.lazy(() =>
+  import("#/components/features/backends/cloud-login-screen").then((m) => ({
+    default: m.CloudLoginScreen,
   })),
 );
 
@@ -190,26 +190,35 @@ function FirstRunOnboardingScreen({ onClose }: { onClose: () => void }) {
 
   const lockedCloudHost = getLockedCloudHost();
   const isLockedToCloud = lockedCloudHost !== null;
+  const { addBackend } = useActiveBackendContext();
 
-  // In locked-to-Cloud mode, show the Add Backend modal directly with Cloud
-  // login, instead of the full onboarding flow with progress bars. This
-  // matches the UX expectation for canvas.openhands.dev where Cloud is the
-  // only backend option.
+  // In locked-to-Cloud mode the app is a hosted-Cloud client: sign-in is the
+  // first thing the user sees, matching the hosted `/login` page. The provider
+  // buttons run the device flow and, on success, register the Cloud backend
+  // and mark onboarding complete so the root gate hands off to the workspace.
+  const handleCloudAuthenticated = React.useCallback(
+    (apiKey: string) => {
+      if (!lockedCloudHost) return;
+      addBackend({
+        name: "OpenHands Cloud",
+        host: lockedCloudHost,
+        apiKey,
+        kind: "cloud",
+      });
+      onClose();
+    },
+    [addBackend, lockedCloudHost, onClose],
+  );
+
   if (isLockedToCloud) {
     return (
-      <main
-        data-testid="first-run-onboarding-screen"
-        className="min-h-screen bg-canvas-base"
-      >
-        <React.Suspense fallback={<AgentServerBootstrapLoading />}>
-          <BackendFormModal
-            mode="add"
-            onClose={onClose}
-            source="manage_backends_modal"
-            hideCloseButton
-          />
-        </React.Suspense>
-      </main>
+      <React.Suspense fallback={<AgentServerBootstrapLoading />}>
+        <CloudLoginScreen
+          host={lockedCloudHost}
+          onAuthenticated={handleCloudAuthenticated}
+          source="onboarding"
+        />
+      </React.Suspense>
     );
   }
 
