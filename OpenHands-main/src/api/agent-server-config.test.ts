@@ -4,6 +4,8 @@ import {
   buildConversationWorkingDir,
   buildConversationWorkingDirForBackend,
   buildRelativeConversationWorkingDir,
+  getLockedCloudHost,
+  isSameCloudHost,
   isServedOriginHost,
 } from "./agent-server-config";
 
@@ -113,5 +115,36 @@ describe("buildConversationWorkingDirForBackend", () => {
         "https://sandbox.example.dev",
       ),
     ).toBe(`${DEFAULT_WORKING_DIR}/abc123`);
+  });
+});
+
+describe("getLockedCloudHost", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("returns null when no Cloud origin is configured", () => {
+    vi.stubEnv("VITE_LOCK_TO_CLOUD", "");
+    expect(getLockedCloudHost()).toBeNull();
+  });
+
+  it('treats an explicit "off" as an unlocked build', () => {
+    vi.stubEnv("VITE_LOCK_TO_CLOUD", "off");
+    expect(getLockedCloudHost()).toBeNull();
+  });
+
+  it("returns the configured Cloud origin", () => {
+    vi.stubEnv("VITE_LOCK_TO_CLOUD", "https://app.all-hands.dev/");
+    expect(getLockedCloudHost()).toBe("https://app.all-hands.dev");
+  });
+
+  it("accepts a bare hostname and assumes https", () => {
+    vi.stubEnv("VITE_LOCK_TO_CLOUD", "app.all-hands.dev");
+    expect(getLockedCloudHost()).toBe("https://app.all-hands.dev");
+  });
+
+  it("matches an equivalent host through the trailing slash and case", () => {
+    vi.stubEnv("VITE_LOCK_TO_CLOUD", "https://app.all-hands.dev");
+    expect(
+      isSameCloudHost("https://APP.all-hands.dev/", getLockedCloudHost()),
+    ).toBe(true);
   });
 });
