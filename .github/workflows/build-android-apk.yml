@@ -67,6 +67,13 @@ jobs:
           # let the user enter it in the app on first launch.
           VITE_BACKEND_BASE_URL: ${{ vars.BACKEND_BASE_URL }}
           VITE_MOCK_API: "false"
+          # Lock the shipped app to hosted OpenHands Cloud so first launch is
+          # the provider login page (GitHub / GitLab / Bitbucket), matching the
+          # hosted product. The device-flow backend-registration path still runs
+          # after sign-in. Override with the CLOUD_BASE_URL repo variable to
+          # point at a self-hosted Cloud deployment, or set it to the literal
+          # value "off" to ship the unlocked, self-hosted build instead.
+          VITE_LOCK_TO_CLOUD: ${{ vars.CLOUD_BASE_URL != 'off' && vars.CLOUD_BASE_URL || '' }}
           # The README and the landing page promise "no telemetry". Upstream's
           # default sends an anonymous install event before any consent, so
           # turn the PostHog client off at build time to make the promise true.
