@@ -96,11 +96,13 @@ other forced uninstall is a bug in the release process.
   Android identifies an app by its package name, so v1.28.0 is a *different app*
   to the device: anyone on v1.27.3 or earlier must uninstall that build once,
   then install v1.28.0.
-- **v1.29.0 changed the `applicationId`** again, from
+- **v1.30.0 changed the `applicationId`** again, from
   `dev.netodev66.openhandsmobile` to `dev.openhandsmobile.com`. This is the
   second intentional break in in-place updates: anyone on v1.28.3 or earlier
-  must uninstall that build once, then install v1.29.0. The signing key did not
-  change, so every release from v1.29.0 onward updates in place.
+  must uninstall that build once, then install v1.30.0. The signing key did not
+  change, so every release from v1.30.0 onward updates in place. (A v1.29.0 was
+  prepared with this package id but never published, so v1.30.0 is the first
+  public build to carry it.)
 
 ## Local builds
 
