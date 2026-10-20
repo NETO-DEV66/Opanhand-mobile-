@@ -4,6 +4,7 @@ import { I18nKey } from "#/i18n/declaration";
 import { useActiveBackendContext } from "#/contexts/active-backend-context";
 import { isNoBackend } from "#/api/backend-registry/active-store";
 import { cloudIntegrationsUrl } from "#/utils/cloud-integrations-url";
+import { isNativeShell } from "#/api/native-shell";
 import { cn } from "#/utils/utils";
 import {
   SIDEBAR_ICON_SLOT_CLASS,
@@ -23,6 +24,9 @@ export function IntegrationsSettingsLink() {
   const { backend, orgId } = active;
 
   if (isNoBackend(backend) || backend.kind !== "cloud") return null;
+  // The native shell cannot open the Cloud host's integrations page without
+  // leaving the app, so the shortcut is not offered there.
+  if (isNativeShell()) return null;
 
   const integrationsUrl = cloudIntegrationsUrl(backend, orgId);
 

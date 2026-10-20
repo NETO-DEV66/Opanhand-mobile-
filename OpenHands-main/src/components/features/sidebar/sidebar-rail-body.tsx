@@ -10,6 +10,7 @@ import {
 import { OpenHandsLogoButton } from "#/components/shared/buttons/openhands-logo-button";
 import { NavigationLink } from "#/components/shared/navigation-link";
 import { getLockedCloudHost } from "#/api/agent-server-config";
+import { isNativeShell } from "#/api/native-shell";
 import {
   automationListPath,
   getInterfaceCopy,
@@ -117,12 +118,17 @@ export function SidebarRailBody({
   const cloudSettingsOrgQuery = activeOrgId
     ? `?org=${encodeURIComponent(activeOrgId)}`
     : "";
-  const cloudSettingsUrl = isCloudBackend
-    ? `${activeBackend.host.replace(/\/+$/, "")}/settings${cloudSettingsOrgQuery}`
-    : null;
   // Locked-to-Cloud (SaaS / self-hosted OHE) serves the canvas at /canvas on
   // the cloud host itself, so cloud settings open in this tab and Back
-  // returns here (OHE-3242). Standalone / Electron keep the new tab.
+  // returns here (OHE-3242). Standalone / Electron keep the new tab. The
+  // native shell runs at the local shell origin, so a link to the cloud host
+  // would leave the app for the system browser — it uses the in-app settings
+  // route instead.
+  const isNative = isNativeShell();
+  const useCloudSettingsUrl = isCloudBackend && !isNative;
+  const cloudSettingsUrl = useCloudSettingsUrl
+    ? `${activeBackend.host.replace(/\/+$/, "")}/settings${cloudSettingsOrgQuery}`
+    : null;
   const isLockedToCloud = getLockedCloudHost() !== null;
 
   return (

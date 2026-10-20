@@ -9,6 +9,7 @@ import { useSettings } from "#/hooks/query/use-settings";
 import type { NativeGitIntegration } from "#/hooks/query/use-native-git-integrations";
 import { I18nKey } from "#/i18n/declaration";
 import { cloudIntegrationsUrl } from "#/utils/cloud-integrations-url";
+import { isNativeShell } from "#/api/native-shell";
 import { convertRawProvidersToList } from "#/utils/convert-raw-providers-to-list";
 
 interface NativeIntegrationPanelProps {
@@ -45,6 +46,11 @@ export function NativeIntegrationPanel({
   }
 
   const openIntegrations = () => {
+    // The Cloud host's integrations page is off-origin in the native shell,
+    // where following it would leave the app. `useNativeGitIntegrations`
+    // already reports no native integrations there, so this is a guard for
+    // any path that still reaches the button.
+    if (isNativeShell()) return;
     window.open(
       cloudIntegrationsUrl(backend, orgId),
       "_blank",

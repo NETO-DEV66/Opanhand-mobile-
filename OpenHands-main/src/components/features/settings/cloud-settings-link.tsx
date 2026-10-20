@@ -4,6 +4,7 @@ import { I18nKey } from "#/i18n/declaration";
 import { useActiveBackendContext } from "#/contexts/active-backend-context";
 import { isNoBackend } from "#/api/backend-registry/active-store";
 import { getLockedCloudHost } from "#/api/agent-server-config";
+import { isNativeShell } from "#/api/native-shell";
 import { cn } from "#/utils/utils";
 import {
   SIDEBAR_ICON_SLOT_CLASS,
@@ -17,6 +18,11 @@ import {
  * hosted settings page. Opens in the same tab when the canvas is locked to a
  * Cloud host (SaaS / self-hosted OHE): the settings page shares that host
  * with the canvas, so Back should return here (OHE-3242).
+ *
+ * The native shell has no such page to hand over to — it runs at the local
+ * shell origin, so following this link would leave the app for the system
+ * browser — so the link is not rendered there. The in-app settings pages
+ * cover the phone build.
  */
 export function CloudSettingsLink() {
   const { t } = useTranslation("openhands");
@@ -26,6 +32,7 @@ export function CloudSettingsLink() {
   if (isNoBackend(backend) || backend.kind !== "cloud") return null;
 
   const isLockedToCloud = getLockedCloudHost() !== null;
+  if (isNativeShell()) return null;
 
   // `org` is consumed by the cloud settings loader so the page opens on the
   // org that is active here instead of the cloud's last-used org.

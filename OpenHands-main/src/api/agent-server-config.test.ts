@@ -7,6 +7,7 @@ import {
   getLockedCloudHost,
   isSameCloudHost,
   isServedOriginHost,
+  shouldDeferSettingsToCloudShell,
 } from "./agent-server-config";
 
 describe("buildRelativeConversationWorkingDir", () => {
@@ -146,5 +147,34 @@ describe("getLockedCloudHost", () => {
     expect(
       isSameCloudHost("https://APP.all-hands.dev/", getLockedCloudHost()),
     ).toBe(true);
+  });
+});
+
+describe("shouldDeferSettingsToCloudShell", () => {
+  const setCapacitor = (native: boolean) => {
+    (window as unknown as { Capacitor?: unknown }).Capacitor = {
+      isNativePlatform: () => native,
+    };
+  };
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    delete (window as unknown as { Capacitor?: unknown }).Capacitor;
+  });
+
+  it("is false for an unlocked build", () => {
+    vi.stubEnv("VITE_LOCK_TO_CLOUD", "off");
+    expect(shouldDeferSettingsToCloudShell()).toBe(false);
+  });
+
+  it("defers to the Cloud shell when locked and running in a browser", () => {
+    vi.stubEnv("VITE_LOCK_TO_CLOUD", "https://app.all-hands.dev");
+    expect(shouldDeferSettingsToCloudShell()).toBe(true);
+  });
+
+  it("keeps the in-app settings in the native shell", () => {
+    vi.stubEnv("VITE_LOCK_TO_CLOUD", "https://app.all-hands.dev");
+    setCapacitor(true);
+    expect(shouldDeferSettingsToCloudShell()).toBe(false);
   });
 });

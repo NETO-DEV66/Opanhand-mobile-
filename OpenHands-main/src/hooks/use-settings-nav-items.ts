@@ -7,7 +7,7 @@ import {
 import { isSettingsPageHidden } from "#/utils/settings-utils";
 import { I18nKey } from "#/i18n/declaration";
 import { useActiveBackend } from "#/contexts/active-backend-context";
-import { getLockedCloudHost } from "#/api/agent-server-config";
+import { shouldDeferSettingsToCloudShell } from "#/api/agent-server-config";
 
 export type SettingsNavRenderedItem =
   | {
@@ -21,14 +21,16 @@ export function useSettingsNavItems(): SettingsNavRenderedItem[] {
   const { data: config } = useConfig();
   const { backend } = useActiveBackend();
   const featureFlags = config?.feature_flags;
-  // Locked-to-Cloud (SaaS / self-hosted OHE) lists only the Application page;
-  // the OHE settings shell behind "All Cloud Settings" owns the rest (OHE-3168).
-  const isLockedToCloud = getLockedCloudHost() !== null;
+  // Locked-to-Cloud inside the Cloud host (SaaS / self-hosted OHE) lists only
+  // the Application page; the OHE settings shell behind "All Cloud Settings"
+  // owns the rest (OHE-3168). The native shell keeps the full in-app list —
+  // it cannot navigate to the Cloud host without leaving the app.
+  const isLockedToCloudShell = shouldDeferSettingsToCloudShell();
 
   return OSS_NAV_ITEMS.filter(
     (item) =>
       !isSettingsPageHidden(item.to, featureFlags) &&
-      (!isLockedToCloud || item.to === LOCKED_CLOUD_SETTINGS_NAV_PATH),
+      (!isLockedToCloudShell || item.to === LOCKED_CLOUD_SETTINGS_NAV_PATH),
   ).map((item) => {
     const renamedItem =
       item.to === "/settings"

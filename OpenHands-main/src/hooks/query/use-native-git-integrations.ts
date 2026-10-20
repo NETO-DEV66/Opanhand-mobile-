@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchCloudIntegrationsConfig } from "#/api/cloud/settings-service.api";
 import { useActiveBackend } from "#/contexts/active-backend-context";
 import { useUserProviders } from "#/hooks/use-user-providers";
+import { isNativeShell } from "#/api/native-shell";
 import type { Provider } from "#/types/settings";
 
 /** Integration catalog entries a cloud instance can also connect natively. */
@@ -37,6 +38,12 @@ export function useNativeGitIntegrations() {
   const { backend } = useActiveBackend();
   const isCloud = backend.kind === "cloud";
   const { providers: connectedProviders } = useUserProviders();
+  // Connecting a native integration happens through an OAuth flow on the
+  // instance's own Settings > Integrations page, which lives on the cloud
+  // host. The native shell cannot reach that page without leaving the app,
+  // so it reports no native integrations and the callers fall back to the
+  // in-app MCP path.
+  const canUseNativeIntegrations = isCloud && !isNativeShell();
 
   const { data: config, isLoading } = useQuery({
     queryKey: [
@@ -55,18 +62,23 @@ export function useNativeGitIntegrations() {
   const getNativeIntegration = useCallback(
     (entryId: string): NativeGitIntegration | null => {
       const provider = NATIVE_PROVIDER_BY_ENTRY_ID[entryId];
-      if (!isCloud || !provider || !configuredProviders?.includes(provider)) {
+      if (
+        !canUseNativeIntegrations ||
+        !provider ||
+        !configuredProviders?.includes(provider)
+      ) {
         return null;
       }
       return { provider, isConnected: connectedProviders.includes(provider) };
     },
-    [isCloud, configuredProviders, connectedProviders],
+    [canUseNativeIntegrations, configuredProviders, connectedProviders],
   );
 
   return {
     getNativeIntegration,
-    isJiraEnabled: isCloud && config?.isJiraEnabled === true,
-    isLinearEnabled: isCloud && config?.isLinearEnabled === true,
+    isJiraEnabled: canUseNativeIntegrations && config?.isJiraEnabled === true,
+    isLinearEnabled:
+      canUseNativeIntegrations && config?.isLinearEnabled === true,
     isLoading,
   };
 }

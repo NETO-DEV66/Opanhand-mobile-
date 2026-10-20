@@ -38,6 +38,7 @@ import { useAutomationHealth } from "#/hooks/query/use-automation-health";
 import { useAutomations } from "#/hooks/query/use-automations";
 import { useNativeGitIntegrations } from "#/hooks/query/use-native-git-integrations";
 import { cloudIntegrationsUrl } from "#/utils/cloud-integrations-url";
+import { isNativeShell } from "#/api/native-shell";
 import { BuiltInIntegrationChoiceModal } from "./built-in-integration-choice-modal";
 import { RecommendedAutomationsRail } from "./recommended-automations-rail";
 import { RecommendedAutomationsSection } from "./recommended-automations-section";
@@ -278,6 +279,10 @@ export function RecommendedAutomationsLauncher({
 
   const handleUseBuiltInIntegration = () => {
     setBuiltInChoice(null);
+    // The Cloud host's integrations page is off-origin in the native shell,
+    // where following it would leave the app; the caller already falls back
+    // to the in-app MCP install path there.
+    if (isNativeShell()) return;
     window.open(
       cloudIntegrationsUrl(activeBackend.backend, activeBackend.orgId),
       "_blank",
