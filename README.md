@@ -41,9 +41,9 @@ device (arm64, armv7 and x86_64). The web bundle contains no native code, so
 there is nothing to split per architecture, and there is no separate debug
 build to choose between. One download works for everyone.
 
-> **Updating from v1.28.3 or earlier?** Uninstall that build first. v1.29.0
+> **Updating from v1.28.3 or earlier?** Uninstall that build first. v1.30.0
 > changed the package id to `dev.openhandsmobile.com`, so Android treats it as
-> a new app. Every release is signed with the same key, so from v1.29.0 onward
+> a new app. Every release is signed with the same key, so from v1.30.0 onward
 > builds install straight over each other — no uninstall, no lost settings. See
 > [SIGNING.md](SIGNING.md) for the certificate fingerprint.
 
@@ -151,9 +151,9 @@ point it at. It does not send your data anywhere by itself.
 
 ## Install
 
-> **Updating from v1.28.3 or earlier?** Uninstall that build once. v1.29.0
+> **Updating from v1.28.3 or earlier?** Uninstall that build once. v1.30.0
 > changed the package id, so Android sees it as a new app. Releases from
-> v1.29.0 onward install straight over each other — no uninstall, no lost
+> v1.30.0 onward install straight over each other — no uninstall, no lost
 > settings. See [SIGNING.md](SIGNING.md) for the fingerprint.
 
 1. On your phone, open the [download link](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk).
