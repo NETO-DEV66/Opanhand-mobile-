@@ -2,7 +2,16 @@ import {
   getAgentServerBaseUrl,
   getAgentServerSessionApiKey,
 } from "../agent-server-config";
+import {
+  isLocalRuntimeEnabled,
+  LOCAL_RUNTIME_SESSION_KEY,
+} from "#/local-runtime/enabled";
 import type { Backend } from "./types";
+
+/** Session key for the seeded backend, or null when this is a server build. */
+function getLocalRuntimeSessionKey(): string | null {
+  return isLocalRuntimeEnabled() ? LOCAL_RUNTIME_SESSION_KEY : null;
+}
 
 /**
  * Stable id for the seeded default local backend that is auto-registered in
@@ -25,7 +34,10 @@ export const DEFAULT_LOCAL_BACKEND_NAME = "Local";
  */
 export function makeDefaultLocalBackend(): Backend | null {
   const host = getAgentServerBaseUrl();
-  const apiKey = getAgentServerSessionApiKey();
+  // The in-process runtime does not authenticate, but the registry only seeds
+  // this entry when a key is present. Supply a placeholder so a standalone
+  // build lands on the agent/LLM onboarding steps instead of the backend form.
+  const apiKey = getAgentServerSessionApiKey() ?? getLocalRuntimeSessionKey();
 
   if (!host || !apiKey) return null;
 

@@ -26,6 +26,12 @@ async function prepareApp() {
         onUnhandledRequest: "bypass",
       });
     }
+    // The mock worker mocks REST, but a service worker cannot intercept a
+    // WebSocket — and Capacitor's Android WebView has no usable service worker
+    // at all. The local runtime takes over the conversation socket in-process
+    // so the app can chat against a real LLM with no server.
+    const { installLocalRuntime } = await import("./local-runtime");
+    installLocalRuntime();
   }
 
   if (import.meta.env.DEV) {

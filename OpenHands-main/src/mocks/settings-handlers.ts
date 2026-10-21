@@ -1,6 +1,8 @@
 import { http, delay, HttpResponse } from "msw";
 import { WebClientConfig } from "#/api/option-service/option.types";
 import type { SaveProfileRequest } from "#/api/profiles-service/profiles-service.api";
+import { mirrorLlmConfigFromSettings } from "#/local-runtime/llm-store";
+import { readJson, writeJson } from "#/local-runtime/persistence";
 import { DEFAULT_SETTINGS } from "#/services/settings";
 import { Settings, SettingsValue } from "#/types/settings";
 import {
@@ -459,6 +461,44 @@ const MOCK_LLM_PROFILES: {
   activeProfile: null,
 };
 
+/**
+ * Persist the mock agent-server's settings and LLM profiles.
+ *
+ * In a standalone build there is no server to hold these, so the user's LLM
+ * setup — the one thing onboarding exists to collect — would be lost on every
+ * reload, leaving the chat composer disabled.
+ */
+const MOCK_STATE_STORAGE_KEY = "openhands-mock-agent-server-state";
+
+type PersistedMockState = {
+  settings: Settings | null;
+  profiles: Array<[string, MockLlmProfile]>;
+  activeProfile: string | null;
+};
+
+function persistMockState(): void {
+  writeJson(MOCK_STATE_STORAGE_KEY, {
+    settings: MOCK_USER_PREFERENCES.settings,
+    profiles: Array.from(MOCK_LLM_PROFILES.profiles.entries()),
+    activeProfile: MOCK_LLM_PROFILES.activeProfile,
+  } satisfies PersistedMockState);
+}
+
+function restoreMockState(): void {
+  const stored = readJson<PersistedMockState | null>(
+    MOCK_STATE_STORAGE_KEY,
+    null,
+  );
+  if (!stored) return;
+  if (stored.settings) MOCK_USER_PREFERENCES.settings = stored.settings;
+  for (const [name, profile] of stored.profiles ?? []) {
+    if (profile?.name) MOCK_LLM_PROFILES.profiles.set(name, profile);
+  }
+  MOCK_LLM_PROFILES.activeProfile = stored.activeProfile ?? null;
+}
+
+restoreMockState();
+
 let mockOpenAISubscriptionConnected = false;
 
 const getProfileNameParam = (value: unknown): string =>
@@ -489,6 +529,10 @@ const applyProfileToMockSettings = (profile: MockLlmProfile) => {
     },
     llm_api_key_set: profile.api_key_set,
   };
+  // The local runtime has no server to read the profile back from, so mirror
+  // the plaintext config it needs into its own store as the profile is applied.
+  mirrorLlmConfigFromSettings(profile.config as Record<string, unknown>);
+  persistMockState();
 };
 
 const buildProfileDetail = (
@@ -536,6 +580,7 @@ const saveMockProfile = (name: string, request: SaveProfileRequest) => {
     applyProfileToMockSettings(profile);
   }
 
+  persistMockState();
   return profile;
 };
 
@@ -544,6 +589,9 @@ export const resetTestHandlersMockSettings = () => {
   MOCK_LLM_PROFILES.profiles.clear();
   MOCK_LLM_PROFILES.activeProfile = null;
   mockOpenAISubscriptionConnected = false;
+  if (typeof window !== "undefined") {
+    window.localStorage.removeItem(MOCK_STATE_STORAGE_KEY);
+  }
 };
 
 // Mock model data used by provider/model endpoints
@@ -840,6 +888,7 @@ export const SETTINGS_HANDLERS = [
     if (MOCK_LLM_PROFILES.activeProfile === name) {
       MOCK_LLM_PROFILES.activeProfile = null;
     }
+    persistMockState();
 
     return HttpResponse.json({
       name,
@@ -881,6 +930,8 @@ export const SETTINGS_HANDLERS = [
     if (MOCK_LLM_PROFILES.activeProfile === name) {
       MOCK_LLM_PROFILES.activeProfile = newName;
       applyProfileToMockSettings(renamedProfile);
+    } else {
+      persistMockState();
     }
 
     return HttpResponse.json({
@@ -901,6 +952,7 @@ export const SETTINGS_HANDLERS = [
     }
 
     MOCK_LLM_PROFILES.activeProfile = name;
+    persistMockState();
     applyProfileToMockSettings(profile);
 
     return HttpResponse.json({
@@ -1074,6 +1126,9 @@ export const SETTINGS_HANDLERS = [
       ) {
         nextSettings.llm_api_key_set = true;
       }
+      // Mirror whatever the settings write carried so the local runtime can
+      // call the provider without a server round-trip.
+      mirrorLlmConfigFromSettings(llm);
     }
 
     if (body.conversation_settings_diff) {
@@ -1105,6 +1160,7 @@ export const SETTINGS_HANDLERS = [
     }
 
     MOCK_USER_PREFERENCES.settings = nextSettings;
+    persistMockState();
 
     // Return the updated settings (without secrets exposed)
     return HttpResponse.json({
@@ -1190,6 +1246,7 @@ export const SETTINGS_HANDLERS = [
       }
 
       MOCK_USER_PREFERENCES.settings = nextSettings;
+      persistMockState();
       return HttpResponse.json(null, { status: 200 });
     }
 

@@ -15,6 +15,12 @@ import {
   CANVAS_DEMO_FILE_PATH,
   CANVAS_DEMO_MARKDOWN,
 } from "#/fixtures/canvas-demo-conversation";
+import { runLocalAgentTurn } from "#/local-runtime/agent";
+import { readJson, writeJson } from "#/local-runtime/persistence";
+import {
+  listLocalEvents,
+  localEventCount,
+} from "#/local-runtime/conversation-store";
 
 /** Map from conversation id → events returned by GET /events/search */
 const CONVERSATION_EVENTS: Record<string, unknown[]> = {
@@ -119,6 +125,43 @@ const conversations: MockConversation[] = [
 const CONVERSATIONS = new Map<string, MockConversation>(
   conversations.map((conversation) => [conversation.id, conversation]),
 );
+
+/**
+ * Conversations this session created, mirrored to `localStorage`.
+ *
+ * The seeded fixtures are re-created on every boot, but a conversation the
+ * user actually started only exists in this map — without persisting it, a
+ * reload would lose the conversation and the chat log attached to it.
+ */
+const CREATED_CONVERSATIONS_KEY = "openhands-mock-created-conversations";
+
+function loadCreatedConversations(): void {
+  const stored = readJson<Record<string, MockConversation>>(
+    CREATED_CONVERSATIONS_KEY,
+    {},
+  );
+  for (const [id, conversation] of Object.entries(stored)) {
+    if (conversation && typeof conversation.id === "string") {
+      CONVERSATIONS.set(id, conversation);
+    }
+  }
+}
+
+function saveCreatedConversations(): void {
+  const created: Record<string, MockConversation> = {};
+  for (const [id, conversation] of CONVERSATIONS) {
+    // Fixtures are rebuilt from code on every boot; only user-made entries
+    // need to be written back.
+    if (!SEEDED_CONVERSATION_IDS.has(id)) created[id] = conversation;
+  }
+  writeJson(CREATED_CONVERSATIONS_KEY, created);
+}
+
+const SEEDED_CONVERSATION_IDS = new Set(
+  conversations.map((conversation) => conversation.id),
+);
+
+loadCreatedConversations();
 
 const paginationEventsByConversation = new Map<string, OpenHandsEvent[]>([
   [
@@ -277,8 +320,14 @@ export const CONVERSATION_HANDLERS = [
     return HttpResponse.json(null, { status: 404 });
   }),
 
-  http.post("*/api/conversations", async () => {
+  http.post("*/api/conversations", async ({ request }) => {
     await delay();
+    const body = (await request.json().catch(() => null)) as {
+      initial_message?: {
+        role?: string;
+        content?: Array<{ type?: string; text?: string }>;
+      } | null;
+    } | null;
     const conversation: MockConversation = {
       id: `${Math.floor(Math.random() * 100000)}`,
       title: "New Conversation",
@@ -287,6 +336,22 @@ export const CONVERSATION_HANDLERS = [
       execution_status: "idle",
     };
     CONVERSATIONS.set(conversation.id, conversation);
+    saveCreatedConversations();
+
+    // A conversation created with an initial message must produce an answer:
+    // on a real backend the sandbox runs it on boot. Run the local turn after
+    // the response so the client has the conversation id before events land.
+    const initial = body?.initial_message;
+    if (initial?.role === "user") {
+      const text = (initial.content ?? [])
+        .filter((part) => part?.type === "text")
+        .map((part) => part.text ?? "")
+        .join("");
+      if (text.trim()) {
+        void runLocalAgentTurn(conversation.id, text);
+      }
+    }
+
     return HttpResponse.json(createConversationResponse(conversation), {
       status: 201,
     });
@@ -312,6 +377,7 @@ export const CONVERSATION_HANDLERS = [
             ...(body.tags ? { tags: body.tags } : {}),
             updated_at: new Date().toISOString(),
           });
+          saveCreatedConversations();
           return HttpResponse.json(null, { status: 200 });
         }
       }
@@ -323,13 +389,16 @@ export const CONVERSATION_HANDLERS = [
     const conversationId = params.conversationId as string;
     if (CONVERSATIONS.has(conversationId)) {
       CONVERSATIONS.delete(conversationId);
+      saveCreatedConversations();
       return HttpResponse.json(null, { status: 200 });
     }
     return HttpResponse.json(null, { status: 404 });
   }),
 
-  http.get("*/api/conversations/:conversationId/events/count", async () =>
-    HttpResponse.json(0),
+  http.get(
+    "*/api/conversations/:conversationId/events/count",
+    async ({ params }) =>
+      HttpResponse.json(localEventCount(params.conversationId as string)),
   ),
 
   http.get(
@@ -343,11 +412,17 @@ export const CONVERSATION_HANDLERS = [
       );
       if (paginationPage) return HttpResponse.json(paginationPage);
 
-      const staticEvents = CONVERSATION_EVENTS[conversationId];
-      if (staticEvents) {
+      // Live local-runtime turns come first: they are the authoritative tail
+      // for a conversation this build actually ran.
+      const localEvents = listLocalEvents(conversationId);
+      const staticEvents = CONVERSATION_EVENTS[conversationId] as
+        | OpenHandsEvent[]
+        | undefined;
+
+      if (localEvents.length > 0 || staticEvents) {
         return HttpResponse.json(
           searchPaginationEvents(
-            staticEvents as OpenHandsEvent[],
+            [...(staticEvents ?? []), ...localEvents],
             searchParams,
           ),
         );
@@ -357,8 +432,26 @@ export const CONVERSATION_HANDLERS = [
     },
   ),
 
-  http.post("*/api/conversations/:conversationId/events", async () =>
-    HttpResponse.json({ ok: true }),
+  // The direct-to-runtime path: the socket posts a user message here when it
+  // is not connected yet, and the local runtime answers it in-process.
+  http.post(
+    "*/api/conversations/:conversationId/events",
+    async ({ params, request }) => {
+      const conversationId = params.conversationId as string;
+      const body = (await request.json()) as {
+        role?: string;
+        content?: Array<{ type?: string; text?: string }>;
+      } | null;
+
+      if (body?.role === "user") {
+        const text = (body.content ?? [])
+          .filter((part) => part?.type === "text")
+          .map((part) => part.text ?? "")
+          .join("");
+        void runLocalAgentTurn(conversationId, text);
+      }
+      return HttpResponse.json({ ok: true });
+    },
   ),
 
   // The generated-canvas fixture behaves like a real workspace artifact:
