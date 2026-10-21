@@ -244,10 +244,15 @@ jobs:
             'split per architecture. Signed with the project release key, so it' \
             'installs in place over any later build.' \
             '' \
+            '**Standalone.** The agent runtime runs on the phone and talks straight' \
+            'to the LLM provider you choose. There is no server to run and no account' \
+            'to create.' \
+            '' \
             '**Install**' \
             '1. Allow install from unknown sources for your browser or file manager.' \
             '2. Open the APK on the phone and install it.' \
-            '3. On first launch, add your agent server host and API key.' \
+            '3. On first launch, pick an agent, then a model and paste your LLM' \
+            '   provider API key. Everything stays on the device.' \
             '' \
             '**Verify the download**' \
             '' \
