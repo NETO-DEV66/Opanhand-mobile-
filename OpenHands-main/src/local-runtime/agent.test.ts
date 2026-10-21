@@ -26,7 +26,7 @@ function textOf(event: StoredEvent): string {
 }
 
 function stubChatCompletion(content: string, usage = true) {
-  const fetchMock = vi.fn(async () =>
+  const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) =>
     Response.json({
       choices: [{ message: { role: "assistant", content } }],
       ...(usage ? { usage: { prompt_tokens: 12, completion_tokens: 5 } } : {}),

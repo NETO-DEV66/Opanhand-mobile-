@@ -6,6 +6,7 @@ import { installLocalWebSocket } from "./session-socket";
 
 export { getLocalLlmConfig, setLocalLlmConfig } from "./llm-store";
 export { isLocalRuntimeEnabled } from "./enabled";
+export { installInProcessFetch } from "./fetch-shim";
 
 let installed = false;
 

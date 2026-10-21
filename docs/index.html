@@ -41,7 +41,7 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "OpenHands Mobile",
-  "description": "OpenHands Agent Canvas packaged as a native Android app. Runs AI coding agents from a phone against your own OpenHands backend.",
+  "description": "OpenHands Agent Canvas packaged as a native Android app. Runs AI coding agents on the phone itself, against your own LLM provider.",
   "operatingSystem": "Android 6.0+ (API 23)",
   "applicationCategory": "DeveloperApplication",
   "softwareVersion": "1.31.1",
@@ -66,7 +66,7 @@
       "name": "Is it safe to install?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except the backend you configure."
+        "text": "You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except the LLM provider you configure."
       }
     },
     {
@@ -90,7 +90,7 @@
       "name": "Does it work offline?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The app opens and its interface loads without a connection. Anything involving an agent needs a reachable OpenHands backend, so plan on having a network path to your server."
+        "text": "The app opens and its interface loads without a connection. Anything involving an agent needs a reachable LLM provider, so plan on having a network path to it."
       }
     },
     {
@@ -98,7 +98,7 @@
       "name": "Do I need a Play Store account?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The app connects to OpenHands Cloud and signs you in through GitHub, GitLab or Bitbucket. You sideload the APK directly. If you want update notifications without the Play Store, add the repo to Obtainium using the badge on this page."
+        "text": "No. You sideload the APK directly from GitHub. If you want update notifications without the Play Store, add the repo to Obtainium using the badge on this page."
       }
     }
   ]
@@ -138,8 +138,8 @@
     {
       "@type": "HowToStep",
       "position": 4,
-      "name": "Connect your backend",
-      "text": "Open the app, enter your OpenHands server URL, and start a conversation.",
+      "name": "Add your API key",
+      "text": "Open the app, pick a model, paste your LLM provider API key, and start a conversation.",
       "url": "https://neto-dev66.github.io/Opanhand-mobile-/#install"
     }
   ]
@@ -1084,8 +1084,8 @@ code,pre{font-family:var(--font-mono)}
     <div class="sec-head reveal">
       <p class="eyebrow"><span class="dot" aria-hidden="true"></span>01 · Overview</p>
       <h2 id="overview-h">A thin shell around a web app. <span class="muted">Nothing hidden.</span></h2>
-      <p class="lead">OpenHands Agent Canvas is the web interface for OpenHands, an open-source AI software engineer. This project wraps that interface in a Capacitor shell so it installs and opens like any other Android app. You still point it at your own backend.</p>
-      <p class="lead">In short: this is the <strong>OpenHands Android app</strong>. It is a community-built mobile client for OpenHands — not an official release — and it lets you <strong>run OpenHands on your phone</strong>. It signs in to OpenHands Cloud with your Git provider, or you can point it at an agent server you run yourself. If you were looking for an <strong>OpenHands APK</strong> to sideload, this is it.</p>
+      <p class="lead">OpenHands Agent Canvas is the web interface for OpenHands, an open-source AI software engineer. This project wraps that interface in a Capacitor shell so it installs and opens like any other Android app, and carries its own runtime so the agent answers on the device.</p>
+      <p class="lead">In short: this is the <strong>OpenHands Android app</strong>. It is a community-built mobile client for OpenHands — not an official release — and it lets you <strong>run OpenHands on your phone</strong>. It needs no account and no server: you pick a model, paste an API key from any LLM provider, and the agent answers on the device. If you were looking for an <strong>OpenHands APK</strong> to sideload, this is it.</p>
     </div>
 
     <div class="grid-3 stagger">
@@ -1102,7 +1102,7 @@ code,pre{font-family:var(--font-mono)}
       <article class="card">
         <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8.2 8 9 4.6-.8 8-4 8-9V6l-8-3Z"/></svg></div>
         <h3>Minimal permissions</h3>
-        <p>INTERNET is the only one it asks for. No storage, no camera, no contacts, no location. Telemetry is compiled out, so the app only talks to the backend you configure.</p>
+        <p>INTERNET is the only one it asks for. No storage, no camera, no contacts, no location. Telemetry is compiled out, so the app only talks to the LLM provider you configure.</p>
       </article>
       <article class="card">
         <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg></div>
@@ -1169,8 +1169,8 @@ code,pre{font-family:var(--font-mono)}
         <article class="row">
           <span class="row-num" aria-hidden="true">05</span>
           <div class="row-body">
-            <h3>Your own backend</h3>
-            <p>Point it at your OpenHands server. The URL and any credentials stay on your device.</p>
+            <h3>Your own model</h3>
+            <p>Point it at any LLM provider. The API key stays on your device.</p>
           </div>
           <span class="row-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></span>
         </article>
@@ -1178,7 +1178,7 @@ code,pre{font-family:var(--font-mono)}
           <span class="row-num" aria-hidden="true">06</span>
           <div class="row-body">
             <h3>Launches offline</h3>
-            <p>The shell opens without a network connection. The agent itself still needs your server.</p>
+            <p>The shell opens without a network connection. The agent itself still needs a reachable LLM provider.</p>
           </div>
           <span class="row-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></span>
         </article>
@@ -1193,18 +1193,18 @@ code,pre{font-family:var(--font-mono)}
     <div class="sec-head reveal">
       <p class="eyebrow"><span class="dot" aria-hidden="true"></span>03 · Screens</p>
       <h2 id="screens-h">The real setup flow, <span class="muted">start to finish.</span></h2>
-      <p class="lead">These are actual captures of the app, not mockups. The first launch signs you in with your Git provider, then walks you through the remaining steps and hands you a working conversation.</p>
+      <p class="lead">These are actual captures of the app, not mockups. First launch walks you through picking an agent and a model, then hands you a working conversation. The first frame is the one step the standalone build skips.</p>
     </div>
 
     <div class="shots stagger">
         <figure class="shot">
           <div class="shot-frame">
             <img src="assets/screens/01-backend.webp" width="742" height="1484" loading="lazy" decoding="async"
-                 alt="Add a backend screen with fields for a friendly name, the agent server URL, a Local/Cloud type toggle, and an API key.">
+                 alt="Add a backend screen with fields for a friendly name, the agent server URL, a Local/Cloud type toggle, and an API key. Shown by the server-backed build only.">
           </div>
           <figcaption>
             <b>1 · Connect</b>
-            <span>Point it at your own agent server — local or remote. A friendly name is enough to start.</span>
+            <span>Where the server-backed build asks for your agent server URL. The standalone build skips straight to the agent picker.</span>
           </figcaption>
         </figure>
 
@@ -1242,7 +1242,7 @@ code,pre{font-family:var(--font-mono)}
         </figure>
     </div>
 
-    <p class="shot-note reveal"><b>A note on these images.</b> They are real screen captures of the app's first-run wizard, taken frame by frame as each step loads. The captures come from the self-hosted build, so they show the backend step instead of the Cloud sign-in page. Any backend details shown are placeholders, not a live server.</p>
+    <p class="shot-note reveal"><b>A note on these images.</b> They are real screen captures of the app's first-run wizard, taken frame by frame as each step loads. The captures come from the server-backed build, so the first frame shows the backend step; the standalone build skips it and opens on the agent picker. Any details shown are placeholders, not live.</p>
   </div>
 </section>
 
@@ -1285,8 +1285,8 @@ code,pre{font-family:var(--font-mono)}
         <div class="step" data-step="4">
           <span class="step-dot" aria-hidden="true">4</span>
           <div class="step-body">
-            <h3>Connect your backend</h3>
-            <p>Open the app, enter your OpenHands server URL, and start a conversation.</p>
+            <h3>Add your API key</h3>
+            <p>Open the app, pick a model, paste your LLM provider API key, and start a conversation.</p>
           </div>
         </div>
       </div>
@@ -1415,7 +1415,7 @@ code,pre{font-family:var(--font-mono)}
     <div class="faq reveal">
       <details>
         <summary>Is it safe to install?<span class="pm" aria-hidden="true"></span></summary>
-        <div class="ans"><div class="ans-in">You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except the backend you configure.</div></div>
+        <div class="ans"><div class="ans-in">You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except the LLM provider you configure.</div></div>
       </details>
       <details>
         <summary>Why does Play Protect warn?<span class="pm" aria-hidden="true"></span></summary>
@@ -1427,11 +1427,11 @@ code,pre{font-family:var(--font-mono)}
       </details>
       <details>
         <summary>Does it work offline?<span class="pm" aria-hidden="true"></span></summary>
-        <div class="ans"><div class="ans-in">The app opens and its interface loads without a connection. Anything involving an agent needs a reachable OpenHands backend, so plan on having a network path to your server.</div></div>
+        <div class="ans"><div class="ans-in">The app opens and its interface loads without a connection. Anything involving an agent needs a reachable LLM provider, so plan on having a network path to it.</div></div>
       </details>
       <details>
         <summary>Do I need a Play Store account?<span class="pm" aria-hidden="true"></span></summary>
-        <div class="ans"><div class="ans-in">The app signs you in to OpenHands Cloud with GitHub, GitLab or Bitbucket — no separate password to create or remember. You sideload the APK directly. If you want update notifications without the Play Store, add the repo to Obtainium using the badge on this page.</div></div>
+        <div class="ans"><div class="ans-in">No account is needed at all. The app runs the agent on the device and talks straight to the LLM provider whose API key you paste in, so there is nothing to sign up for. You sideload the APK directly from GitHub. If you want update notifications without the Play Store, add the repo to Obtainium using the badge on this page.</div></div>
       </details>
     </div>
   </div>
