@@ -1,4 +1,5 @@
 import { http, delay, HttpResponse } from "msw";
+import type { MetaProfile } from "@openhands/typescript-client";
 import { WebClientConfig } from "#/api/option-service/option.types";
 import type { SaveProfileRequest } from "#/api/profiles-service/profiles-service.api";
 import { mirrorLlmConfigFromSettings } from "#/local-runtime/llm-store";
@@ -460,6 +461,26 @@ const MOCK_LLM_PROFILES: {
   profiles: new Map(),
   activeProfile: null,
 };
+
+/**
+ * Meta-profiles (model routing) and provider connections (shared credentials)
+ * are separate stores from LLM profiles. They are kept in memory only: neither
+ * carries a secret, and the settings view tolerates an empty list.
+ */
+const MOCK_META_PROFILES = new Map<string, MetaProfile>();
+let MOCK_ACTIVE_META_PROFILE: string | null = null;
+
+type MockProviderConnection = {
+  id: string;
+  display_name: string;
+  provider: string;
+  base_url: string | null;
+  created_at: number;
+  updated_at: number;
+  api_key_set: boolean;
+};
+
+const MOCK_PROVIDER_CONNECTIONS = new Map<string, MockProviderConnection>();
 
 /**
  * Persist the mock agent-server's settings and LLM profiles.
@@ -1258,5 +1279,151 @@ export const SETTINGS_HANDLERS = [
   http.post("*/api/mcp/test", async () => {
     await delay();
     return HttpResponse.json({ ok: true, tools: [] });
+  }),
+
+  // GET /api/automation/sdk-version — version probe used by telemetry. The
+  // local runtime has no automation sidecar, so answer with an explicit empty
+  // version rather than letting the request reach the dev server, which would
+  // answer the SPA shell (HTML) and make the probe look like a bad backend.
+  http.get("*/api/automation/sdk-version", async () =>
+    HttpResponse.json({ sdk_version: null }),
+  ),
+
+  // GET /api/meta-profiles — model-routing profiles (software-agent-sdk #4287).
+  // Empty list keeps the settings view in its "no profiles yet" state, which is
+  // what a fresh local runtime has.
+  http.get("*/api/meta-profiles", async () =>
+    HttpResponse.json({ meta_profiles: [], active_meta_profile: null }),
+  ),
+
+  http.get("*/api/meta-profiles/:name", async ({ params }) => {
+    const name = getProfileNameParam(params.name);
+    const profile = MOCK_META_PROFILES.get(name);
+
+    if (!profile) {
+      return HttpResponse.json(
+        { detail: `Meta-profile '${name}' not found` },
+        { status: 404 },
+      );
+    }
+
+    return HttpResponse.json({ name, config: profile });
+  }),
+
+  http.post("*/api/meta-profiles/:name", async ({ params, request }) => {
+    const name = getProfileNameParam(params.name);
+    const config = (await request.json()) as MetaProfile | null;
+
+    if (!config) {
+      return HttpResponse.json({ detail: "Empty body" }, { status: 400 });
+    }
+
+    MOCK_META_PROFILES.set(name, config);
+    return HttpResponse.json(
+      { name, message: `Meta-profile '${name}' saved` },
+      { status: 201 },
+    );
+  }),
+
+  http.delete("*/api/meta-profiles/:name", async ({ params }) => {
+    const name = getProfileNameParam(params.name);
+    MOCK_META_PROFILES.delete(name);
+    if (MOCK_ACTIVE_META_PROFILE === name) MOCK_ACTIVE_META_PROFILE = null;
+
+    return HttpResponse.json({
+      name,
+      message: `Meta-profile '${name}' deleted`,
+    });
+  }),
+
+  http.post("*/api/meta-profiles/:name/activate", async ({ params }) => {
+    const name = getProfileNameParam(params.name);
+    MOCK_ACTIVE_META_PROFILE = name;
+
+    return HttpResponse.json({
+      name,
+      message: `Meta-profile '${name}' activated`,
+    });
+  }),
+
+  // /api/llm/provider-connections — shared api_key + base_url records that LLM
+  // profiles reference by id. No secrets are stored here: `api_key_set` only
+  // reports whether a key is present.
+  http.get("*/api/llm/provider-connections", async () =>
+    HttpResponse.json(Array.from(MOCK_PROVIDER_CONNECTIONS.values())),
+  ),
+
+  http.post("*/api/llm/provider-connections", async ({ request }) => {
+    const body = (await request.json()) as {
+      display_name?: string;
+      provider?: string;
+      api_key?: string;
+      base_url?: string | null;
+    } | null;
+
+    if (!body?.display_name || !body.provider) {
+      return HttpResponse.json(
+        { detail: "display_name and provider are required" },
+        { status: 400 },
+      );
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const connection = {
+      id: `pc-${MOCK_PROVIDER_CONNECTIONS.size + 1}`,
+      display_name: body.display_name,
+      provider: body.provider,
+      base_url: body.base_url ?? null,
+      created_at: now,
+      updated_at: now,
+      api_key_set: Boolean(body.api_key),
+    };
+    MOCK_PROVIDER_CONNECTIONS.set(connection.id, connection);
+
+    return HttpResponse.json(connection, { status: 201 });
+  }),
+
+  http.patch(
+    "*/api/llm/provider-connections/:id",
+    async ({ params, request }) => {
+      const id = String(params.id);
+      const existing = MOCK_PROVIDER_CONNECTIONS.get(id);
+      if (!existing) {
+        return HttpResponse.json(
+          { detail: `Provider connection '${id}' not found` },
+          { status: 404 },
+        );
+      }
+
+      const body = (await request.json()) as {
+        display_name?: string;
+        provider?: string;
+        api_key?: string;
+        base_url?: string | null;
+      } | null;
+
+      const updated = {
+        ...existing,
+        ...(body?.display_name ? { display_name: body.display_name } : {}),
+        ...(body?.provider ? { provider: body.provider } : {}),
+        ...(body && "base_url" in body
+          ? { base_url: body.base_url ?? null }
+          : {}),
+        ...(body?.api_key ? { api_key_set: true } : {}),
+        updated_at: Math.floor(Date.now() / 1000),
+      };
+      MOCK_PROVIDER_CONNECTIONS.set(id, updated);
+
+      return HttpResponse.json(updated);
+    },
+  ),
+
+  http.delete("*/api/llm/provider-connections/:id", async ({ params }) => {
+    const id = String(params.id);
+    MOCK_PROVIDER_CONNECTIONS.delete(id);
+
+    return HttpResponse.json({
+      message: `Provider connection '${id}' deleted`,
+    });
   }),
 ];

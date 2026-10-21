@@ -11,6 +11,7 @@ import { AgentServerUIProviders } from "./components/providers";
 import { installMarsWebBridge } from "./api/mars/mars-web-bridge";
 import { waitForI18n } from "./i18n";
 import { shouldStartMockWorker } from "./mocks/should-start-mock-worker";
+import { startMockWorkerWithFallback } from "./mocks/start-mock-worker";
 
 async function prepareApp() {
   // DigitalOcean Managed Agents in the browser: present only when the server
@@ -29,18 +30,15 @@ async function prepareApp() {
     if (shouldStartMockWorker()) {
       const { worker } = await import("./mocks/browser");
 
-      try {
-        await worker.start({
-          onUnhandledRequest: "bypass",
-        });
-      } catch (error) {
-        // Registration fails where service workers are unavailable (some
-        // Android WebViews, private modes). Fall back to answering the same
-        // handlers from inside the page rather than rendering against an
-        // unmocked `fetch`.
-        console.warn("Mock service worker did not start:", error);
-        installInProcessFetch();
-      }
+      // Never await the worker unbounded: a WebView that registers the worker
+      // but never activates it would otherwise hang startup forever and the
+      // app would render nothing. The helper falls back to the in-process
+      // handlers when the worker does not come up in time.
+      await startMockWorkerWithFallback({
+        startWorker: () => worker.start({ onUnhandledRequest: "bypass" }),
+        installFallback: installInProcessFetch,
+        stopWorker: () => worker.stop(),
+      });
     }
   }
 

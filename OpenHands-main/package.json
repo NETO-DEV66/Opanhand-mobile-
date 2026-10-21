@@ -121,6 +121,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "3.3.6",
     "@eslint/js": "9.39.4",
+    "@mswjs/interceptors": "^0.41.9",
     "@playwright/test": "1.63.0",
     "@react-router/dev": "7.18.2",
     "@shadcn/lint": "0.2.1",
