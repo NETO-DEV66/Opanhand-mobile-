@@ -19,12 +19,28 @@ async function prepareApp() {
   await Promise.all([waitForI18n(), installMarsWebBridge()]);
 
   if (import.meta.env.DEV || import.meta.env.VITE_MOCK_API === "true") {
+    // The socket shim must be in place before the first request: a service
+    // worker cannot intercept a WebSocket, and Capacitor's Android WebView has
+    // no usable service worker at all.
+    const { installInProcessFetch, installLocalRuntime } =
+      await import("./local-runtime");
+    installLocalRuntime();
+
     if (shouldStartMockWorker()) {
       const { worker } = await import("./mocks/browser");
 
-      await worker.start({
-        onUnhandledRequest: "bypass",
-      });
+      try {
+        await worker.start({
+          onUnhandledRequest: "bypass",
+        });
+      } catch (error) {
+        // Registration fails where service workers are unavailable (some
+        // Android WebViews, private modes). Fall back to answering the same
+        // handlers from inside the page rather than rendering against an
+        // unmocked `fetch`.
+        console.warn("Mock service worker did not start:", error);
+        installInProcessFetch();
+      }
     }
   }
 

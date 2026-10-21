@@ -107,28 +107,28 @@ shell using [Capacitor](https://capacitorjs.com/), so you can launch it, watch
 runs, and approve actions from a phone.
 
 The app contains **the same UI as the browser version** (`@openhands/agent-canvas`
-v1.27.1). It is a client. The shipped build signs in to hosted OpenHands Cloud
-with your Git provider; a self-hosted build talks to an agent server you run
-yourself, on your laptop, a server, or in the cloud.
+v1.27.1). The shipped build is **standalone**: it runs the agent runtime on the
+phone and calls your own LLM provider, so there is no server to sign in to. A
+server-backed build that talks to an agent server you run is also available.
 
 **This is a community packaging, not an official OpenHands release.**
 
 ### Run OpenHands on Android, without a laptop
 
-OpenHands has no official mobile app. The Agent Canvas needs Docker and Node.js,
-so it does not run on a phone by itself. This project is the missing piece: it
-takes the Canvas that is already running on your machine and puts a real Android
-app in front of it.
+OpenHands has no official mobile app, and the full Agent Canvas needs Docker and
+Node.js, so it does not run on a phone by itself. This project ships a mobile
+build that carries its own runtime: you pick a model, paste your API key, and
+the agent answers on the device. No Docker, no server, no laptop in the loop.
 
 If you searched for **"OpenHands Android app"**, **"OpenHands mobile"**,
-**"OpenHands APK"**, or **"run OpenHands on my phone"** — this is that. You keep
-the agent on real hardware, and you get the controls in your pocket.
+**"OpenHands APK"**, or **"run OpenHands on my phone"** — this is that.
 
 | Question | Answer |
 | --- | --- |
 | Is there an official OpenHands mobile app? | No. This is an independent, community-built Android wrapper. |
-| Does the agent run on the phone? | No. The agent runs on your server; the phone is the client. |
+| Does the agent run on the phone? | Yes, in the standalone build. The server-backed build keeps the agent on your server and the phone as the client. |
 | Do I need a Play Store account? | No. You sideload the APK. |
+| Do I need an OpenHands Cloud account? | No. The standalone build only needs an API key from an LLM provider you choose. |
 | Is it free? | Yes — MIT licensed, no telemetry. |
 | Which Android versions? | 6.0 (Marshmallow, API 23) and newer. |
 
@@ -141,11 +141,12 @@ the agent on real hardware, and you get the controls in your pocket.
 | Android version | 6.0 (Marshmallow, API 23) or newer |
 | Architecture | Universal — arm64, armv7, x86_64 (no native code) |
 | Permissions | Internet only |
-| Backend | OpenHands Cloud (built in), or a reachable agent server you provide |
+| Backend | None required — the app ships standalone and calls your own LLM provider directly. A server-backed build is available (see [Standalone mode](#standalone-mode)). |
 | Telemetry | None. The APK is built with `VITE_DO_NOT_TRACK=1`, so the upstream PostHog client is disabled at compile time and never initialised. |
 
-The app needs network access to OpenHands Cloud, or to the agent server you
-point it at. It does not send your data anywhere by itself.
+The standalone app needs network access to your LLM provider and nothing else.
+The server-backed build needs the agent server you point it at. Neither sends
+your data anywhere by itself.
 
 ---
 
@@ -168,32 +169,55 @@ point it at. It does not send your data anywhere by itself.
 
 ## First launch
 
-The shipped build is a **hosted OpenHands Cloud client**. On first launch it
-shows a sign-in page with one button per Git provider:
+The shipped build is **standalone**: it runs the agent runtime on the phone and
+calls your own LLM provider. There is no server to sign in to and no backend to
+configure, so first launch is three steps.
 
-| 1 · Sign in with a Git provider |
-| :---: |
-| <img src="docs/assets/screens/01-backend.webp" alt="Cloud sign-in screen with Log in with GitHub, GitLab and Bitbucket buttons" width="300"> |
+| 1 · Pick an agent | 2 · Choose a model |
+| :---: | :---: |
+| <img src="docs/assets/screens/02-agent.webp" alt="Agent picker with OpenHands selected" width="300"> | <img src="docs/assets/screens/03-llm.webp" alt="Model and API key form" width="300"> |
 
-1. **Sign in** — tap **Log in with GitHub**, **GitLab** or **Bitbucket**. The
-   app opens that provider's consent screen in your browser and shows an
-   eight-character code. Approve the code in the browser, and the app signs in
-   and connects to OpenHands Cloud.
-2. **Pick an agent** — OpenHands by default, or bring your own Claude Code,
+1. **Pick an agent** — OpenHands by default, or bring your own Claude Code,
    Codex, Gemini CLI, Pi or OpenCode agent.
-3. **Choose a model** — pick a provider and model. A sensible default is
-   pre-selected.
-4. **Start working** — send a first message, or open a proven workflow template
-   with its prompt and MCPs already set up.
+2. **Choose a model** — pick a provider and model, and paste your API key. For a
+   provider that is not listed, set a **base URL** to any OpenAI-compatible
+   endpoint (a local llama.cpp, Ollama or vLLM server works).
+3. **Start working** — send a first message and the reply streams back from your
+   provider.
 
-The captures below come from the self-hosted flow; the sign-in step is the one
-difference. Your settings are stored on the device. To change them later, open
-**Settings** inside the app.
+Your settings, your conversations and their messages are stored on the device
+and survive a restart. To change the model later, open **Settings** inside the
+app.
 
-> **Self-hosted build.** To ship an APK that talks only to an agent server you
-> run — no Cloud account, first launch is the four-step setup wizard — set the
-> repository variable `CLOUD_BASE_URL` to `off` before building. See
-> [Building from source](#building-from-source).
+> **Server-backed build.** To ship the app as a client of an agent server you
+> run instead — hosted OpenHands Cloud, or your own — set the repository
+> variable `STANDALONE_MODE` to `false` before building. See
+> [Standalone mode](#standalone-mode).
+
+---
+
+## Standalone mode
+
+The default build answers the agent-server REST and WebSocket API from inside
+the app (`OpenHands-main/src/local-runtime/`) and calls your LLM provider
+directly, so no server is involved. Two things follow from that:
+
+- **Your API key stays on the device.** It is written to the app's
+  `localStorage` and sent only to the provider you configured. Nothing is
+  proxied anywhere.
+- **A service worker is not required.** Some Android WebViews cannot register
+  one. When registration fails the app answers the same mock REST handlers from
+  inside the page instead of rendering against an unmocked `fetch`.
+
+The runtime only exists in the mock build (`VITE_MOCK_API=true`). The
+server-backed build is byte-for-byte the upstream client: no local runtime, no
+mock handlers, no `localStorage` conversation store.
+
+| Repository variable | Standalone (default) | Server-backed |
+| --- | --- | --- |
+| `STANDALONE_MODE` | unset or anything but `false` | `false` |
+| `BACKEND_BASE_URL` | ignored | baked in as the agent server URL |
+| `CLOUD_BASE_URL` | ignored | Cloud host to lock to, or `off` to ship unlocked |
 
 ---
 
@@ -226,7 +250,8 @@ npm ci
 npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
 
 # 3. Build the web bundle
-#    Leave VITE_BACKEND_BASE_URL unset to show the in-app setup screen.
+#    The default build is standalone (no server). For a server-backed build,
+#    use: VITE_MOCK_API=false VITE_BACKEND_BASE_URL=https://my-server.example.com npm run build:app
 npm run build:app
 
 # 4. Copy the web bundle into the Android project
@@ -239,10 +264,17 @@ cd android
 
 The APK lands in `android/app/build/outputs/apk/release/app-release.apk`.
 
-To bake in your own server URL, set it before step 3:
+The standalone bundle is built with the mock API enabled, which is what installs
+the local runtime:
 
 ```bash
-VITE_BACKEND_BASE_URL=https://my-server.example.com npm run build:app
+VITE_MOCK_API=true npm run build:app
+```
+
+To build the server-backed client instead, turn it off and point it at a server:
+
+```bash
+VITE_MOCK_API=false VITE_BACKEND_BASE_URL=https://my-server.example.com npm run build:app
 ```
 
 ### Running the tests
@@ -370,8 +402,9 @@ APK can never be released by accident.
 
 | Name | Type | Purpose |
 | --- | --- | --- |
-| `CLOUD_BASE_URL` | Variable | The Cloud origin the app is locked to. Unset means hosted OpenHands Cloud (`https://app.all-hands.dev`). Set it to another origin for a self-hosted Cloud, or to `off` to ship the unlocked, self-hosted build. |
-| `BACKEND_BASE_URL` | Variable | Bakes the agent server URL into the app. |
+| `STANDALONE_MODE` | Variable | Unset (default) ships the standalone app — no server, first launch is the agent/LLM steps. Set it to `false` to ship the server-backed client instead. |
+| `CLOUD_BASE_URL` | Variable | Server-backed build only. The Cloud origin the app is locked to; unset means hosted OpenHands Cloud (`https://app.all-hands.dev`). Set it to another origin for a self-hosted Cloud, or to `off` to ship the unlocked build (backend form on first launch). |
+| `BACKEND_BASE_URL` | Variable | Server-backed build only. Bakes the agent server URL into the app. |
 | `SIGNING_CERT_SHA256` | Variable | **Set.** The pinned signer fingerprint. The workflow refuses to publish an APK signed with anything else, and fails closed if it cannot read the fingerprint at all. Change it only when rotating the key on purpose. |
 | `ANDROID_KEYSTORE_BASE64` | Secret | The signing keystore, base64-encoded. Required to publish. |
 | `ANDROID_KEYSTORE_PASSWORD` | Secret | Keystore store password. |
@@ -386,9 +419,11 @@ APK can never be released by accident.
 | --- | --- |
 | "App not installed" | You have a copy signed by a different key, or the pre-1.28.0 build with the old package id. Uninstall that one, then install this APK. Releases from v1.28.0 onward always install in place. |
 | Play Protect blocks install | Tap **Install anyway**; the APK is not from the Play Store. |
-| App opens but cannot connect | Check the server URL and that the phone can reach it. Use `https://` for remote servers. |
-| Stuck on the loading screen | Confirm the agent server is running, then reopen the app. |
-| Blank screen after an update | Clear app data in Android settings and reconnect. |
+| "Your LLM isn't set up yet" | Open **Settings → LLM**, pick a provider and model, and paste an API key. |
+| The agent replies with a provider error | The API key is wrong, or the provider rejected the request. The message names the provider's reason. |
+| A provider that is not in the list fails | Set a **base URL** to an OpenAI-compatible endpoint (Ollama, vLLM, llama.cpp). |
+| Server-backed build cannot connect | Check `BACKEND_BASE_URL` and that the phone can reach the server. Use `https://` for remote servers. |
+| Blank screen after an update | Clear app data in Android settings and set the model up again. |
 
 ---
 

@@ -62,17 +62,20 @@ jobs:
 
       - name: Build web bundle
         env:
-          # Public URL of the OpenHands agent server the phone talks to.
-          # Set repo variable BACKEND_BASE_URL to bake it in; leave unset to
-          # let the user enter it in the app on first launch.
-          VITE_BACKEND_BASE_URL: ${{ vars.BACKEND_BASE_URL }}
-          VITE_MOCK_API: "false"
-          # Lock the shipped app to hosted OpenHands Cloud so first launch is
-          # the provider login page (GitHub / GitLab / Bitbucket), matching the
-          # hosted product. Set the CLOUD_BASE_URL repo variable to a
-          # self-hosted Cloud origin to point elsewhere, or to "off" to ship
-          # the unlocked self-hosted build (backend form on first launch).
-          VITE_LOCK_TO_CLOUD: ${{ vars.CLOUD_BASE_URL == 'off' && '' || vars.CLOUD_BASE_URL || 'https://app.all-hands.dev' }}
+          # This build is STANDALONE by default: the local runtime answers REST
+          # and the conversation socket in-process and calls the user's own LLM
+          # provider, so the phone needs no agent server at all. Set the repo
+          # variable STANDALONE_MODE to "false" to ship the server-backed build.
+          VITE_MOCK_API: ${{ vars.STANDALONE_MODE == 'false' && 'false' || 'true' }}
+          # Public URL of the OpenHands agent server the phone talks to. Only
+          # used by the server-backed build; standalone ignores it.
+          VITE_BACKEND_BASE_URL: ${{ vars.STANDALONE_MODE == 'false' && vars.BACKEND_BASE_URL || '' }}
+          # Cloud lock only applies to the server-backed build. Locking the
+          # standalone build to hosted Cloud would put a login page in front of
+          # an app that has no server to log in to. Set CLOUD_BASE_URL to a
+          # self-hosted origin to point the server-backed build elsewhere, or to
+          # "off" to ship it unlocked (backend form on first launch).
+          VITE_LOCK_TO_CLOUD: ${{ vars.STANDALONE_MODE == 'false' && (vars.CLOUD_BASE_URL == 'off' && '' || vars.CLOUD_BASE_URL || 'https://app.all-hands.dev') || '' }}
           # The README and the landing page promise "no telemetry". Upstream's
           # default sends an anonymous install event before any consent, so
           # turn the PostHog client off at build time to make the promise true.
