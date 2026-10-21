@@ -32,7 +32,7 @@ Run and supervise your AI coding agents from your phone.
 
 | Build | Size | Link |
 | --- | --- | --- |
-| **Universal (signed)** | 5.7 MB | **[app-release.apk](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)** |
+| **Universal (signed)** | 5.9 MB | **[app-release.apk](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)** |
 
 All builds: [Releases page](https://github.com/NETO-DEV66/Opanhand-mobile-/releases)
 
