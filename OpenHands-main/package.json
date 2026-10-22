@@ -94,7 +94,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "check-translation-completeness": "node scripts/check-translation-completeness.cjs",
-    "build:app": "npm run check:prelude && npm run make-i18n && react-router build",
+    "build:app": "npm run check:prelude && npm run make-i18n && react-router build && npm run check:bundle-syntax",
     "check:prelude": "node scripts/check-legacy-polyfills-es5.mjs",
     "build:lib": "npm run make-i18n && react-router typegen && cross-env BUILD_LIB=true vite build && tsc -p tsconfig.lib.json",
     "build:docker": "node scripts/docker-build.mjs",
@@ -105,7 +105,8 @@
     "build:desktop:universal": "npm run build:app && cross-env ELECTRON_ARCH=universal node scripts/download-uv.mjs && cross-env ELECTRON_ARCH=universal node scripts/download-node.mjs && cross-env ELECTRON_ARCH=universal electron-builder --config electron-builder.config.mjs --publish never",
     "download-uv": "node scripts/download-uv.mjs",
     "download-node": "node scripts/download-node.mjs",
-    "generate-icons": "node scripts/generate-icons.mjs"
+    "generate-icons": "node scripts/generate-icons.mjs",
+    "check:bundle-syntax": "node scripts/check-bundle-syntax.mjs"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx,js}": [

@@ -224,6 +224,12 @@ directly, so no server is involved. Two things follow from that:
   `arrowParens: "always"`) rewrite it with ES2017 syntax, so the file is listed in
   `.prettierignore`, and `npm run check:prelude` (part of `build:app` and `lint`)
   fails the build if it is not pure ES5.
+- **The chunks have a syntax floor too.** `npm run check:bundle-syntax` (also in
+  `build:app`) parses the build output and fails on any app chunk needing syntax
+  above ES2019 (Chrome 76) — optional chaining, nullish coalescing, logical
+  assignment. Those cannot be shimmed at runtime, so a chunk that contains one
+  black-screens the same way. The generated mock service worker is reported as a
+  warning only, since the app falls back in-process when it cannot run.
 - **Startup cannot hang.** `prepareApp()` races an 8 s deadline in
   `src/entry.client.tsx`, so a request that never settles (i18n locale fetch on a
   captive portal, say) still renders the app instead of leaving it blank.
