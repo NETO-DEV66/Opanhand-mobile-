@@ -57,6 +57,19 @@ const EXTENSIONS_SKILLS_DIR = resolve(
 const PUBLIC_LOCALES_DIR = resolve(process.cwd(), "public", "locales");
 
 const appBuildConfig = {
+  // Transpile down to what the APK's WebView can parse. Without an explicit
+  // target Vite 8 defaults to `baseline-widely-available` (Chrome 107+), which
+  // leaves `?.`, `??`, class fields and logical assignment in the output. An
+  // Android System WebView older than that fails to *parse* the entry chunk, so
+  // nothing runs at all and the screen stays black with no console error - the
+  // polyfills in `public/legacy-polyfills.js` cannot help, because they fix
+  // missing globals, not unsupported syntax.
+  //
+  // es2019 is the floor that keeps the syntax parseable on WebView 76+ (the
+  // oldest that ships on an Android 6 device still receiving WebView updates).
+  // It is a *syntax* target only: runtime gaps (TextEncoderStream,
+  // structuredClone, ...) are still covered by the polyfill prelude.
+  target: ["es2019", "chrome76", "firefox67", "safari12"],
   rolldownOptions: {
     output: {
       codeSplitting: {

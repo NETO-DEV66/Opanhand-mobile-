@@ -104,6 +104,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="OpenHands" />
+        {/* Classic script, first in <head>, before any module. Fills in the
+            globals a recent Chrome has and an old Android System WebView does
+            not; without them the module graph throws before React mounts and
+            the app shows a black screen. Must stay a plain <script src>: a
+            module would be subject to the very features it supplies. */}
+        <script src="/legacy-polyfills.js" />
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <Meta />

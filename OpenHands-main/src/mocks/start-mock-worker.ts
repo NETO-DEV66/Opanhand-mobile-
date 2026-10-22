@@ -60,6 +60,14 @@ export async function startMockWorkerWithFallback({
     });
   }
 
-  installFallback();
+  // Installing the fallback is itself a place a WebView can throw (it builds an
+  // interceptor pair). That must not reject this promise: the caller awaits it
+  // on the startup path, and an unhandled rejection there is another way to
+  // render nothing at all.
+  try {
+    installFallback();
+  } catch (error) {
+    warn("Could not install the in-process fallback:", error);
+  }
   return "fallback";
 }

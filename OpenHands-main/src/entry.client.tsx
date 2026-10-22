@@ -17,6 +17,8 @@ async function prepareApp() {
   // DigitalOcean Managed Agents in the browser: present only when the server
   // this page came from hosts the MARS bridge (scripts/mars-web-bridge.mjs).
   // Must settle before render — the UI reads `window.marsBridge` synchronously.
+  // Both steps resolve rather than reject on the paths that matter, but nothing
+  // here is worth a blank screen, so a throw is contained below.
   await Promise.all([waitForI18n(), installMarsWebBridge()]);
 
   if (import.meta.env.DEV || import.meta.env.VITE_MOCK_API === "true") {
@@ -49,22 +51,42 @@ async function prepareApp() {
   }
 }
 
-prepareApp().then(() =>
-  startTransition(() => {
-    hydrateRoot(
-      document,
-      <StrictMode>
-        <AgentServerUIProviders
-          // Analytics off: this build must not contact OpenHands' telemetry
-          // endpoint (z.openhands.dev). Passing `false` means PostHog is never
-          // initialized, so no install/session event leaves the device and the
-          // consent banner is never shown.
-          analytics={false}
-          withStyleRoot={false}
-        >
-          <HydratedRouter />
-        </AgentServerUIProviders>
-      </StrictMode>,
-    );
-  }),
-);
+/**
+ * Hydrate, and never leave the screen empty because startup failed.
+ *
+ * `prepareApp()` is best-effort preparation: the mock transport, the local
+ * runtime shims, the MARS bridge. None of it is required to *mount* the app,
+ * and every step is wrapped so it cannot reject — but if it ever does (a
+ * WebView missing an API a dependency calls at import time, say), the previous
+ * `.then()` form skipped `hydrateRoot` entirely and the user stared at a black
+ * screen with no error, because there was nothing on the page to report one.
+ * Hydrating anyway turns that into a normal React error boundary or a visible
+ * failure instead of silence.
+ */
+prepareApp()
+  .catch((error: unknown) => {
+    console.error("App preparation failed; rendering anyway.", error);
+  })
+  .then(() =>
+    startTransition(() => {
+      hydrateRoot(
+        document,
+        <StrictMode>
+          <AgentServerUIProviders
+            // Analytics off: this build must not contact OpenHands' telemetry
+            // endpoint (z.openhands.dev). Passing `false` means PostHog is never
+            // initialized, so no install/session event leaves the device and the
+            // consent banner is never shown.
+            analytics={false}
+            withStyleRoot={false}
+          >
+            <HydratedRouter />
+          </AgentServerUIProviders>
+        </StrictMode>,
+      );
+
+      // Tells the compatibility prelude in <head> that the app reached React,
+      // so its blank-screen watchdog stays quiet.
+      window.__openhandsMounted = true;
+    }),
+  );
