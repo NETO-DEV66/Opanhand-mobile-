@@ -485,12 +485,20 @@
         "style",
         [
           "position:fixed",
-          "inset:0",
+          // Not `inset:0`: the shorthand is Chrome 87+, and this notice exists
+          // for WebViews older than that. Without the longhands the box would
+          // shrink to its content in the top-left corner.
+          "top:0",
+          "right:0",
+          "bottom:0",
+          "left:0",
           "z-index:2147483647",
           "display:flex",
           "flex-direction:column",
           "justify-content:center",
-          "gap:8px",
+          // `gap` in a flex container is Chrome 84+. Spacing the children with
+          // a margin instead keeps the notice laid out on the WebViews that
+          // need it most.
           "padding:28px",
           "background:#101014",
           "color:#f4f4f5",
@@ -500,7 +508,10 @@
         ].join(";")
       );
       var heading = document.createElement("div");
-      heading.setAttribute("style", "font-weight:600;font-size:16px");
+      heading.setAttribute(
+        "style",
+        "font-weight:600;font-size:16px;margin-bottom:8px"
+      );
       heading.appendChild(document.createTextNode(title));
       var body = document.createElement("div");
       body.setAttribute("style", "opacity:.8");
@@ -591,6 +602,12 @@
   // That flag is set the moment `hydrateRoot` is *called*, which is not the same
   // as React having rendered: if hydration throws, the flag is still set and a
   // flag-gated watchdog would stay silent over a black screen.
+  //
+  // Note the deliberate limit: "text present but unstyled" is *not* detected
+  // here. A computed-style probe is a feature test, and a feature test can be
+  // wrong - jsdom reports every declaration as unapplied - so gating the notice
+  // on one would cover a working app. The stylesheet that caused that state is
+  // caught at build time instead, by `flatten:css` and `check:css-compat`.
   var blankChecks = 0;
   var watchdog = setInterval(function () {
     blankChecks += 1;

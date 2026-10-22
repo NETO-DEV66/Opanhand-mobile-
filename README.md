@@ -242,6 +242,18 @@ directly, so no server is involved. Two things follow from that:
   assignment. Those cannot be shimmed at runtime, so a chunk that contains one
   black-screens the same way. The generated mock service worker is reported as a
   warning only, since the app falls back in-process when it cannot run.
+- **The stylesheet has a floor, and it is the one that bites hardest.**
+  Tailwind v4 emits every rule inside `@layer`, and cascade layers are Chrome 99.
+  An older WebView does not know the at-rule, and CSS says to drop an unknown
+  at-rule together with its whole block — so the entire stylesheet contributes
+  nothing. Unlike the JavaScript failures above this one is *silent even to the
+  prelude*: the app still mounts, `document.body.innerText` is non-empty, so the
+  blank-page watchdog reads the page as fine and shows no notice. The user gets a
+  black screen and no explanation. `npm run flatten:css` (in `build:app`) unwraps
+  every `@layer` block before `cap sync`, and `npm run check:css-compat` fails the
+  build if one reappears. This was the shipped v1.32.4 state: its APK carried
+  five `@layer` blocks, which is why "the notice never appears" on real devices
+  even though the ES5 prelude ran correctly.
 - **Startup cannot hang.** `prepareApp()` races an 8 s deadline in
   `src/entry.client.tsx`, so a request that never settles (i18n locale fetch on a
   captive portal, say) still renders the app instead of leaving it blank.
