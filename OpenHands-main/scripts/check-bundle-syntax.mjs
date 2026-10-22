@@ -101,7 +101,10 @@ function findTooNewSyntax(source) {
         node.operator === "&&=" ||
         node.operator === "??=")
     ) {
-      found = { label: `logical assignment (\`${node.operator}\`) - Chrome 85`, node };
+      found = {
+        label: `logical assignment (\`${node.operator}\`) - Chrome 85`,
+        node,
+      };
     }
     for (const key of Object.keys(node)) {
       if (key === "type" || key === "start" || key === "end") continue;
@@ -170,6 +173,4 @@ for (const warning of warnings) {
   );
 }
 
-console.log(
-  `All app chunks parse at ES${ECOSYSTEM_LEVEL} (Chrome 76 floor).`,
-);
+console.log(`All app chunks parse at ES${ECOSYSTEM_LEVEL} (Chrome 76 floor).`);

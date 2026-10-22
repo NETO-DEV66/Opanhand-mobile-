@@ -47,7 +47,7 @@ console.log("ok    public/legacy-polyfills.js parses as ES5");
 
 // Names are applied inside the page; a function map cannot
 // cross the addInitScript boundary, so only the names are sent.
-const ALL = ["tes", "sc", "uuid", "hasown", "at"];
+const ALL = ["ts", "tes", "sc", "uuid", "hasown", "at"];
 
 const CASES = [
   {
@@ -110,6 +110,22 @@ try {
       }) => {
         // Each entry mirrors the Chrome floor the prelude documents.
         const remove = {
+          ts: () => {
+            // Chrome 67. The one that was missed: `ReadableStream` and
+            // `WritableStream` arrived in Chrome 43 but `TransformStream` only
+            // in 67, so a WebView in between has the native streams the shim
+            // needs and no TransformStream. The bundle has `class extends
+            // TransformStream` at module scope and the inline bootstrap pipes
+            // through TextEncoderStream (itself built on TransformStream), so
+            // both throw and the app never mounts - the shipped v1.32.3 black
+            // screen. Deleting only this, leaving the rest, is exactly that
+            // device.
+            try {
+              delete window.TransformStream;
+            } catch {
+              /* already absent */
+            }
+          },
           tes: () => {
             // Chrome 105.
             for (const name of ["TextEncoderStream", "TextDecoderStream"]) {

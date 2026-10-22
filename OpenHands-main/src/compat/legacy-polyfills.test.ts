@@ -51,6 +51,11 @@ function makeRealm({ timers = false } = {}): Realm {
     },
     TextEncoder,
     TextDecoder,
+    // A WebView between Chrome 43 and 66 has these two but not TransformStream,
+    // which is the floor this suite cares about. All three are injected so a
+    // test can remove exactly the one it means to.
+    ReadableStream,
+    WritableStream,
     TransformStream,
     AbortController,
     crypto,
@@ -104,13 +109,99 @@ describe("legacy-polyfills prelude", () => {
   it("keeps the boot-critical stream shims first", () => {
     // index.html's inline bootstrap needs TextEncoderStream before any module
     // runs, so the shim must not sit behind a later definition that throws.
+    // TransformStream has to come before even that, because TextEncoderStream is
+    // built on it.
+    const transformAt = SOURCE.indexOf('define("TransformStream"');
     const encoderAt = SOURCE.indexOf('define("TextEncoderStream"');
     const decoderAt = SOURCE.indexOf('define("TextDecoderStream"');
     const firstOther = SOURCE.indexOf('define("globalThis"');
+    expect(transformAt).toBeGreaterThan(-1);
     expect(encoderAt).toBeGreaterThan(-1);
     expect(decoderAt).toBeGreaterThan(-1);
+    expect(transformAt).toBeLessThan(encoderAt);
     expect(encoderAt).toBeLessThan(firstOther);
     expect(decoderAt).toBeLessThan(firstOther);
+  });
+
+  it("defines TransformStream on a WebView between Chrome 43 and 66", () => {
+    // The shipped v1.32.3 black screen. `ReadableStream` and `WritableStream`
+    // arrived in Chrome 43 but `TransformStream` only in Chrome 67, so a device
+    // in between - which minSdk 23 admits - has the native streams the shim
+    // needs and no TransformStream. Without this the bundle's `class extends
+    // TransformStream` and the inline bootstrap's pipeThrough both throw before
+    // React mounts.
+    const realm = load(setup({ remove: ["TransformStream"] }));
+
+    expect(realm.eval("typeof TransformStream")).toBe("function");
+    expect(realm.eval("new TransformStream() instanceof TransformStream")).toBe(
+      true,
+    );
+    expect(
+      realm.eval("new TransformStream().readable instanceof ReadableStream"),
+    ).toBe(true);
+    expect(
+      realm.eval("new TransformStream().writable instanceof WritableStream"),
+    ).toBe(true);
+  });
+
+  it("round-trips a chunk through a shimmed TransformStream", async () => {
+    const realm = load(setup({ remove: ["TransformStream"] }));
+
+    // The real use: a source piped through a transform, read back out. Values
+    // are pulled out of the realm as strings so no cross-realm object crosses
+    // the boundary.
+    const result = realm.eval(`
+      (function () {
+        var source = new ReadableStream({
+          start: function (controller) {
+            controller.enqueue("hello");
+            controller.close();
+          },
+        });
+        var upper = new TransformStream({
+          transform: function (chunk, controller) {
+            controller.enqueue(chunk.toUpperCase());
+          },
+        });
+        return source.pipeThrough(upper);
+      })()
+    `) as { getReader: () => { read: () => Promise<{ value: unknown }> } };
+
+    const reader = result.getReader();
+    const first = await reader.read();
+    expect(String(first.value)).toBe("HELLO");
+  });
+
+  it("defines TextEncoderStream so the SPA bootstrap can pipe through it", () => {
+    const realm = load(setup({ remove: ["TextEncoderStream"] }));
+
+    expect(realm.eval("typeof TextEncoderStream")).toBe("function");
+    expect(
+      realm.eval("new TextEncoderStream() instanceof TextEncoderStream"),
+    ).toBe(true);
+    expect(realm.eval("new TextEncoderStream().readable !== undefined")).toBe(
+      true,
+    );
+    expect(realm.eval("new TextEncoderStream().writable !== undefined")).toBe(
+      true,
+    );
+  });
+
+  it("encodes through a shimmed TextEncoderStream without a native TransformStream", () => {
+    // The combination the old-WebView floor actually presents: TextEncoderStream
+    // missing *and* TransformStream missing. The encoder shim returns early when
+    // TransformStream is absent, so it only works because the prelude defines
+    // that first.
+    const realm = load(
+      setup({ remove: ["TransformStream", "TextEncoderStream"] }),
+    );
+
+    expect(
+      realm.eval(
+        "new ReadableStream({ start: function (c) { c.enqueue('ok'); c.close(); } })" +
+          ".pipeThrough(new TextEncoderStream()) instanceof ReadableStream",
+      ),
+    ).toBe(true);
   });
 
   it("defines structuredClone when the platform lacks it", () => {

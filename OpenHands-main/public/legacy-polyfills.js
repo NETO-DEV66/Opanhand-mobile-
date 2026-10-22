@@ -44,7 +44,90 @@
    * throws, `__reactRouterContext.stream` is never created, and the app never
    * mounts - a black screen. Every other definition here is additive and can
    * wait; these two cannot.
+   *
+   * `TransformStream` has to come before both, because `TextEncoderStream`
+   * below is built on it and so is code in the bundle (`class extends
+   * TransformStream`, the brotli interceptor). The platform gained
+   * `ReadableStream` and `WritableStream` in Chrome 43 but `TransformStream`
+   * only in Chrome 67, so a WebView in between - which minSdk 23 admits - hits
+   * `new TransformStream(...)` at module scope, throws `TransformStream is not
+   * defined`, and leaves a black screen with an empty console. That was the
+   * shipped v1.32.3 failure.
+   *
+   * This is built on the *native* streams rather than on a bundled polyfill on
+   * purpose: native `pipeThrough`/`pipeTo` brand-check the streams they are
+   * given, and would reject a polyfilled `readable`/`writable`.
    */
+  define("TransformStream", function () {
+    if (typeof window.TransformStream === "function") return;
+    if (typeof window.ReadableStream !== "function") return;
+    if (typeof window.WritableStream !== "function") return;
+
+    window.TransformStream = function (
+      transformer,
+      writableStrategy,
+      readableStrategy
+    ) {
+      var source = transformer || {};
+      var readableController = null;
+
+      // `start` runs synchronously from the constructor, so the controller is
+      // in hand before the writable side can call `transform`.
+      var readable = new window.ReadableStream(
+        {
+          start: function (controller) {
+            readableController = controller;
+          },
+        },
+        readableStrategy
+      );
+
+      // The transformer is written against the TransformStreamDefaultController
+      // surface; expose the parts it uses and no more.
+      var transformController = {
+        enqueue: function (chunk) {
+          readableController.enqueue(chunk);
+        },
+        error: function (reason) {
+          readableController.error(reason);
+        },
+        terminate: function () {
+          readableController.close();
+        },
+        get desiredSize() {
+          return readableController.desiredSize;
+        },
+      };
+
+      var writable = new window.WritableStream(
+        {
+          write: function (chunk) {
+            if (typeof source.transform === "function") {
+              source.transform(chunk, transformController);
+            } else {
+              readableController.enqueue(chunk);
+            }
+          },
+          close: function () {
+            if (typeof source.flush === "function") {
+              source.flush(transformController);
+            }
+            readableController.close();
+          },
+          abort: function (reason) {
+            readableController.error(
+              reason === undefined ? new Error("aborted") : reason
+            );
+          },
+        },
+        writableStrategy
+      );
+
+      this.readable = readable;
+      this.writable = writable;
+    };
+  });
+
   define("TextEncoderStream", function () {
     if (typeof window.TextEncoderStream === "function") return;
     if (typeof TransformStream !== "function") return;
