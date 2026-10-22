@@ -1,0 +1,6 @@
+# The compatibility prelude must stay ES5. Prettier's defaults here
+# (trailingComma: "all" from .prettierrc.json, arrowParens: "always") rewrite it
+# with ES2017 syntax, which is a parse error on the very WebViews the file
+# exists to support - the whole file is discarded and the app shows a black
+# screen. scripts/check-legacy-polyfills-es5.mjs is the gate that enforces this.
+public/legacy-polyfills.js

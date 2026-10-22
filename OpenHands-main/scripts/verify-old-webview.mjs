@@ -13,6 +13,9 @@
  *   BASE=http://127.0.0.1:5500 node scripts/verify-old-webview.mjs
  */
 import { chromium } from "playwright";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { parse } from "acorn";
 
 const base = process.env.BASE || "http://127.0.0.1:5500";
 const executablePath =
@@ -20,6 +23,27 @@ const executablePath =
   (process.env.CI ? undefined : "/usr/bin/chromium");
 
 const MIN_VISIBLE = 50;
+
+// Delete-the-globals alone is not a real old-WebView test. Chromium still
+// *parses* with a modern engine, so ES2017 syntax in the prelude passes here and
+// still black-screens on a device that cannot parse it. The prelude is therefore
+// parsed at ES5 up front, which is the property the whole file exists for.
+const preludePath = fileURLToPath(
+  new URL("../public/legacy-polyfills.js", import.meta.url),
+);
+try {
+  parse(readFileSync(preludePath, "utf8"), {
+    ecmaVersion: 5,
+    sourceType: "script",
+  });
+} catch (error) {
+  console.error(
+    `FAIL  public/legacy-polyfills.js is not ES5: ${error.message}\n` +
+      "      An old WebView would discard it and show a black screen.",
+  );
+  process.exit(1);
+}
+console.log("ok    public/legacy-polyfills.js parses as ES5");
 
 // Names are applied inside the page; a function map cannot
 // cross the addInitScript boundary, so only the names are sent.

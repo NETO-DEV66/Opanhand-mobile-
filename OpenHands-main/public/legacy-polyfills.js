@@ -35,6 +35,55 @@
     }
   }
 
+  /*
+   * Boot-critical, and therefore first.
+   *
+   * `index.html` carries an inline classic script that runs
+   * `new ReadableStream(...).pipeThrough(new TextEncoderStream())` with no
+   * guard, before any module. If TextEncoderStream is missing, that script
+   * throws, `__reactRouterContext.stream` is never created, and the app never
+   * mounts - a black screen. Every other definition here is additive and can
+   * wait; these two cannot.
+   */
+  define("TextEncoderStream", function () {
+    if (typeof window.TextEncoderStream === "function") return;
+    if (typeof TransformStream !== "function") return;
+    window.TextEncoderStream = function () {
+      var encoder = new TextEncoder();
+      var stream = new TransformStream({
+        transform: function (chunk, controller) {
+          controller.enqueue(encoder.encode(chunk));
+        },
+        flush: function (controller) {
+          var tail = encoder.encode();
+          if (tail.byteLength > 0) controller.enqueue(tail);
+        },
+      });
+      this.readable = stream.readable;
+      this.writable = stream.writable;
+    };
+  });
+
+  define("TextDecoderStream", function () {
+    if (typeof window.TextDecoderStream === "function") return;
+    if (typeof TransformStream !== "function") return;
+    window.TextDecoderStream = function (label, options) {
+      var decoder = new TextDecoder(label, options);
+      var stream = new TransformStream({
+        transform: function (chunk, controller) {
+          var text = decoder.decode(chunk, { stream: true });
+          if (text) controller.enqueue(text);
+        },
+        flush: function (controller) {
+          var text = decoder.decode();
+          if (text) controller.enqueue(text);
+        },
+      });
+      this.readable = stream.readable;
+      this.writable = stream.writable;
+    };
+  });
+
   define("globalThis", function () {
     if (typeof globalThis === "undefined") window.globalThis = window;
   });
@@ -181,9 +230,9 @@
             },
             function (reason) {
               return { status: "rejected", reason: reason };
-            },
+            }
           );
-        }),
+        })
       );
     };
   });
@@ -207,7 +256,7 @@
             if (remaining === 0) {
               if (typeof AggregateError === "function") {
                 reject(
-                  new AggregateError(errors, "All promises were rejected"),
+                  new AggregateError(errors, "All promises were rejected")
                 );
               } else {
                 reject(new Error("All promises were rejected"));
@@ -300,48 +349,6 @@
     };
   });
 
-  // Chrome 105. react-router's SPA bootstrap pipes its hydration stream through
-  // `new TextEncoderStream()` in an inline script that has no guard, so without
-  // this the document's own bootstrap throws before any module loads.
-  define("TextEncoderStream", function () {
-    if (typeof window.TextEncoderStream === "function") return;
-    if (typeof TransformStream !== "function") return;
-    window.TextEncoderStream = function () {
-      var encoder = new TextEncoder();
-      var stream = new TransformStream({
-        transform: function (chunk, controller) {
-          controller.enqueue(encoder.encode(chunk));
-        },
-        flush: function (controller) {
-          var tail = encoder.encode();
-          if (tail.byteLength > 0) controller.enqueue(tail);
-        },
-      });
-      this.readable = stream.readable;
-      this.writable = stream.writable;
-    };
-  });
-
-  define("TextDecoderStream", function () {
-    if (typeof window.TextDecoderStream === "function") return;
-    if (typeof TransformStream !== "function") return;
-    window.TextDecoderStream = function (label, options) {
-      var decoder = new TextDecoder(label, options);
-      var stream = new TransformStream({
-        transform: function (chunk, controller) {
-          var text = decoder.decode(chunk, { stream: true });
-          if (text) controller.enqueue(text);
-        },
-        flush: function (controller) {
-          var text = decoder.decode();
-          if (text) controller.enqueue(text);
-        },
-      });
-      this.readable = stream.readable;
-      this.writable = stream.writable;
-    };
-  });
-
   // Chrome 64. HeroUI and framer-motion observe element size. There is no way
   // to synthesise real resize notifications, so this reports the current size
   // once and then stays quiet: layout may not reflow on rotation, but the app
@@ -407,7 +414,7 @@
           "font:14px/1.55 system-ui,-apple-system,sans-serif",
           "-webkit-user-select:text",
           "user-select:text",
-        ].join(";"),
+        ].join(";")
       );
       var heading = document.createElement("div");
       heading.setAttribute("style", "font-weight:600;font-size:16px");
@@ -426,8 +433,7 @@
   // `noModule` is the standard probe for `<script type="module">` support. It
   // only chooses the wording of the notice below, never whether to show one: a
   // feature probe can be wrong, and a false positive would cover a working app.
-  // The trigger is always the observable outcome - React never mounted and the
-  // page is still blank.
+  // The trigger is always the observable outcome - the page is still blank.
   var supportsModules = true;
   try {
     supportsModules = "noModule" in document.createElement("script");
@@ -435,36 +441,88 @@
     supportsModules = true;
   }
 
-  // If the app has not mounted by the time this fires, the page is still blank,
-  // and a blank page is indistinguishable from a crash. Report the WebView
-  // version so the failure can be diagnosed from the device, not by guesswork.
-  setTimeout(function () {
-    if (window.__openhandsMounted) return;
-
-    var visible = "";
+  function pageIsBlank() {
     try {
-      visible = (
-        document.body && document.body.innerText ? document.body.innerText : ""
-      ).trim();
+      if (!document.body) return true;
+      // Visible text is the signal, and the only one that matches what the user
+      // sees. `body.children.length` is not usable: the react-router bootstrap
+      // leaves its own <script> elements in the body, so a page that never
+      // rendered still has children.
+      var text = document.body.innerText ? document.body.innerText.trim() : "";
+      return text.length === 0;
     } catch (error) {
-      visible = "";
+      return true;
     }
-    if (visible.length > 0) return;
+  }
 
-    if (supportsModules) {
-      renderNotice(
-        "OpenHands could not start",
-        "The interface did not load on this device (" +
-          webViewLabel() +
-          '). Update "Android System WebView" and "Chrome" in the Play Store, then reopen the app.',
-      );
-    } else {
-      renderNotice(
-        "Android System WebView is out of date",
-        "OpenHands could not start because this device's WebView cannot run modern JavaScript (" +
-          webViewLabel() +
-          '). Update "Android System WebView" and "Chrome" in the Play Store, then reopen the app.',
-      );
+  // Capture the first uncaught error or rejection so the notice can name a
+  // cause instead of only a symptom. Without this the console is the sole record
+  // and a screenshot of a black screen says nothing about why.
+  var firstFailure = "";
+  function rememberFailure(label, value) {
+    if (firstFailure) return;
+    var detail = "";
+    try {
+      if (value && value.message) {
+        detail = value.message;
+      } else {
+        detail = String(value);
+      }
+    } catch (error) {
+      detail = "";
     }
-  }, 20000);
+    firstFailure = label + ": " + detail.slice(0, 160);
+  }
+
+  try {
+    window.addEventListener("error", function (event) {
+      rememberFailure("error", event.error || event.message);
+    });
+    window.addEventListener("unhandledrejection", function (event) {
+      rememberFailure("rejection", event.reason);
+    });
+  } catch (error) {
+    /* no event listeners; the notice falls back to the generic wording */
+  }
+
+  function blankNoticeDetail() {
+    var fallback = supportsModules
+      ? "The interface did not load on this device"
+      : "This device's WebView cannot run modern JavaScript";
+    return (
+      fallback +
+      " (" +
+      webViewLabel() +
+      ")" +
+      (firstFailure ? ".\n\nReported: " + firstFailure : "") +
+      '. Update "Android System WebView" and "Chrome" in the Play Store, then reopen the app.'
+    );
+  }
+
+  // A blank page is indistinguishable from a crash, and on these WebViews it is
+  // silent: the code that would report the error never ran. This prelude is the
+  // only thing guaranteed to have executed, so it reports the WebView version
+  // and the first error itself.
+  //
+  // The trigger is deliberately the observable outcome, not `__openhandsMounted`.
+  // That flag is set the moment `hydrateRoot` is *called*, which is not the same
+  // as React having rendered: if hydration throws, the flag is still set and a
+  // flag-gated watchdog would stay silent over a black screen.
+  var blankChecks = 0;
+  var watchdog = setInterval(function () {
+    blankChecks += 1;
+    if (!pageIsBlank()) {
+      clearInterval(watchdog);
+      return;
+    }
+    // Give a slow device time to paint before accusing it, then stop.
+    if (blankChecks < 20) return;
+    clearInterval(watchdog);
+    renderNotice(
+      supportsModules
+        ? "OpenHands could not start"
+        : "Android System WebView is out of date",
+      blankNoticeDetail()
+    );
+  }, 1000);
 })();

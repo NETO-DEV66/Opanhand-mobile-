@@ -17,7 +17,7 @@ Run and supervise your AI coding agents from your phone.
 
 [![Download APK](https://img.shields.io/badge/Download-APK-6c5ce7?style=for-the-badge&logo=android&logoColor=white)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)
 [![Website](https://img.shields.io/badge/Website-openhands--app-FF6A3D?style=for-the-badge&logo=githubpages&logoColor=white)](https://neto-dev66.github.io/Opanhand-mobile-/)
-[![Version](https://img.shields.io/badge/version-1.32.2-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.32.2)
+[![Version](https://img.shields.io/badge/version-1.32.3-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.32.3)
 [![Build](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml/badge.svg)](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/blob/main/LICENSE)
 [![Support via UPI](https://img.shields.io/badge/Support-UPI-ff9f1c?style=for-the-badge&logo=buymeacoffee&logoColor=white)](#support-this-project)
@@ -216,6 +216,17 @@ directly, so no server is involved. Two things follow from that:
   If the WebView is too old even for module scripts, the prelude shows an update
   prompt rather than a black screen. `node scripts/verify-old-webview.mjs`
   checks this against a real browser with those globals removed.
+- **The prelude must stay ES5.** It is loaded as a classic script before every
+  module, so on an old WebView it is the only code that can run at all. ES2015+
+  syntax in it is not a partial failure: the WebView discards the whole file, the
+  `TextEncoderStream` shim never installs, react-router's inline bootstrap throws
+  and the app shows a black screen. Prettier's defaults (`trailingComma: "all"`,
+  `arrowParens: "always"`) rewrite it with ES2017 syntax, so the file is listed in
+  `.prettierignore`, and `npm run check:prelude` (part of `build:app` and `lint`)
+  fails the build if it is not pure ES5.
+- **Startup cannot hang.** `prepareApp()` races an 8 s deadline in
+  `src/entry.client.tsx`, so a request that never settles (i18n locale fetch on a
+  captive portal, say) still renders the app instead of leaving it blank.
 
 The runtime only exists in the mock build (`VITE_MOCK_API=true`). The
 server-backed build is byte-for-byte the upstream client: no local runtime, no
@@ -397,8 +408,8 @@ release APK with the secret key and attaches it to the GitHub Release.
 2. Commit, then tag and push:
 
 ```bash
-git tag v1.32.2
-git push origin v1.32.2
+git tag v1.32.3
+git push origin v1.32.3
 ```
 
 GitHub Actions builds and publishes the APK. The `releases/latest/download`

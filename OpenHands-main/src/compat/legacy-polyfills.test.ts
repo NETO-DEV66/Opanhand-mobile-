@@ -1,23 +1,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createContext, runInContext } from "node:vm";
+import { parse } from "acorn";
 import { describe, expect, it } from "vitest";
 
 const SOURCE = readFileSync(
   resolve(process.cwd(), "public/legacy-polyfills.js"),
   "utf8",
 );
-
-/** Strip comments and string literals so keyword checks only see real code. */
-function codeOnly(source: string): string {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, " ")
-    .replace(/\/\/[^\n]*/g, " ")
-    .replace(/"(?:\\.|[^"\\])*"/g, '""')
-    .replace(/'(?:\\.|[^'\\])*'/g, "''");
-}
-
-const CODE = codeOnly(SOURCE);
 
 type Realm = {
   eval: (code: string) => unknown;
@@ -37,16 +27,28 @@ type Realm = {
  */
 function makeRealm({ timers = false } = {}): Realm {
   const pending: Array<() => void> = [];
+  const intervals = new Map<() => void, number>();
+  let nextHandle = 1;
   const context = createContext({
     console,
-    // The prelude arms a 20s watchdog. Capturing its callback instead of
-    // scheduling it keeps the suite fast and lets a test decide when the
-    // watchdog fires, so nothing depends on wall-clock time.
+    // The prelude arms a watchdog. Capturing its callback instead of scheduling
+    // it keeps the suite fast and lets a test decide when the watchdog fires, so
+    // nothing depends on wall-clock time.
     setTimeout: (callback: () => void) => {
       if (timers) pending.push(callback);
       return 0;
     },
     clearTimeout: () => {},
+    setInterval: (callback: () => void) => {
+      const handle = nextHandle++;
+      if (timers) intervals.set(callback, handle);
+      return handle;
+    },
+    clearInterval: (handle: number) => {
+      for (const [callback, id] of intervals) {
+        if (id === handle) intervals.delete(callback);
+      }
+    },
     TextEncoder,
     TextDecoder,
     TransformStream,
@@ -60,6 +62,15 @@ function makeRealm({ timers = false } = {}): Realm {
       return runInContext(code, context);
     },
     flushTimers() {
+      // The watchdog is an interval that must be allowed to stop itself, so a
+      // tick that clears it is not rescheduled. Bounded to avoid a runaway loop
+      // if a test's stub never reports content.
+      for (let tick = 0; tick < 200 && intervals.size > 0; tick += 1) {
+        const due = Array.from(intervals.keys());
+        for (const callback of due) {
+          if (intervals.has(callback)) callback();
+        }
+      }
       while (pending.length) pending.shift()!();
     },
   };
@@ -77,16 +88,29 @@ function load(realm: Realm): Realm {
 }
 
 describe("legacy-polyfills prelude", () => {
-  it("stays ES5 so an old WebView can parse it", () => {
-    // A `const`, arrow or template literal in real code would be a parse error
-    // on the very WebViews this file exists to support - and a parse error in
-    // <head> takes the whole document down.
-    expect(CODE).not.toMatch(/=>/);
-    expect(CODE).not.toMatch(/\b(const|let|class)\b/);
-    expect(CODE).not.toMatch(/`/);
-    expect(CODE).not.toMatch(/\?\./);
-    expect(CODE).not.toMatch(/\?\?/);
-    expect(CODE).not.toMatch(/\bfor\s*\([^)]*\bof\b/);
+  it("parses as ES5 so an old WebView can run it", () => {
+    // This is the whole reason the file exists, and the only check that catches
+    // every ES2015+ construct at once. A keyword scan is not enough: prettier's
+    // `trailingComma: "all"` added ES2017 trailing commas to argument lists,
+    // which a scan for `const`/`let`/`=>` misses entirely. On the WebViews this
+    // file targets that is a parse error, the file is discarded whole, the
+    // TextEncoderStream shim below never installs, react-router's inline
+    // bootstrap throws, and the app shows a black screen.
+    expect(() =>
+      parse(SOURCE, { ecmaVersion: 5, sourceType: "script" }),
+    ).not.toThrow();
+  });
+
+  it("keeps the boot-critical stream shims first", () => {
+    // index.html's inline bootstrap needs TextEncoderStream before any module
+    // runs, so the shim must not sit behind a later definition that throws.
+    const encoderAt = SOURCE.indexOf('define("TextEncoderStream"');
+    const decoderAt = SOURCE.indexOf('define("TextDecoderStream"');
+    const firstOther = SOURCE.indexOf('define("globalThis"');
+    expect(encoderAt).toBeGreaterThan(-1);
+    expect(decoderAt).toBeGreaterThan(-1);
+    expect(encoderAt).toBeLessThan(firstOther);
+    expect(decoderAt).toBeLessThan(firstOther);
   });
 
   it("defines structuredClone when the platform lacks it", () => {
@@ -195,7 +219,7 @@ describe("legacy-polyfills prelude", () => {
   });
 
   it("tells the user to update once the page is still blank after the watchdog", () => {
-    // Modules unsupported (no `noModule` probe) and nothing mounted: the notice
+    // Modules unsupported (no `noModule` probe) and nothing rendered: the notice
     // must appear, and must say the WebView is out of date.
     const realm = setup({ timers: true });
     realm.eval(
@@ -219,13 +243,19 @@ describe("legacy-polyfills prelude", () => {
     expect(realm.eval("window.__notices[0]")).toBe("compat-notice");
   });
 
-  it("stays quiet when the app mounted before the watchdog fired", () => {
+  it("still reports a blank page after hydrateRoot was called", () => {
+    // The flag is set when hydrateRoot is *called*, not when React has rendered.
+    // A flag-gated watchdog went quiet here and left a black screen, so the
+    // notice must still appear even though the app "mounted".
     const realm = setup({ timers: true });
     realm.eval(
       "window.__notices = [];" +
+        "function stubNode(id) {" +
+        "  return { id: id || '', setAttribute: function () {}, appendChild: function () {} };" +
+        "}" +
         "window.document = {" +
-        "  createElement: function () { return { noModule: false }; }," +
-        "  createTextNode: function () { return {}; }," +
+        "  createElement: function () { return stubNode(''); }," +
+        "  createTextNode: function () { return stubNode(''); }," +
         "  getElementById: function () { return null; }," +
         "  body: { innerText: '', appendChild: function (node) { window.__notices.push(node.id); } }," +
         "  documentElement: { appendChild: function () {} }" +
@@ -236,10 +266,41 @@ describe("legacy-polyfills prelude", () => {
     realm.eval("window.__openhandsMounted = true;");
     realm.flushTimers();
 
-    expect(realm.eval("window.__notices.length")).toBe(0);
+    expect(realm.eval("window.__notices.length")).toBe(1);
   });
 
-  it("stays quiet when the page has visible content", () => {
+  it("names the first error in the notice when one was captured", () => {
+    const realm = setup({ timers: true });
+    realm.eval(
+      "window.__notices = [];" +
+        "window.__listeners = {};" +
+        "window.addEventListener = function (type, handler) { window.__listeners[type] = handler; };" +
+        "function stubNode(id) {" +
+        "  return { id: id || '', setAttribute: function () {}, appendChild: function () {} };" +
+        "}" +
+        "window.__text = [];" +
+        "window.document = {" +
+        "  createElement: function () { return { setAttribute: function () {}, appendChild: function (n) { window.__text.push(n.text); } }; }," +
+        "  createTextNode: function (text) { return { text: text }; }," +
+        "  getElementById: function () { return null; }," +
+        "  body: { innerText: '', appendChild: function (node) { window.__notices.push(node.id); } }," +
+        "  documentElement: { appendChild: function () {} }" +
+        "};" +
+        "window.navigator = { userAgent: 'Mozilla/5.0 Chrome/120.0.0.0' };",
+    );
+    load(realm);
+    realm.eval(
+      "window.__listeners.error({ error: { message: 'TransformStream is not defined' } });",
+    );
+    realm.flushTimers();
+
+    expect(realm.eval("window.__notices.length")).toBe(1);
+    expect(realm.eval("window.__text.join(' ')")).toContain(
+      "TransformStream is not defined",
+    );
+  });
+
+  it("stays quiet when the app has rendered content", () => {
     const realm = setup({ timers: true });
     realm.eval(
       "window.__notices = [];" +
@@ -248,6 +309,30 @@ describe("legacy-polyfills prelude", () => {
         "  createTextNode: function () { return {}; }," +
         "  getElementById: function () { return null; }," +
         "  body: { innerText: 'Choose your agent', appendChild: function (node) { window.__notices.push(node.id); } }," +
+        "  documentElement: { appendChild: function () {} }" +
+        "};",
+    );
+    load(realm);
+    realm.flushTimers();
+
+    expect(realm.eval("window.__notices.length")).toBe(0);
+  });
+
+  it("stays quiet once content appears before the watchdog gives up", () => {
+    // A slow device may paint after the first few checks; the watchdog must
+    // stop rather than accuse a working app.
+    const realm = setup({ timers: true });
+    realm.eval(
+      "window.__notices = [];" +
+        "window.__checks = 0;" +
+        "window.document = {" +
+        "  createElement: function () { return { noModule: false }; }," +
+        "  createTextNode: function () { return {}; }," +
+        "  getElementById: function () { return null; }," +
+        "  body: {" +
+        "    get innerText() { window.__checks += 1; return window.__checks > 3 ? 'Choose your agent' : ''; }," +
+        "    appendChild: function (node) { window.__notices.push(node.id); }" +
+        "  }," +
         "  documentElement: { appendChild: function () {} }" +
         "};",
     );

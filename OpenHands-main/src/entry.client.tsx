@@ -55,38 +55,61 @@ async function prepareApp() {
  * Hydrate, and never leave the screen empty because startup failed.
  *
  * `prepareApp()` is best-effort preparation: the mock transport, the local
- * runtime shims, the MARS bridge. None of it is required to *mount* the app,
- * and every step is wrapped so it cannot reject — but if it ever does (a
- * WebView missing an API a dependency calls at import time, say), the previous
- * `.then()` form skipped `hydrateRoot` entirely and the user stared at a black
- * screen with no error, because there was nothing on the page to report one.
- * Hydrating anyway turns that into a normal React error boundary or a visible
- * failure instead of silence.
+ * runtime shims, the MARS bridge. None of it is required to *mount* the app, and
+ * there are two distinct ways it can fail to hand over:
+ *
+ *  - It *rejects* (a WebView missing an API a dependency calls at import time,
+ *    say). The `.catch` below covers that; the previous `.then()` form skipped
+ *    `hydrateRoot` entirely and left a black screen with nothing on the page to
+ *    report one.
+ *  - It *hangs*. Nothing catches a promise that never settles, so `hydrateRoot`
+ *    would never run and the result is the same black screen, this time with an
+ *    empty console. i18next's HTTP backend is the realistic candidate: it
+ *    fetches `locales/*.json`, and a request that never settles (captive portal,
+ *    flaky radio, a WebView that drops it) leaves the promise pending forever.
+ *
+ * So preparation races a deadline and render runs exactly once, whichever
+ * finishes first. A working UI whose first request failed beats no UI at all.
  */
+const STARTUP_DEADLINE_MS = 8000;
+
+let rendered = false;
+
+function renderApp() {
+  if (rendered) return;
+  rendered = true;
+
+  startTransition(() => {
+    hydrateRoot(
+      document,
+      <StrictMode>
+        <AgentServerUIProviders
+          // Analytics off: this build must not contact OpenHands' telemetry
+          // endpoint (z.openhands.dev). Passing `false` means PostHog is never
+          // initialized, so no install/session event leaves the device and the
+          // consent banner is never shown.
+          analytics={false}
+          withStyleRoot={false}
+        >
+          <HydratedRouter />
+        </AgentServerUIProviders>
+      </StrictMode>,
+    );
+  });
+}
+
+const startupDeadline = setTimeout(() => {
+  console.warn(
+    `App preparation did not finish within ${STARTUP_DEADLINE_MS}ms; rendering anyway.`,
+  );
+  renderApp();
+}, STARTUP_DEADLINE_MS);
+
 prepareApp()
   .catch((error: unknown) => {
     console.error("App preparation failed; rendering anyway.", error);
   })
-  .then(() =>
-    startTransition(() => {
-      hydrateRoot(
-        document,
-        <StrictMode>
-          <AgentServerUIProviders
-            // Analytics off: this build must not contact OpenHands' telemetry
-            // endpoint (z.openhands.dev). Passing `false` means PostHog is never
-            // initialized, so no install/session event leaves the device and the
-            // consent banner is never shown.
-            analytics={false}
-            withStyleRoot={false}
-          >
-            <HydratedRouter />
-          </AgentServerUIProviders>
-        </StrictMode>,
-      );
-
-      // Tells the compatibility prelude in <head> that the app reached React,
-      // so its blank-screen watchdog stays quiet.
-      window.__openhandsMounted = true;
-    }),
-  );
+  .then(() => {
+    clearTimeout(startupDeadline);
+    renderApp();
+  });
