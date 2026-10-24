@@ -47,7 +47,17 @@ console.log("ok    public/legacy-polyfills.js parses as ES5");
 
 // Names are applied inside the page; a function map cannot
 // cross the addInitScript boundary, so only the names are sent.
-const ALL = ["ts", "tes", "sc", "uuid", "hasown", "at"];
+const ALL = [
+  "ts",
+  "tes",
+  "sc",
+  "uuid",
+  "hasown",
+  "at",
+  "fromEntries",
+  "flat",
+  "matchAll",
+];
 
 const CASES = [
   {
@@ -164,6 +174,34 @@ try {
             // Chrome 92.
             try {
               delete Array.prototype.at;
+            } catch {
+              /* already absent */
+            }
+          },
+          fromEntries: () => {
+            // Chrome 73. The v1.32.5 black screen on a Chrome 69 WebView:
+            // color-themes calls it at module scope, so a missing
+            // implementation throws before React mounts and the DOM ends up
+            // with zero text. Deleting only this reproduces that device.
+            try {
+              delete Object.fromEntries;
+            } catch {
+              /* already absent */
+            }
+          },
+          flat: () => {
+            // Chrome 69 (i.e. below the Android 7/8 WebView ceiling).
+            try {
+              delete Array.prototype.flat;
+              delete Array.prototype.flatMap;
+            } catch {
+              /* already absent */
+            }
+          },
+          matchAll: () => {
+            // Chrome 73.
+            try {
+              delete String.prototype.matchAll;
             } catch {
               /* already absent */
             }

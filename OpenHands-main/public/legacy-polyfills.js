@@ -241,6 +241,125 @@
     };
   });
 
+  /*
+   * Chrome 73.
+   *
+   * The shipped v1.32.5 APK died on a Chrome 69 WebView with an *uncaught*
+   * `TypeError: Object.fromEntries is not a function` thrown from
+   * `assets/color-themes-*.js` at module scope, before React mounted: text in
+   * the DOM was zero characters, i.e. a genuine black screen. The syntax gate
+   * cannot see this (the code parses fine) and the blank-page watchdog only
+   * reports after 20s, so the API gap is silent until then.
+   *
+   * `Object.fromEntries` is called across the settings, manifests, MCP and
+   * themes modules - many of them imported while the entry chunk evaluates -
+   * so a missing implementation is not one broken surface, it is no app.
+   */
+  define("Object.fromEntries", function () {
+    if (typeof Object.fromEntries === "function") return;
+    Object.fromEntries = function (entries) {
+      var result = {};
+      if (entries === null || entries === undefined) {
+        throw new TypeError("Object.fromEntries requires an iterable");
+      }
+      // Array and Map both carry forEach; cover them without an iterator.
+      if (typeof entries.forEach === "function") {
+        entries.forEach(function (pair) {
+          if (pair && typeof pair === "object") result[pair[0]] = pair[1];
+        });
+        return result;
+      }
+      // Anything else has to be walked through the iterator protocol.
+      if (
+        typeof Symbol !== "undefined" &&
+        Symbol.iterator &&
+        typeof entries[Symbol.iterator] === "function"
+      ) {
+        var iterator = entries[Symbol.iterator]();
+        var step = iterator.next();
+        while (!step.done) {
+          var pair = step.value;
+          if (pair && typeof pair === "object") result[pair[0]] = pair[1];
+          step = iterator.next();
+        }
+        return result;
+      }
+      throw new TypeError("Object.fromEntries requires an iterable");
+    };
+  });
+
+  /*
+   * Chrome 69. Below the declared Chrome 76 floor by enough to matter: a
+   * WebView stuck on Android 7/8 (61-68) has neither. `flatMap` in particular
+   * is used through the dependency graph, and one throw at module scope is the
+   * same black screen as above.
+   */
+  define("Array.prototype.flat", function () {
+    function flattenInto(target, source, depth) {
+      for (var i = 0; i < source.length; i++) {
+        if (!(i in source)) continue;
+        var value = source[i];
+        if (depth > 0 && Array.isArray(value)) {
+          flattenInto(target, value, depth - 1);
+        } else {
+          target.push(value);
+        }
+      }
+      return target;
+    }
+
+    if (typeof Array.prototype.flat !== "function") {
+      Array.prototype.flat = function (depth) {
+        var level = depth === undefined ? 1 : Math.max(0, Math.floor(depth));
+        return flattenInto([], this, level);
+      };
+    }
+
+    if (typeof Array.prototype.flatMap !== "function") {
+      Array.prototype.flatMap = function (callback, thisArg) {
+        var mapped = [];
+        for (var i = 0; i < this.length; i++) {
+          if (!(i in this)) continue;
+          mapped.push(callback.call(thisArg, this[i], i, this));
+        }
+        return flattenInto([], mapped, 1);
+      };
+    }
+  });
+
+  // Chrome 73. Same failure class as Object.fromEntries: a single missing
+  // method throws wherever it is called, and several callers sit on the entry
+  // chunk's import graph.
+  define("String.prototype.matchAll", function () {
+    if (typeof String.prototype.matchAll === "function") return;
+    String.prototype.matchAll = function (regexp) {
+      if (regexp === null || regexp === undefined) {
+        throw new TypeError("String.prototype.matchAll requires a RegExp");
+      }
+      var source =
+        typeof regexp === "object" ? regexp.source : String(regexp);
+      var flags = "g";
+      if (typeof regexp === "object") {
+        if (regexp.ignoreCase) flags += "i";
+        if (regexp.multiline) flags += "m";
+        if (regexp.unicode) flags += "u";
+        if (regexp.sticky) flags += "y";
+      }
+      var re = new RegExp(source, flags);
+      var str = String(this);
+      var matches = [];
+      var match = re.exec(str);
+      while (match !== null) {
+        matches.push(match);
+        // An empty match would loop forever without advancing lastIndex.
+        if (match[0] === "") re.lastIndex += 1;
+        match = re.exec(str);
+      }
+      // The spec hands back an iterator; an array's satisfies for...of.
+      return matches;
+    };
+  });
+
   // Chrome 92.
   define("Array.prototype.at", function () {
     if (typeof Array.prototype.at === "function") return;
