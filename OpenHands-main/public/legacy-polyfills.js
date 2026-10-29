@@ -476,9 +476,39 @@
     return match ? "Chrome/" + match[1] : userAgent.slice(0, 90);
   }
 
+  function noticeNode() {
+    try {
+      return document.getElementById("compat-notice");
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // The notice's own text has to be distinguishable from the app's, because the
+  // blank check reads `body.innerText` and would otherwise read this warning as
+  // proof that the app rendered.
+  function noticeText() {
+    var node = noticeNode();
+    if (!node) return "";
+    try {
+      return node.innerText ? node.innerText : node.textContent || "";
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function removeNotice() {
+    try {
+      var node = noticeNode();
+      if (node && node.parentNode) node.parentNode.removeChild(node);
+    } catch (error) {
+      /* nothing else we can do */
+    }
+  }
+
   function renderNotice(title, detail) {
     try {
-      if (document.getElementById("compat-notice")) return;
+      if (noticeNode()) return;
       var box = document.createElement("div");
       box.id = "compat-notice";
       box.setAttribute(
@@ -543,6 +573,14 @@
       // leaves its own <script> elements in the body, so a page that never
       // rendered still has children.
       var text = document.body.innerText ? document.body.innerText.trim() : "";
+      // The notice is this file's own text, not the app's. Counting it would
+      // make the page look rendered the moment the notice appeared, so the
+      // watchdog would never see the app arrive and never take the notice back
+      // down.
+      var own = noticeText();
+      if (own && text.indexOf(own) !== -1) {
+        text = text.split(own).join("").trim();
+      }
       return text.length === 0;
     } catch (error) {
       return true;
@@ -608,21 +646,41 @@
   // wrong - jsdom reports every declaration as unapplied - so gating the notice
   // on one would cover a working app. The stylesheet that caused that state is
   // caught at build time instead, by `flatten:css` and `check:css-compat`.
+  //
+  // The watchdog never fully gives up. On a slow device - a cold TCG emulator,
+  // a low-end phone - the app can take far longer than the threshold to paint,
+  // and a one-shot notice would then sit over a working app forever (its
+  // background is near-black, so the user reports exactly the black screen this
+  // file exists to explain). So once the notice is up the watchdog keeps
+  // watching and removes it as soon as the app's own content arrives.
+  //
+  // The extra watching is bounded: a genuinely dead page must not pay a
+  // layout-forcing `innerText` read every second for the life of the process.
+  var BLANK_CHECKS_BEFORE_NOTICE = 20;
+  var EXTRA_CHECKS_AFTER_NOTICE = 300;
   var blankChecks = 0;
+  var noticeShown = false;
   var watchdog = setInterval(function () {
     blankChecks += 1;
     if (!pageIsBlank()) {
       clearInterval(watchdog);
+      if (noticeShown) removeNotice();
       return;
     }
-    // Give a slow device time to paint before accusing it, then stop.
-    if (blankChecks < 20) return;
-    clearInterval(watchdog);
-    renderNotice(
-      supportsModules
-        ? "OpenHands could not start"
-        : "Android System WebView is out of date",
-      blankNoticeDetail()
-    );
+    if (!noticeShown) {
+      // Give a slow device time to paint before accusing it.
+      if (blankChecks < BLANK_CHECKS_BEFORE_NOTICE) return;
+      noticeShown = true;
+      renderNotice(
+        supportsModules
+          ? "OpenHands could not start"
+          : "Android System WebView is out of date",
+        blankNoticeDetail()
+      );
+      return;
+    }
+    if (blankChecks >= BLANK_CHECKS_BEFORE_NOTICE + EXTRA_CHECKS_AFTER_NOTICE) {
+      clearInterval(watchdog);
+    }
   }, 1000);
 })();

@@ -17,7 +17,7 @@ Run and supervise your AI coding agents from your phone.
 
 [![Download APK](https://img.shields.io/badge/Download-APK-6c5ce7?style=for-the-badge&logo=android&logoColor=white)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk)
 [![Website](https://img.shields.io/badge/Website-openhands--app-FF6A3D?style=for-the-badge&logo=githubpages&logoColor=white)](https://neto-dev66.github.io/Opanhand-mobile-/)
-[![Version](https://img.shields.io/badge/version-1.32.4-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.32.4)
+[![Version](https://img.shields.io/badge/version-1.32.6-blue?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/releases/tag/v1.32.6)
 [![Build](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml/badge.svg)](https://github.com/NETO-DEV66/Opanhand-mobile-/actions/workflows/build-android-apk.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](https://github.com/NETO-DEV66/Opanhand-mobile-/blob/main/LICENSE)
 [![Support via UPI](https://img.shields.io/badge/Support-UPI-ff9f1c?style=for-the-badge&logo=buymeacoffee&logoColor=white)](#support-this-project)
@@ -257,6 +257,18 @@ directly, so no server is involved. Two things follow from that:
 - **Startup cannot hang.** `prepareApp()` races an 8 s deadline in
   `src/entry.client.tsx`, so a request that never settles (i18n locale fetch on a
   captive portal, say) still renders the app instead of leaving it blank.
+- **The blank-page watchdog must not become the black screen.** The prelude's
+  watchdog shows a full-screen notice when nothing has rendered, and that notice
+  has a near-black background — so a notice left up over a working app looks
+  exactly like the black screen it exists to explain. A slow device (a cold
+  emulator, a low-end phone) can take well over the 20 s threshold to paint, and
+  the notice used to be one-shot and permanent: it would appear at 20 s and stay
+  up over an app that rendered at 60 s. The watchdog now keeps watching after it
+  shows the notice and removes it as soon as the app's own text appears. The
+  blank check also subtracts the notice's own text, since `body.innerText`
+  includes it and would otherwise read the warning as proof the app rendered.
+  This was the shipped v1.32.5 state on a WebView 83 emulator: CSS fixed (2774
+  rules, layout restored) but the app sat under a stale notice.
 
 The runtime only exists in the mock build (`VITE_MOCK_API=true`). The
 server-backed build is byte-for-byte the upstream client: no local runtime, no
@@ -438,8 +450,8 @@ release APK with the secret key and attaches it to the GitHub Release.
 2. Commit, then tag and push:
 
 ```bash
-git tag v1.32.4
-git push origin v1.32.4
+git tag v1.32.6
+git push origin v1.32.6
 ```
 
 GitHub Actions builds and publishes the APK. The `releases/latest/download`

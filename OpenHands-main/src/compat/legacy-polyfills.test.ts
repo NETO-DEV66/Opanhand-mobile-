@@ -432,4 +432,89 @@ describe("legacy-polyfills prelude", () => {
 
     expect(realm.eval("window.__notices.length")).toBe(0);
   });
+
+  it("takes the notice back down when the app paints after the deadline", () => {
+    // The slow-device case seen on a cold emulator: the app is blank past the
+    // threshold, so the notice appears, and only then does the app render. A
+    // one-shot notice would stay up over a working app forever - and because
+    // its background is near-black, that stale notice *is* the black screen it
+    // was written to explain. The watchdog must keep watching and clear it.
+    const realm = setup({ timers: true });
+    realm.eval(
+      "window.__notices = [];" +
+        "window.__removed = [];" +
+        "window.__checks = 0;" +
+        "window.__noticeNode = null;" +
+        "function makeNode() {" +
+        "  return { id: '', innerText: '', textContent: '', parentNode: null," +
+        "    setAttribute: function () {}," +
+        "    appendChild: function (child) { this.textContent += (child.textContent || ''); } };" +
+        "}" +
+        "var bodyNode = {" +
+        "  appendChild: function (node) { node.parentNode = bodyNode; window.__noticeNode = node; window.__notices.push(node.id); }," +
+        "  removeChild: function (node) { window.__removed.push(node.id); node.parentNode = null; window.__noticeNode = null; }" +
+        "};" +
+        "Object.defineProperty(bodyNode, 'innerText', { get: function () {" +
+        "  window.__checks += 1;" +
+        "  var own = window.__noticeNode ? window.__noticeNode.textContent : '';" +
+        "  var app = window.__checks > 30 ? 'Choose your agent' : '';" +
+        "  return own + app;" +
+        "} });" +
+        "window.document = {" +
+        "  createElement: function () { return makeNode(); }," +
+        "  createTextNode: function (text) { return { textContent: text }; }," +
+        "  getElementById: function (id) { return (window.__noticeNode && window.__noticeNode.id === id) ? window.__noticeNode : null; }," +
+        "  body: bodyNode," +
+        "  documentElement: { appendChild: function () {} }" +
+        "};" +
+        "window.navigator = { userAgent: 'Mozilla/5.0 Chrome/120.0.0.0' };",
+    );
+    load(realm);
+    realm.flushTimers();
+
+    // Shown while blank...
+    expect(realm.eval("window.__notices.length")).toBe(1);
+    // ...and gone once the app's own text arrived.
+    expect(realm.eval("window.__removed.length")).toBe(1);
+    expect(realm.eval("window.__removed[0]")).toBe("compat-notice");
+  });
+
+  it("does not mistake the notice's own text for a rendered app", () => {
+    // `pageIsBlank` reads `body.innerText`, which includes the notice. Counting
+    // the notice as content would blind the watchdog to a page that never
+    // rendered, so a dead page must keep reporting blank even with the notice
+    // on screen.
+    const realm = setup({ timers: true });
+    realm.eval(
+      "window.__notices = [];" +
+        "window.__removed = [];" +
+        "window.__noticeNode = null;" +
+        "function makeNode() {" +
+        "  return { id: '', innerText: '', textContent: '', parentNode: null," +
+        "    setAttribute: function () {}," +
+        "    appendChild: function (child) { this.textContent += (child.textContent || ''); } };" +
+        "}" +
+        "var bodyNode = {" +
+        "  appendChild: function (node) { node.parentNode = bodyNode; window.__noticeNode = node; window.__notices.push(node.id); }," +
+        "  removeChild: function (node) { window.__removed.push(node.id); node.parentNode = null; }" +
+        "};" +
+        "Object.defineProperty(bodyNode, 'innerText', { get: function () {" +
+        "  return window.__noticeNode ? window.__noticeNode.textContent : '';" +
+        "} });" +
+        "window.document = {" +
+        "  createElement: function () { return makeNode(); }," +
+        "  createTextNode: function (text) { return { textContent: text }; }," +
+        "  getElementById: function (id) { return (window.__noticeNode && window.__noticeNode.id === id) ? window.__noticeNode : null; }," +
+        "  body: bodyNode," +
+        "  documentElement: { appendChild: function () {} }" +
+        "};" +
+        "window.navigator = { userAgent: 'Mozilla/5.0 Chrome/120.0.0.0' };",
+    );
+    load(realm);
+    realm.flushTimers();
+
+    expect(realm.eval("window.__notices.length")).toBe(1);
+    // A permanently blank page must never have the notice taken away.
+    expect(realm.eval("window.__removed.length")).toBe(0);
+  });
 });
