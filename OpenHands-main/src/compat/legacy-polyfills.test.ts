@@ -237,6 +237,94 @@ describe("legacy-polyfills prelude", () => {
     ).toBe(true);
   });
 
+  it("defines Object.fromEntries so a module-scope theme table can build", () => {
+    const realm = load(setup({ remove: ["Object.fromEntries"] }));
+    expect(realm.eval("typeof Object.fromEntries")).toBe("function");
+    // The real use: `Object.fromEntries(keys.map(k => [k, value]))`.
+    expect(
+      realm.eval(
+        "JSON.stringify(Object.fromEntries([['a', 1], ['b', 2]]))",
+      ),
+    ).toBe('{"a":1,"b":2}');
+    // Entries may arrive as any iterable, not just an array.
+    expect(
+      realm.eval(
+        "JSON.stringify(Object.fromEntries(new Map([['x', 9]])))",
+      ),
+    ).toBe('{"x":9}');
+    expect(realm.eval("JSON.stringify(Object.fromEntries([]))")).toBe("{}");
+  });
+
+  it("defines Object.entries and Object.values for own properties only", () => {
+    const realm = load(
+      setup({ remove: ["Object.entries", "Object.values"] }),
+    );
+    expect(realm.eval("typeof Object.entries")).toBe("function");
+    expect(realm.eval("typeof Object.values")).toBe("function");
+    expect(
+      realm.eval(
+        "JSON.stringify(Object.entries({ a: 1, b: 2 }))",
+      ),
+    ).toBe('[["a",1],["b",2]]');
+    expect(
+      realm.eval("JSON.stringify(Object.values({ a: 1, b: 2 }))"),
+    ).toBe("[1,2]");
+    // Inherited enumerable properties are not own entries.
+    expect(
+      realm.eval(
+        "JSON.stringify(Object.entries(Object.create({ inherited: 1 })))",
+      ),
+    ).toBe("[]");
+  });
+
+  it("defines Array.prototype.flat and flatMap at the requested depth", () => {
+    const realm = load(
+      setup({ remove: ["Array.prototype.flat", "Array.prototype.flatMap"] }),
+    );
+    expect(realm.eval("JSON.stringify([1, [2, [3]]].flat())")).toBe(
+      "[1,2,[3]]",
+    );
+    expect(realm.eval("JSON.stringify([1, [2, [3]]].flat(2))")).toBe(
+      "[1,2,3]",
+    );
+    expect(realm.eval("JSON.stringify([1, [2]].flatMap((n) => [n, n]))")).toBe(
+      "[1,1,[2],[2]]",
+    );
+    expect(realm.eval("JSON.stringify([1, 2].flatMap((n) => [n, n * 10]))")).toBe(
+      "[1,10,2,20]",
+    );
+  });
+
+  it("defines the pad and trim string helpers", () => {
+    const realm = load(
+      setup({
+        remove: [
+          "String.prototype.padStart",
+          "String.prototype.padEnd",
+          "String.prototype.trimStart",
+          "String.prototype.trimEnd",
+        ],
+      }),
+    );
+    expect(realm.eval("'5'.padStart(3, '0')")).toBe("005");
+    expect(realm.eval("'5'.padEnd(3, '0')")).toBe("500");
+    expect(realm.eval("'   x   '.trimStart()")).toBe("x   ");
+    expect(realm.eval("'   x   '.trimEnd()")).toBe("   x");
+  });
+
+  it("defines String.prototype.matchAll over a global RegExp", () => {
+    const realm = load(setup({ remove: ["String.prototype.matchAll"] }));
+    expect(realm.eval("typeof String.prototype.matchAll")).toBe("function");
+    expect(
+      realm.eval(
+        "JSON.stringify(Array.from('a1b2'.matchAll(/[a-z](\\d)/g)).map((m) => m[1]))",
+      ),
+    ).toBe('["1","2"]');
+    expect(realm.eval("typeof Object.getOwnPropertyDescriptors")).toBe(
+      "function",
+    );
+  });
+
   it("defines Object.hasOwn with own-property semantics", () => {
     const realm = load(setup({ remove: ["Object.hasOwn"] }));
 

@@ -47,7 +47,19 @@ console.log("ok    public/legacy-polyfills.js parses as ES5");
 
 // Names are applied inside the page; a function map cannot
 // cross the addInitScript boundary, so only the names are sent.
-const ALL = ["ts", "tes", "sc", "uuid", "hasown", "at"];
+const ALL = [
+  "ts",
+  "tes",
+  "sc",
+  "uuid",
+  "hasown",
+  "at",
+  "fromentries",
+  "entries",
+  "flat",
+  "matchall",
+  "pad",
+];
 
 const CASES = [
   {
@@ -166,6 +178,60 @@ try {
               delete Array.prototype.at;
             } catch {
               /* already absent */
+            }
+          },
+          fromentries: () => {
+            // Chrome 73. The bundle builds the color-theme table with
+            // `Object.fromEntries` at module scope, so a WebView older than this
+            // throws before React mounts - the shipped v1.34.0 black screen on a
+            // WebView that already had the stream shims.
+            try {
+              delete Object.fromEntries;
+            } catch {
+              /* already absent */
+            }
+          },
+          entries: () => {
+            // Chrome 54.
+            for (const name of ["entries", "values", "getOwnPropertyDescriptors"]) {
+              try {
+                delete Object[name];
+              } catch {
+                /* already absent */
+              }
+            }
+          },
+          flat: () => {
+            // Chrome 69.
+            for (const name of ["flat", "flatMap"]) {
+              try {
+                delete Array.prototype[name];
+              } catch {
+                /* already absent */
+              }
+            }
+          },
+          matchall: () => {
+            // Chrome 73.
+            try {
+              delete String.prototype.matchAll;
+            } catch {
+              /* already absent */
+            }
+          },
+          pad: () => {
+            // Chrome 57.
+            for (const name of [
+              "padStart",
+              "padEnd",
+              "trimStart",
+              "trimEnd",
+            ]) {
+              try {
+                delete String.prototype[name];
+              } catch {
+                /* already absent */
+              }
             }
           },
         };

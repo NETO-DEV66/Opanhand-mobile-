@@ -241,6 +241,169 @@
     };
   });
 
+  /*
+   * The bundle reaches for these in module scope - `Object.fromEntries` builds
+   * a theme table at import time, `Object.entries`/`Object.values` walk config
+   * objects - so on a WebView older than the one the bundle assumes the module
+   * graph throws before React mounts and the screen stays black with nothing to
+   * report it. The prelude shipped without them until now, which is why a
+   * WebView new enough to have the streams the earlier fixes added could still
+   * fail: Chrome 73 introduced `Object.fromEntries` and `String.matchAll`,
+   * Chrome 54 `Object.entries`/`values`/`getOwnPropertyDescriptors`, Chrome 69
+   * `flat`/`flatMap`. All sit inside the same gap the prelude exists to fill.
+   */
+  define("Object.entries", function () {
+    if (typeof Object.entries === "function") return;
+    Object.entries = function (object) {
+      var result = [];
+      for (var key in Object(object)) {
+        if (Object.prototype.hasOwnProperty.call(object, key)) {
+          result.push([key, object[key]]);
+        }
+      }
+      return result;
+    };
+  });
+
+  define("Object.values", function () {
+    if (typeof Object.values === "function") return;
+    Object.values = function (object) {
+      var result = [];
+      for (var key in Object(object)) {
+        if (Object.prototype.hasOwnProperty.call(object, key)) {
+          result.push(object[key]);
+        }
+      }
+      return result;
+    };
+  });
+
+  define("Object.fromEntries", function () {
+    if (typeof Object.fromEntries === "function") return;
+    Object.fromEntries = function (entries) {
+      var result = {};
+      if (entries == null) {
+        throw new TypeError("Object.fromEntries requires an iterable");
+      }
+      var list = Array.from(entries);
+      for (var i = 0; i < list.length; i++) {
+        var entry = list[i];
+        result[entry[0]] = entry[1];
+      }
+      return result;
+    };
+  });
+
+  define("Object.getOwnPropertyDescriptors", function () {
+    if (typeof Object.getOwnPropertyDescriptors === "function") return;
+    Object.getOwnPropertyDescriptors = function (object) {
+      var descriptors = {};
+      var names = Object.getOwnPropertyNames(Object(object));
+      for (var i = 0; i < names.length; i++) {
+        descriptors[names[i]] = Object.getOwnPropertyDescriptor(object, names[i]);
+      }
+      return descriptors;
+    };
+  });
+
+  define("Array.prototype.flat", function () {
+    if (typeof Array.prototype.flat === "function") return;
+    Array.prototype.flat = function (depth) {
+      var levels = depth === undefined ? 1 : Math.trunc(depth) || 0;
+      var result = [];
+      (function flatten(list, remaining) {
+        for (var i = 0; i < list.length; i++) {
+          var value = list[i];
+          if (remaining > 0 && Array.isArray(value)) {
+            flatten(value, remaining - 1);
+          } else {
+            result.push(value);
+          }
+        }
+      })(this, levels);
+      return result;
+    };
+  });
+
+  define("Array.prototype.flatMap", function () {
+    if (typeof Array.prototype.flatMap === "function") return;
+    Array.prototype.flatMap = function (callback, thisArg) {
+      var mapped = [];
+      for (var i = 0; i < this.length; i++) {
+        mapped.push(callback.call(thisArg, this[i], i, this));
+      }
+      return mapped.flat();
+    };
+  });
+
+  define("String.prototype.padStart", function () {
+    if (typeof String.prototype.padStart === "function") return;
+    String.prototype.padStart = function (targetLength, padString) {
+      var string = String(this);
+      var target = targetLength >>> 0;
+      if (string.length >= target) return string;
+      var filler = padString === undefined ? " " : String(padString);
+      if (filler === "") return string;
+      var padding = "";
+      while (padding.length < target - string.length) padding += filler;
+      return padding.slice(0, target - string.length) + string;
+    };
+  });
+
+  define("String.prototype.padEnd", function () {
+    if (typeof String.prototype.padEnd === "function") return;
+    String.prototype.padEnd = function (targetLength, padString) {
+      var string = String(this);
+      var target = targetLength >>> 0;
+      if (string.length >= target) return string;
+      var filler = padString === undefined ? " " : String(padString);
+      if (filler === "") return string;
+      var padding = "";
+      while (padding.length < target - string.length) padding += filler;
+      return string + padding.slice(0, target - string.length);
+    };
+  });
+
+  define("String.prototype.trimStart", function () {
+    if (typeof String.prototype.trimStart === "function") return;
+    String.prototype.trimStart = function () {
+      return String(this).replace(/^[\s\uFEFF\xA0]+/, "");
+    };
+  });
+
+  define("String.prototype.trimEnd", function () {
+    if (typeof String.prototype.trimEnd === "function") return;
+    String.prototype.trimEnd = function () {
+      return String(this).replace(/[\s\uFEFF\xA0]+$/, "");
+    };
+  });
+
+  define("String.prototype.matchAll", function () {
+    if (typeof String.prototype.matchAll === "function") return;
+    String.prototype.matchAll = function (regexp) {
+      var source = String(this);
+      var flags = regexp.flags || "";
+      if (flags.indexOf("g") === -1) {
+        throw new TypeError("matchAll must be called with a global RegExp");
+      }
+      var global = new RegExp(regexp.source, flags);
+      var matches = [];
+      var match;
+      while ((match = global.exec(source)) !== null) {
+        matches.push(match);
+        if (match[0] === "") global.lastIndex += 1;
+      }
+      return matches[Symbol.iterator]();
+    };
+  });
+
+  // Chrome 63. Only needed when the platform predates it; a modern WebView
+  // already has the well-known symbol and this is a no-op.
+  define("Symbol.asyncIterator", function () {
+    if (typeof Symbol === "undefined" || Symbol.asyncIterator) return;
+    Symbol.asyncIterator = Symbol("Symbol.asyncIterator");
+  });
+
   // Chrome 92.
   define("Array.prototype.at", function () {
     if (typeof Array.prototype.at === "function") return;
