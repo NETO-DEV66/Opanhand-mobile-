@@ -97,6 +97,7 @@ export function parseArgs(argv = process.argv.slice(2), env = process.env) {
     authRequired: false,
     allowLanSessionKey: false,
     runtimeServicesInfo: null,
+    lockToCloud: null,
     basePath: "/",
     vscodeBasePath: null,
     // Also settable via the --disable-telemetry flag below.
@@ -138,6 +139,9 @@ export function parseArgs(argv = process.argv.slice(2), env = process.env) {
         break;
       case "--runtime-services-info":
         config.runtimeServicesInfo = argv[++i] || null;
+        break;
+      case "--lock-to-cloud":
+        config.lockToCloud = argv[++i] || null;
         break;
       case "--base-path":
         config.basePath = normalizeBasePath(argv[++i]);
@@ -189,6 +193,14 @@ export function parseArgs(argv = process.argv.slice(2), env = process.env) {
       default:
         throw new Error(`Unknown flag: ${flag}`);
     }
+  }
+
+  // Fallback: allow the session API key to be supplied via the
+  // SESSION_API_KEY environment variable instead of the command line, so
+  // launchers never have to expose it in `ps`/`/proc/<pid>/cmdline` on
+  // shared hosts. Only used in local mode (never with --auth-required).
+  if (!config.sessionApiKey && !config.authRequired && env.SESSION_API_KEY) {
+    config.sessionApiKey = env.SESSION_API_KEY;
   }
 
   // Guard: --session-api-key and --auth-required are semantically
@@ -248,6 +260,9 @@ OPTIONS:
   --session-api-key <key>      Inject session API key into index.html so the
                                pre-built frontend authenticates to agent-server
                                without needing VITE_SESSION_API_KEY baked in.
+                               Alternatively set SESSION_API_KEY env var (not
+                               shown in process listings), which is preferred on
+                               shared hosts.
   --auth-required              Inject authRequired flag into index.html so the
                                pre-built frontend shows the API key entry screen
                                (public mode) without VITE_AUTH_REQUIRED baked in.
@@ -259,6 +274,9 @@ OPTIONS:
                                frontend can populate the agent's
                                <RUNTIME_SERVICES> system-prompt block without
                                VITE_RUNTIME_SERVICES_INFO baked in.
+  --lock-to-cloud <cloud-url>  Lock backend setup to a single OpenHands Cloud
+                               URL. Hides manual/local backend setup and the
+                               custom Cloud URL field in the pre-built frontend.
   --disable-telemetry          Disable all product telemetry (including the
                                anonymous install event) in the pre-built
                                frontend at runtime, without VITE_DO_NOT_TRACK
@@ -327,6 +345,11 @@ ROUTING:
  *   when `VITE_RUNTIME_SERVICES_INFO` is empty, so static builds (Docker /
  *   published binary) still populate the agent's `<RUNTIME_SERVICES>` block.
  *
+ * - `lockToCloud`: an OpenHands Cloud URL exposed as
+ *   `window.__AGENT_CANVAS_LOCK_TO_CLOUD__`. Read by `getLockedCloudHost()` in
+ *   `agent-server-config.ts` so pre-built frontend bundles can hide manual
+ *   backend setup and the custom Cloud URL field at runtime.
+ *
  * - `basePath`: the path prefix the SPA is mounted under, exposed as
  *   `window.__AGENT_CANVAS_BASE_PATH__` so runtime static assets like locale
  *   files can resolve through the same subpath as the built bundle.
@@ -356,6 +379,7 @@ function makeConfigInjectionScript(
   sessionApiKey,
   authRequired,
   runtimeServicesInfo,
+  lockToCloud,
   basePath,
   vscodeBasePath,
   disableTelemetry,
@@ -396,6 +420,12 @@ function makeConfigInjectionScript(
     );
   }
 
+  if (lockToCloud) {
+    parts.push(
+      `window.__AGENT_CANVAS_LOCK_TO_CLOUD__=${serializeForInlineScript(lockToCloud)};`,
+    );
+  }
+
   if (basePath && basePath !== "/") {
     parts.push(
       `window.__AGENT_CANVAS_BASE_PATH__=${serializeForInlineScript(basePath)};`,
@@ -429,6 +459,7 @@ async function serveInjectedIndexHtml(
     sessionApiKey,
     authRequired,
     runtimeServicesInfo,
+    lockToCloud,
     basePath,
     vscodeBasePath,
     disableTelemetry,
@@ -445,6 +476,7 @@ async function serveInjectedIndexHtml(
     sessionApiKey,
     authRequired,
     runtimeServicesInfo,
+    lockToCloud,
     basePath,
     vscodeBasePath,
     disableTelemetry,
@@ -495,6 +527,7 @@ function needsRuntimeInjection(injectionOpts) {
     injectionOpts.sessionApiKey ||
     injectionOpts.authRequired ||
     injectionOpts.runtimeServicesInfo ||
+    injectionOpts.lockToCloud ||
     injectionOpts.vscodeBasePath ||
     injectionOpts.disableTelemetry ||
     (injectionOpts.basePath && injectionOpts.basePath !== "/"),
@@ -647,6 +680,7 @@ export function startStaticServer(config) {
     sessionApiKey: policy.sessionApiKey,
     authRequired: policy.authRequired,
     runtimeServicesInfo: config.runtimeServicesInfo || null,
+    lockToCloud: config.lockToCloud || null,
     basePath: normalizeBasePath(config.basePath),
     vscodeBasePath: config.vscodeBasePath || null,
     disableTelemetry: config.disableTelemetry || false,
@@ -657,7 +691,7 @@ export function startStaticServer(config) {
   const staticMiddleware = createStaticMiddleware(dirAbs);
 
   const uninstallDiagnostics = proxy.installDiagnostics();
-  // DigitalOcean Managed Agents for the browser: this server hosts the MARS
+  // DigitalOcean Managed Agents for the browser: with MARS_WEB=1, host the MARS
   // bridge and proxies to sessions' tunnel listeners, behind the session key
   // (see mars-web-bridge.mjs). Deliberately `config.sessionApiKey`, not
   // `policy.sessionApiKey`: the policy decides whether the key may be baked
@@ -742,6 +776,9 @@ export function startStaticServer(config) {
         for (const prefix of rejectPrefixes) {
           console.log(`  ${prefix} -> 503 (rejected)`);
         }
+      }
+      if (config.lockToCloud) {
+        console.log(`  Backend setup locked to Cloud: ${config.lockToCloud}`);
       }
       console.log("  * (default) -> static files + SPA fallback");
       console.log("");

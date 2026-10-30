@@ -28,7 +28,7 @@ import {
   isSettingsPageHidden,
 } from "#/utils/settings-utils";
 import { SettingsSectionHeaderProvider } from "#/contexts/settings-section-header-context";
-import { shouldDeferSettingsToCloudShell } from "#/api/agent-server-config";
+import { getLockedCloudHost } from "#/api/agent-server-config";
 
 export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
   const url = new URL(request.url);
@@ -93,12 +93,11 @@ function SettingsScreen() {
   const shouldHideTitle =
     routeHandle?.hideTitle === true || isMobileHub || hideSectionHeader;
 
-  // Locked-to-Cloud inside the Cloud host (SaaS / self-hosted OHE) only
-  // exposes the Application page; the OHE settings shell owns the rest, so
-  // direct links to the other Canvas settings pages are sent to Application
-  // instead (OHE-3457). The native shell keeps every in-app page.
+  // Locked-to-Cloud (SaaS / self-hosted OHE) only exposes the Application
+  // page; the OHE settings shell owns the rest, so direct links to the other
+  // Canvas settings pages are sent to Application instead (OHE-3457).
   if (
-    shouldDeferSettingsToCloudShell() &&
+    getLockedCloudHost() !== null &&
     location.pathname !== "/settings" &&
     location.pathname !== LOCKED_CLOUD_SETTINGS_NAV_PATH
   ) {

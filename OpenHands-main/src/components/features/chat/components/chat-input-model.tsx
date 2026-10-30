@@ -15,7 +15,7 @@ import { Divider } from "#/ui/divider";
 import { Typography } from "#/ui/typography";
 import { I18nKey } from "#/i18n/declaration";
 import { cn } from "#/utils/utils";
-import { shouldDeferSettingsToCloudShell } from "#/api/agent-server-config";
+import { getLockedCloudHost } from "#/api/agent-server-config";
 import { chatInputPillButtonClassName } from "#/utils/form-control-classes";
 import React from "react";
 
@@ -54,7 +54,7 @@ export function ChatInputModelMenuContent({
   const switchAcpModel = useSwitchAcpModel();
   const hasModelRows = model.showAcpPicker || Boolean(model.displayModel);
   // Locked-to-Cloud blocks the Canvas settings pages this links to (OHE-3457).
-  const showSettingsLink = !shouldDeferSettingsToCloudShell();
+  const showSettingsLink = getLockedCloudHost() === null;
 
   const handleSelectAcpModel = (modelId: string | null) => {
     if (modelId !== model.selectedModelId) {

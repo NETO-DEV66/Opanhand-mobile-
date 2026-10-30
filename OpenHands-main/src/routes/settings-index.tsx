@@ -7,7 +7,7 @@ import { useConfig } from "#/hooks/query/use-config";
 import { useSettingsNavItems } from "#/hooks/use-settings-nav-items";
 import { SettingsMobileHub } from "#/components/features/settings/settings-mobile-hub";
 import { getFirstAvailablePath } from "#/utils/settings-utils";
-import { shouldDeferSettingsToCloudShell } from "#/api/agent-server-config";
+import { getLockedCloudHost } from "#/api/agent-server-config";
 import { LOCKED_CLOUD_SETTINGS_NAV_PATH } from "#/constants/settings-nav";
 
 export default function SettingsIndex() {
@@ -19,12 +19,12 @@ export default function SettingsIndex() {
     return <SettingsMobileHub navigationItems={navigationItems} />;
   }
 
-  // Locked-to-Cloud inside the Cloud host (SaaS / self-hosted OHE) lists only
-  // the Application page, so land there instead of the Agent library
-  // (OHE-3168). The native shell keeps its own full settings list.
-  const fallbackPath = shouldDeferSettingsToCloudShell()
-    ? LOCKED_CLOUD_SETTINGS_NAV_PATH
-    : (getFirstAvailablePath(config?.feature_flags) ?? "/settings/app");
+  // Locked-to-Cloud (SaaS / self-hosted OHE) lists only the Application page,
+  // so land there instead of the Agent library (OHE-3168).
+  const fallbackPath =
+    getLockedCloudHost() !== null
+      ? LOCKED_CLOUD_SETTINGS_NAV_PATH
+      : (getFirstAvailablePath(config?.feature_flags) ?? "/settings/app");
 
   return <Navigate to={fallbackPath} replace />;
 }

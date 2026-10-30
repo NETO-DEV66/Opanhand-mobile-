@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("../../config/defaults.json", () => ({
-  compatibility: {
-    minimumAgentServer: "1.47.0-rc.2",
+  default: {
+    compatibility: {
+      minimumAgentServer: "1.47.0-rc.2",
+    },
   },
 }));
 

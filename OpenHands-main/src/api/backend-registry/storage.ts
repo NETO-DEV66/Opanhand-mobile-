@@ -1,6 +1,7 @@
 import {
   SEEDED_DEFAULT_BACKEND_ID,
   makeDefaultLocalBackend,
+  makeLockedCloudBackend,
 } from "./default-backend";
 import type {
   Backend,
@@ -104,6 +105,16 @@ export function readStoredBackends(): Backend[] {
   if (typeof window === "undefined") return [];
 
   try {
+    const lockedCloudBackend = makeLockedCloudBackend();
+    if (lockedCloudBackend) {
+      writeStoredBackends([lockedCloudBackend]);
+      const activeSelection = readStoredActiveBackend();
+      if (activeSelection?.backendId !== lockedCloudBackend.id) {
+        writeStoredActiveBackend({ backendId: lockedCloudBackend.id });
+      }
+      return [lockedCloudBackend];
+    }
+
     const raw = window.localStorage.getItem(BACKENDS_STORAGE_KEY);
 
     // First install: seed only when the launcher supplied enough information
@@ -118,15 +129,7 @@ export function readStoredBackends(): Backend[] {
 
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    // Keep every valid entry. Cloud-kind backends are still supported: the add
-    // form infers `cloud` for an OpenHands Cloud host and the rest of the app
-    // branches on it, so dropping them here would silently delete a backend
-    // the user configured.
     const valid = parsed.filter(isValidBackend);
-
-    if (valid.length !== parsed.length) {
-      writeStoredBackends(valid);
-    }
 
     // If the stored array is empty (or everything in it failed validation),
     // only re-seed when the launcher supplied both a host and API key.

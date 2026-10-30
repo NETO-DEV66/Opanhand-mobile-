@@ -9,7 +9,7 @@ import { useSettings } from "#/hooks/query/use-settings";
 import { useLlmProfiles } from "#/hooks/query/use-llm-profiles";
 import { useLlmConfigured } from "#/hooks/use-llm-configured";
 import { parseMcpConfig } from "#/utils/mcp-config";
-import { shouldDeferSettingsToCloudShell } from "#/api/agent-server-config";
+import { getLockedCloudHost } from "#/api/agent-server-config";
 import {
   isCustomizeChecklistPath,
   SIDEBAR_ONBOARDING_CHECKLIST_ITEM_IDS,
@@ -114,30 +114,25 @@ export function useSidebarOnboardingChecklist() {
     settings?.agent_settings?.mcp_config,
   ]);
 
-  // Locked-to-Cloud inside the Cloud host blocks the Canvas LLM and Agent
-  // settings pages these two items link to, and "customize-agent" only
-  // completes by visiting one (OHE-3457). The native shell keeps those in-app
-  // pages, so the checklist keeps the items.
-  const isLockedToCloudShell = shouldDeferSettingsToCloudShell();
-
   const items = useMemo(
     (): SidebarOnboardingChecklistItemState[] =>
-      SIDEBAR_ONBOARDING_CHECKLIST_ITEM_IDS.filter(
-        (id) =>
-          !isLockedToCloudShell ||
-          (id !== "configure-llm" && id !== "customize-agent"),
-      ).map((id) => ({
+      SIDEBAR_ONBOARDING_CHECKLIST_ITEM_IDS.map((id) => ({
         id,
         isComplete: completionById[id],
       })),
-    [completionById, isLockedToCloudShell],
+    [completionById],
   );
 
   const completedCount = items.filter((item) => item.isComplete).length;
   const isAllComplete = completedCount === items.length;
 
+  // A canvas locked to a Cloud host (SaaS / self-hosted OHE) never shows the
+  // checklist: the main app owns setup there (OHE-3457, OHE-3683).
+  const isLockedToCloud = getLockedCloudHost() !== null;
+
   // The Super Admin setup guide replaces this checklist while it is shown.
   const isVisible =
+    !isLockedToCloud &&
     onboardingCompleted &&
     !isDismissed &&
     !isAllComplete &&

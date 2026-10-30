@@ -30,9 +30,12 @@ export function isNativeGitCandidate(entryId: string): boolean {
  * option — on local backends, for non-git entries, and for providers the
  * instance has not enabled. While `isLoading`, the instance's providers are
  * not known yet and null means nothing: wait rather than decide on it.
- * `isJiraEnabled` and `isLinearEnabled` are whether the instance offers the
- * built-in Jira Cloud and Linear integrations there; they are not git
- * connections, so they never satisfy an integration requirement.
+ * `isJiraEnabled`, `isLinearEnabled` and `isSlackEnabled` are whether the
+ * instance offers the built-in Jira Cloud, Linear and Slack integrations
+ * there; they are not git connections, so they never satisfy an integration
+ * requirement.
+ * `deploymentMode` is the instance's reported deployment mode (`cloud` or
+ * `self_hosted`), null on local backends and on instances that report none.
  */
 export function useNativeGitIntegrations() {
   const { backend } = useActiveBackend();
@@ -79,6 +82,11 @@ export function useNativeGitIntegrations() {
     isJiraEnabled: canUseNativeIntegrations && config?.isJiraEnabled === true,
     isLinearEnabled:
       canUseNativeIntegrations && config?.isLinearEnabled === true,
+    isSlackEnabled:
+      canUseNativeIntegrations && config?.isSlackEnabled === true,
+    deploymentMode: canUseNativeIntegrations
+      ? (config?.deploymentMode ?? null)
+      : null,
     isLoading,
   };
 }
