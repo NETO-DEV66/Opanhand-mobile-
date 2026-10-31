@@ -41,11 +41,11 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "OpenHands Mobile",
-  "description": "OpenHands Agent Canvas packaged as a native Android app. Runs AI coding agents on the phone itself, against your own LLM provider.",
+  "description": "OpenHands Agent Canvas packaged as a native Android app. Sign in with GitHub, GitLab or Bitbucket and drive AI coding agents on OpenHands Cloud from your phone.",
   "operatingSystem": "Android 6.0+ (API 23)",
   "applicationCategory": "DeveloperApplication",
-  "softwareVersion": "1.32.6",
-  "fileSize": "6.0 MB",
+  "softwareVersion": "1.34.3",
+  "fileSize": "5.8 MB",
   "downloadUrl": "https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk",
   "installUrl": "https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk",
   "codeRepository": "https://github.com/NETO-DEV66/Opanhand-mobile-",
@@ -66,7 +66,7 @@
       "name": "Is it safe to install?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except the LLM provider you configure."
+        "text": "You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except OpenHands Cloud, where your agents run."
       }
     },
     {
@@ -90,7 +90,7 @@
       "name": "Does it work offline?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The app opens and its interface loads without a connection. Anything involving an agent needs a reachable LLM provider, so plan on having a network path to it."
+        "text": "The app opens and its interface loads without a connection. Anything involving an agent needs a reachable OpenHands Cloud, so plan on having a network path to it."
       }
     },
     {
@@ -118,7 +118,7 @@
       "@type": "HowToStep",
       "position": 1,
       "name": "Download the APK",
-      "text": "Grab app-release.apk from the latest release. It is about 6.0 MB.",
+      "text": "Grab app-release.apk from the latest release. It is about 5.8 MB.",
       "url": "https://neto-dev66.github.io/Opanhand-mobile-/#install"
     },
     {
@@ -138,8 +138,8 @@
     {
       "@type": "HowToStep",
       "position": 4,
-      "name": "Add your API key",
-      "text": "Open the app, pick a model, paste your LLM provider API key, and start a conversation.",
+      "name": "Sign in and start working",
+      "text": "Tap Log in with GitHub (or GitLab / Bitbucket), approve the sign-in in the browser, and you land in your workspace.",
       "url": "https://neto-dev66.github.io/Opanhand-mobile-/#install"
     }
   ]
@@ -964,7 +964,7 @@ code,pre{font-family:var(--font-mono)}
           <a href="#support">Support</a>
           <a href="https://github.com/NETO-DEV66/Opanhand-mobile-" target="_blank" rel="noopener">GitHub</a>
           <a class="btn btn-primary" href="https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk">
-            Download APK · 6.0 MB
+            Download APK · 5.8 MB
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
           </a>
         </nav>
@@ -992,7 +992,7 @@ code,pre{font-family:var(--font-mono)}
 
         <div class="hero-cta" id="h-cta">
           <a class="btn btn-primary" href="https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk">
-            Download APK · 6.0 MB
+            Download APK · 5.8 MB
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
           </a>
           <a class="btn btn-ghost" href="https://github.com/NETO-DEV66/Opanhand-mobile-" target="_blank" rel="noopener">
@@ -1009,7 +1009,7 @@ code,pre{font-family:var(--font-mono)}
         </div>
 
         <ul class="chips" id="h-chips">
-          <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v18M3 12h18" opacity=".4"/><circle cx="12" cy="12" r="9"/></svg>v1.32.6</li>
+          <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v18M3 12h18" opacity=".4"/><circle cx="12" cy="12" r="9"/></svg>v1.34.3</li>
           <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>Android 6.0+</li>
           <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8.2 8 9 4.6-.8 8-4 8-9V6l-8-3Z"/></svg>INTERNET only</li>
           <li class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>No account</li>
@@ -1084,8 +1084,8 @@ code,pre{font-family:var(--font-mono)}
     <div class="sec-head reveal">
       <p class="eyebrow"><span class="dot" aria-hidden="true"></span>01 · Overview</p>
       <h2 id="overview-h">A thin shell around a web app. <span class="muted">Nothing hidden.</span></h2>
-      <p class="lead">OpenHands Agent Canvas is the web interface for OpenHands, an open-source AI software engineer. This project wraps that interface in a Capacitor shell so it installs and opens like any other Android app, and carries its own runtime so the agent answers on the device.</p>
-      <p class="lead">In short: this is the <strong>OpenHands Android app</strong>. It is a community-built mobile client for OpenHands — not an official release — and it lets you <strong>run OpenHands on your phone</strong>. It needs no account and no server: you pick a model, paste an API key from any LLM provider, and the agent answers on the device. If you were looking for an <strong>OpenHands APK</strong> to sideload, this is it.</p>
+      <p class="lead">OpenHands Agent Canvas is the web interface for OpenHands, an open-source AI software engineer. This project wraps that interface in a Capacitor shell so it installs and opens like any other Android app, and signs you in to OpenHands Cloud so your agents run on the server.</p>
+      <p class="lead">In short: this is the <strong>OpenHands Android app</strong>. It is a community-built mobile client for OpenHands — not an official release — and it lets you <strong>run OpenHands on your phone</strong>. On first launch you sign in with GitHub, GitLab or Bitbucket and your agents run on OpenHands Cloud. If you were looking for an <strong>OpenHands APK</strong> to sideload, this is it.</p>
     </div>
 
     <div class="grid-3 stagger">
@@ -1102,7 +1102,7 @@ code,pre{font-family:var(--font-mono)}
       <article class="card">
         <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8.2 8 9 4.6-.8 8-4 8-9V6l-8-3Z"/></svg></div>
         <h3>Minimal permissions</h3>
-        <p>INTERNET is the only one it asks for. No storage, no camera, no contacts, no location. Telemetry is compiled out, so the app only talks to the LLM provider you configure.</p>
+        <p>INTERNET is the only one it asks for. No storage, no camera, no contacts, no location. Telemetry is compiled out, so the app only talks to OpenHands Cloud.</p>
       </article>
       <article class="card">
         <div class="card-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg></div>
@@ -1170,7 +1170,7 @@ code,pre{font-family:var(--font-mono)}
           <span class="row-num" aria-hidden="true">05</span>
           <div class="row-body">
             <h3>Your own model</h3>
-            <p>Point it at any LLM provider. The API key stays on your device.</p>
+            <p>Sign in with GitHub, GitLab or Bitbucket. One tap, then you are in.</p>
           </div>
           <span class="row-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></span>
         </article>
@@ -1178,7 +1178,7 @@ code,pre{font-family:var(--font-mono)}
           <span class="row-num" aria-hidden="true">06</span>
           <div class="row-body">
             <h3>Launches offline</h3>
-            <p>The shell opens without a network connection. The agent itself still needs a reachable LLM provider.</p>
+            <p>The shell opens without a network connection. The agents themselves need a reachable OpenHands Cloud.</p>
           </div>
           <span class="row-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14m0 0-6-6m6 6-6 6"/></svg></span>
         </article>
@@ -1193,18 +1193,29 @@ code,pre{font-family:var(--font-mono)}
     <div class="sec-head reveal">
       <p class="eyebrow"><span class="dot" aria-hidden="true"></span>03 · Screens</p>
       <h2 id="screens-h">The real setup flow, <span class="muted">start to finish.</span></h2>
-      <p class="lead">These are actual captures of the app, not mockups. First launch walks you through picking an agent and a model, then hands you a working conversation. The first frame is the one step the standalone build skips.</p>
+      <p class="lead">These are actual captures of the app, not mockups. The shipped build opens on a Git-provider sign-in and drops you into your workspace. The later frames are the standalone build's first-run wizard, where you pick an agent and a model instead.</p>
     </div>
 
     <div class="shots stagger">
         <figure class="shot">
           <div class="shot-frame">
-            <img src="assets/screens/01-backend.webp" width="742" height="1484" loading="lazy" decoding="async"
-                 alt="Add a backend screen with fields for a friendly name, the agent server URL, a Local/Cloud type toggle, and an API key. Shown by the server-backed build only.">
+            <img src="assets/screens/00-login.webp" width="824" height="1830" loading="lazy" decoding="async"
+                 alt="Sign in to OpenHands screen with Log in with GitHub, Log in with GitLab and Log in with Bitbucket buttons.">
           </div>
           <figcaption>
-            <b>1 · Connect</b>
-            <span>Where the server-backed build asks for your agent server URL. The standalone build skips straight to the agent picker.</span>
+            <b>1 · Sign in</b>
+            <span>The shipped build's first screen. Pick a Git provider and you are in.</span>
+          </figcaption>
+        </figure>
+
+        <figure class="shot">
+          <div class="shot-frame">
+            <img src="assets/screens/01-backend.webp" width="742" height="1484" loading="lazy" decoding="async"
+                 alt="Add a backend screen with fields for a friendly name, the agent server URL, a Local/Cloud type toggle, and an API key. Shown by the standalone build only.">
+          </div>
+          <figcaption>
+            <b>2 · Connect</b>
+            <span>Where the standalone build asks for your agent server URL. The shipped Cloud build skips this and opens on the agent picker instead.</span>
           </figcaption>
         </figure>
 
@@ -1214,7 +1225,7 @@ code,pre{font-family:var(--font-mono)}
                  alt="Choose your agent screen listing OpenHands, Claude Code, Codex, Gemini CLI, Pi and OpenCode.">
           </div>
           <figcaption>
-            <b>2 · Pick an agent</b>
+            <b>3 · Pick an agent</b>
             <span>OpenHands by default, or bring Claude Code, Codex, Gemini CLI, Pi or OpenCode.</span>
           </figcaption>
         </figure>
@@ -1225,7 +1236,7 @@ code,pre{font-family:var(--font-mono)}
                  alt="Set up your LLM screen for choosing a model provider and model, with a pre-selected default.">
           </div>
           <figcaption>
-            <b>3 · Choose a model</b>
+            <b>4 · Choose a model</b>
             <span>Pick a provider and model. A sensible default is pre-selected for you.</span>
           </figcaption>
         </figure>
@@ -1236,13 +1247,13 @@ code,pre{font-family:var(--font-mono)}
                  alt="Say hello screen with a first-message box and a list of ready-made workflow templates.">
           </div>
           <figcaption>
-            <b>4 · Start working</b>
+            <b>5 · Start working</b>
             <span>Send a first message, or open a proven workflow with its prompt and MCPs already set up.</span>
           </figcaption>
         </figure>
     </div>
 
-    <p class="shot-note reveal"><b>A note on these images.</b> They are real screen captures of the app's first-run wizard, taken frame by frame as each step loads. The captures come from the server-backed build, so the first frame shows the backend step; the standalone build skips it and opens on the agent picker. Any details shown are placeholders, not live.</p>
+    <p class="shot-note reveal"><b>A note on these images.</b> They are real screen captures of the app. The first is the shipped build's sign-in screen. The rest are the standalone build's first-run wizard, taken frame by frame as each step loads; the standalone build opens on the agent picker and skips the backend step. Any details shown are placeholders, not live.</p>
   </div>
 </section>
 
@@ -1262,7 +1273,7 @@ code,pre{font-family:var(--font-mono)}
           <span class="step-dot" aria-hidden="true">1</span>
           <div class="step-body">
             <h3>Download the APK</h3>
-            <p>Grab <code>app-release.apk</code> from the latest release. It is about 6.0 MB.</p>
+            <p>Grab <code>app-release.apk</code> from the latest release. It is about 5.8 MB.</p>
           </div>
         </div>
 
@@ -1285,8 +1296,8 @@ code,pre{font-family:var(--font-mono)}
         <div class="step" data-step="4">
           <span class="step-dot" aria-hidden="true">4</span>
           <div class="step-body">
-            <h3>Add your API key</h3>
-            <p>Open the app, pick a model, paste your LLM provider API key, and start a conversation.</p>
+            <h3>Sign in</h3>
+            <p>Open the app and tap Log in with GitHub (or GitLab / Bitbucket). Approve the sign-in in the browser that opens, and you land in your workspace.</p>
           </div>
         </div>
       </div>
@@ -1415,7 +1426,7 @@ code,pre{font-family:var(--font-mono)}
     <div class="faq reveal">
       <details>
         <summary>Is it safe to install?<span class="pm" aria-hidden="true"></span></summary>
-        <div class="ans"><div class="ans-in">You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except the LLM provider you configure.</div></div>
+        <div class="ans"><div class="ans-in">You are installing a file from GitHub rather than the Play Store, so it is worth checking first. Compare the APK hash with the value in the Verify section, and read the source if you want. The app asks for one permission, INTERNET, and sends nothing anywhere except OpenHands Cloud, where your agents run.</div></div>
       </details>
       <details>
         <summary>Why does Play Protect warn?<span class="pm" aria-hidden="true"></span></summary>
@@ -1427,11 +1438,11 @@ code,pre{font-family:var(--font-mono)}
       </details>
       <details>
         <summary>Does it work offline?<span class="pm" aria-hidden="true"></span></summary>
-        <div class="ans"><div class="ans-in">The app opens and its interface loads without a connection. Anything involving an agent needs a reachable LLM provider, so plan on having a network path to it.</div></div>
+        <div class="ans"><div class="ans-in">The app opens and its interface loads without a connection. Anything involving an agent needs a reachable OpenHands Cloud, so plan on having a network path to it.</div></div>
       </details>
       <details>
         <summary>Do I need a Play Store account?<span class="pm" aria-hidden="true"></span></summary>
-        <div class="ans"><div class="ans-in">No account is needed at all. The app runs the agent on the device and talks straight to the LLM provider whose API key you paste in, so there is nothing to sign up for. You sideload the APK directly from GitHub. If you want update notifications without the Play Store, add the repo to Obtainium using the badge on this page.</div></div>
+        <div class="ans"><div class="ans-in">You sign in with a Git account — GitHub, GitLab or Bitbucket — on first launch; there is no separate OpenHands signup. Your agents run on OpenHands Cloud. You sideload the APK directly from GitHub. If you want update notifications without the Play Store, add the repo to Obtainium using the badge on this page.</div></div>
       </details>
     </div>
   </div>
@@ -1537,7 +1548,7 @@ code,pre{font-family:var(--font-mono)}
 </footer>
 
 <div class="stickybar" id="stickybar">
-  <div class="bar-meta"><span>v1.32.6 · 6.0 MB</span><span>Android 6.0+</span></div>
+  <div class="bar-meta"><span>v1.34.3 · 5.8 MB</span><span>Android 6.0+</span></div>
   <a class="btn btn-primary" href="https://github.com/NETO-DEV66/Opanhand-mobile-/releases/latest/download/app-release.apk">
     Download APK
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>

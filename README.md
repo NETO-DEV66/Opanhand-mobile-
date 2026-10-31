@@ -107,18 +107,19 @@ shell using [Capacitor](https://capacitorjs.com/), so you can launch it, watch
 runs, and approve actions from a phone.
 
 The app contains **the same UI as the browser version** (`@openhands/agent-canvas`
-v1.27.1). The shipped build is **standalone**: it runs the agent runtime on the
-phone and calls your own LLM provider, so there is no server to sign in to. A
-server-backed build that talks to an agent server you run is also available.
+v1.27.1). The shipped build is a **client of OpenHands Cloud**: on first launch
+you sign in with GitHub, GitLab or Bitbucket, and the agent runs on the server.
+A **standalone** build that runs the agent runtime on the phone and calls your
+own LLM provider is also available.
 
 **This is a community packaging, not an official OpenHands release.**
 
-### Run OpenHands on Android, without a laptop
+### OpenHands on Android
 
 OpenHands has no official mobile app, and the full Agent Canvas needs Docker and
 Node.js, so it does not run on a phone by itself. This project ships a mobile
-build that carries its own runtime: you pick a model, paste your API key, and
-the agent answers on the device. No Docker, no server, no laptop in the loop.
+build that signs you in to OpenHands Cloud and lets you run and watch agents from
+the phone. No Docker, no laptop in the loop.
 
 If you searched for **"OpenHands Android app"**, **"OpenHands mobile"**,
 **"OpenHands APK"**, or **"run OpenHands on my phone"** — this is that.
@@ -126,9 +127,9 @@ If you searched for **"OpenHands Android app"**, **"OpenHands mobile"**,
 | Question | Answer |
 | --- | --- |
 | Is there an official OpenHands mobile app? | No. This is an independent, community-built Android wrapper. |
-| Does the agent run on the phone? | Yes, in the standalone build. The server-backed build keeps the agent on your server and the phone as the client. |
+| Does the agent run on the phone? | No, in the shipped build — it runs on OpenHands Cloud and the phone is the client. The standalone build runs the agent on the phone instead. |
 | Do I need a Play Store account? | No. You sideload the APK. |
-| Do I need an OpenHands Cloud account? | No. The standalone build only needs an API key from an LLM provider you choose. |
+| Do I need an OpenHands Cloud account? | Yes, for the shipped build — sign in with GitHub, GitLab or Bitbucket on first launch. The standalone build needs only an LLM provider API key instead. |
 | Is it free? | Yes — MIT licensed, no telemetry. |
 | Which Android versions? | 6.0 (Marshmallow, API 23) and newer. |
 
@@ -142,11 +143,11 @@ If you searched for **"OpenHands Android app"**, **"OpenHands mobile"**,
 | Architecture | Universal — arm64, armv7, x86_64 (no native code) |
 | WebView | Android System WebView 76 or newer (Chrome 76+). Older WebViews cannot parse the app bundle and show an update prompt instead of the UI. |
 | Permissions | Internet only |
-| Backend | None required — the app ships standalone and calls your own LLM provider directly. A server-backed build is available (see [Standalone mode](#standalone-mode)). |
+| Backend | OpenHands Cloud, reached by signing in with GitHub, GitLab or Bitbucket. A standalone build that runs the agent on the phone is available (see [Standalone mode](#standalone-mode)). |
 | Telemetry | None. The APK is built with `VITE_DO_NOT_TRACK=1`, so the upstream PostHog client is disabled at compile time and never initialised. |
 
-The standalone app needs network access to your LLM provider and nothing else.
-The server-backed build needs the agent server you point it at. Neither sends
+The shipped app needs network access to OpenHands Cloud and nothing else.
+The standalone build needs network access to your LLM provider. Neither sends
 your data anywhere by itself.
 
 ---
@@ -170,38 +171,30 @@ your data anywhere by itself.
 
 ## First launch
 
-The shipped build is **standalone**: it runs the agent runtime on the phone and
-calls your own LLM provider. There is no server to sign in to and no backend to
-configure, so first launch is three steps.
+The shipped build is a **client of OpenHands Cloud**. The first screen is a
+sign-in: tap your Git provider and finish the login in the browser that opens.
+You land in your workspace.
 
-| 1 · Pick an agent | 2 · Choose a model |
-| :---: | :---: |
-| <img src="docs/assets/screens/02-agent.webp" alt="Agent picker with OpenHands selected" width="300"> | <img src="docs/assets/screens/03-llm.webp" alt="Model and API key form" width="300"> |
+<img src="docs/assets/screens/00-login.webp" alt="Sign in to OpenHands with GitHub, GitLab or Bitbucket" width="300">
 
-1. **Pick an agent** — OpenHands by default, or bring your own Claude Code,
-   Codex, Gemini CLI, Pi or OpenCode agent.
-2. **Choose a model** — pick a provider and model, and paste your API key. For a
-   provider that is not listed, set a **base URL** to any OpenAI-compatible
-   endpoint (a local llama.cpp, Ollama or vLLM server works).
-3. **Start working** — send a first message and the reply streams back from your
-   provider.
+1. **Tap a provider** — Log in with GitHub, GitLab or Bitbucket.
+2. **Approve in the browser** — the phone shows a short code; the provider page
+   opens and you confirm. You only do this once per device.
+3. **Start working** — you land in your workspace and can run and watch agents.
 
-Your settings, your conversations and their messages are stored on the device
-and survive a restart. To change the model later, open **Settings** inside the
-app.
-
-> **Server-backed build.** To ship the app as a client of an agent server you
-> run instead — hosted OpenHands Cloud, or your own — set the repository
-> variable `STANDALONE_MODE` to `false` before building. See
-> [Standalone mode](#standalone-mode).
+> **Standalone build.** To run the agent on the phone and call your own LLM
+> provider instead, leave the repository variable `STANDALONE_MODE` unset (or
+> set it to `true`). First launch is then the agent picker, a model, and your
+> provider API key. See [Standalone mode](#standalone-mode).
 
 ---
 
 ## Standalone mode
 
-The default build answers the agent-server REST and WebSocket API from inside
-the app (`OpenHands-main/src/local-runtime/`) and calls your LLM provider
-directly, so no server is involved. Two things follow from that:
+The standalone build (`STANDALONE_MODE` unset or `true`) answers the agent-server
+REST and WebSocket API from inside the app (`OpenHands-main/src/local-runtime/`)
+and calls your LLM provider directly, so no server is involved. Two things follow
+from that:
 
 - **Your API key stays on the device.** It is written to the app's
   `localStorage` and sent only to the provider you configured. Nothing is
@@ -270,15 +263,22 @@ directly, so no server is involved. Two things follow from that:
   This was the shipped v1.32.5 state on a WebView 83 emulator: CSS fixed (2774
   rules, layout restored) but the app sat under a stale notice.
 
-The runtime only exists in the mock build (`VITE_MOCK_API=true`). The
-server-backed build is byte-for-byte the upstream client: no local runtime, no
-mock handlers, no `localStorage` conversation store.
+The runtime only exists in the standalone build (`VITE_MOCK_API=true`, i.e.
+`STANDALONE_MODE` unset or `true`). The shipped Cloud client is byte-for-byte
+the upstream client: no local runtime, no mock handlers, no `localStorage`
+conversation store.
 
-| Repository variable | Standalone (default) | Server-backed |
+| Repository variable | Cloud client (shipped) | Standalone |
 | --- | --- | --- |
-| `STANDALONE_MODE` | unset or anything but `false` | `false` |
-| `BACKEND_BASE_URL` | ignored | baked in as the agent server URL |
-| `CLOUD_BASE_URL` | ignored | Cloud host to lock to, or `off` to ship unlocked |
+| `STANDALONE_MODE` | `false` | unset or anything but `false` |
+| `BACKEND_BASE_URL` | baked in as the Cloud API URL | ignored |
+| `CLOUD_BASE_URL` | Cloud host to lock to, or `off` to ship unlocked | ignored |
+
+With `STANDALONE_MODE=false` the build is locked to OpenHands Cloud
+(`VITE_LOCK_TO_CLOUD`), which is what makes first launch the GitHub/GitLab/
+Bitbucket sign-in rather than the agent/LLM onboarding. Leaving `CLOUD_BASE_URL`
+unset locks to hosted Cloud (`https://app.all-hands.dev`); set it to another
+origin for a self-hosted Cloud, or to `off` to ship the unlocked build.
 
 ---
 
@@ -311,9 +311,10 @@ npm ci
 npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
 
 # 3. Build the web bundle
-#    The default build is standalone (no server). For a server-backed build,
-#    use: VITE_MOCK_API=false VITE_BACKEND_BASE_URL=https://my-server.example.com npm run build:app
-npm run build:app
+#    The shipped build is the OpenHands Cloud client (locked to Cloud, so first
+#    launch is the Git-provider sign-in). For the standalone build instead, use:
+#    VITE_MOCK_API=true npm run build:app
+VITE_MOCK_API=false VITE_BACKEND_BASE_URL=https://app.all-hands.dev VITE_LOCK_TO_CLOUD=https://app.all-hands.dev npm run build:app
 
 # 4. Copy the web bundle into the Android project
 npx cap sync android
@@ -325,17 +326,18 @@ cd android
 
 The APK lands in `android/app/build/outputs/apk/release/app-release.apk`.
 
-The standalone bundle is built with the mock API enabled, which is what installs
-the local runtime:
+The shipped Cloud client turns the mock API off and locks to Cloud, which is
+what shows the sign-in on first launch:
+
+```bash
+VITE_MOCK_API=false VITE_BACKEND_BASE_URL=https://app.all-hands.dev VITE_LOCK_TO_CLOUD=https://app.all-hands.dev npm run build:app
+```
+
+The standalone build turns the mock API on, which is what installs the local
+runtime:
 
 ```bash
 VITE_MOCK_API=true npm run build:app
-```
-
-To build the server-backed client instead, turn it off and point it at a server:
-
-```bash
-VITE_MOCK_API=false VITE_BACKEND_BASE_URL=https://my-server.example.com npm run build:app
 ```
 
 ### Running the tests
@@ -463,9 +465,9 @@ APK can never be released by accident.
 
 | Name | Type | Purpose |
 | --- | --- | --- |
-| `STANDALONE_MODE` | Variable | Unset (default) ships the standalone app — no server, first launch is the agent/LLM steps. Set it to `false` to ship the server-backed client instead. |
-| `CLOUD_BASE_URL` | Variable | Server-backed build only. The Cloud origin the app is locked to; unset means hosted OpenHands Cloud (`https://app.all-hands.dev`). Set it to another origin for a self-hosted Cloud, or to `off` to ship the unlocked build (backend form on first launch). |
-| `BACKEND_BASE_URL` | Variable | Server-backed build only. Bakes the agent server URL into the app. |
+| `STANDALONE_MODE` | Variable | **Set to `false`.** Ships the OpenHands Cloud client: first launch is the GitHub/GitLab/Bitbucket sign-in. Unset (or `true`) ships the standalone app instead — no server, first launch is the agent/LLM steps. |
+| `CLOUD_BASE_URL` | Variable | Cloud client only. The Cloud origin the app is locked to; unset means hosted OpenHands Cloud (`https://app.all-hands.dev`). Set it to another origin for a self-hosted Cloud, or to `off` to ship the unlocked build (backend form on first launch). |
+| `BACKEND_BASE_URL` | Variable | Cloud client only. Bakes the Cloud API URL into the app. |
 | `SIGNING_CERT_SHA256` | Variable | **Set.** The pinned signer fingerprint. The workflow refuses to publish an APK signed with anything else, and fails closed if it cannot read the fingerprint at all. Change it only when rotating the key on purpose. |
 | `ANDROID_KEYSTORE_BASE64` | Secret | The signing keystore, base64-encoded. Required to publish. |
 | `ANDROID_KEYSTORE_PASSWORD` | Secret | Keystore store password. |
