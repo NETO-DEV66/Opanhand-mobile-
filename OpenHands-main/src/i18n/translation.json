@@ -39796,5 +39796,41 @@
     "tr": "{{provider}} ile giriş yap",
     "uk": "Увійти за допомогою {{provider}}",
     "id": "Masuk dengan {{provider}}"
+  },
+  "SETTINGS$ANDROID_BACK_BUTTON_LABEL": {
+    "en": "Back button navigates back",
+    "ja": "戻るボタンで1つ前に戻る",
+    "zh-CN": "返回键返回上一步",
+    "zh-TW": "返回鍵返回上一步",
+    "ko-KR": "뒤로 가기 버튼으로 한 단계 뒤로",
+    "de": "Zurück-Taste geht einen Schritt zurück",
+    "no": "Tilbake-knappen går ett steg tilbake",
+    "it": "Il tasto Indietro torna di un passo",
+    "pt": "Botão Voltar retrocede um passo",
+    "es": "El botón Atrás retrocede un paso",
+    "ar": "زر الرجوع يعود خطوة للخلف",
+    "fr": "Le bouton Retour revient en arrière",
+    "tr": "Geri düğmesi bir adım geri gider",
+    "uk": "Кнопка «Назад» повертає на крок назад",
+    "ca": "El botó Enrere retrocedeix un pas",
+    "id": "Tombol Kembali kembali satu langkah"
+  },
+  "SETTINGS$ANDROID_BACK_BUTTON_DESCRIPTION": {
+    "en": "On Android, the system Back button closes the top menu or dialog, then goes back one screen. Turn this off to let Back always leave the app.",
+    "ja": "Android では、システムの戻るボタンは開いているメニューやダイアログを閉じてから1つ前の画面に戻ります。オフにすると、戻るボタンは常にアプリを終了します。",
+    "zh-CN": "在 Android 上，系统返回键会先关闭打开的菜单或对话框，然后返回上一个屏幕。关闭后，返回键将始终退出应用。",
+    "zh-TW": "在 Android 上，系統返回鍵會先關閉開啟的選單或對話框，然後返回上一個畫面。關閉後，返回鍵將一律結束應用程式。",
+    "ko-KR": "Android에서 시스템 뒤로 가기 버튼은 열린 메뉴나 대화상자를 닫은 뒤 이전 화면으로 이동합니다. 끄면 뒤로 가기 버튼이 항상 앱을 종료합니다.",
+    "de": "Unter Android schließt die System-Zurück-Taste zuerst das oberste Menü oder Dialogfeld und geht dann einen Bildschirm zurück. Wenn deaktiviert, verlässt Zurück immer die App.",
+    "no": "På Android lukker systemets Tilbake-knapp den øverste menyen eller dialogen, og går deretter ett skjermbilde tilbake. Slå av for å la Tilbake alltid forlate appen.",
+    "it": "Su Android il tasto Indietro di sistema chiude prima il menu o la finestra in alto, poi torna di una schermata. Disattivalo per far uscire sempre dall'app.",
+    "pt": "No Android, o botão Voltar do sistema fecha o menu ou diálogo aberto e depois volta um ecrã. Desative para que Voltar saia sempre da aplicação.",
+    "es": "En Android, el botón Atrás del sistema cierra el menú o diálogo superior y luego retrocede una pantalla. Desactívalo para que Atrás siempre salga de la app.",
+    "ar": "في Android، يغلق زر الرجوع في النظام القائمة أو مربع الحوار العلوي، ثم يعود شاشة واحدة للخلف. أوقف هذا ليجعل زر الرجوع يخرج من التطبيق دائمًا.",
+    "fr": "Sur Android, le bouton Retour du système ferme d'abord le menu ou la boîte de dialogue du dessus, puis revient d'un écran. Désactivez-le pour que Retour quitte toujours l'application.",
+    "tr": "Android'de sistem Geri düğmesi önce en üstteki menüyü veya iletişim kutusunu kapatır, sonra bir ekran geri gider. Geri düğmesinin her zaman uygulamadan çıkması için bunu kapatın.",
+    "uk": "В Android системна кнопка «Назад» спершу закриває верхнє меню чи діалог, а потім повертає на один екран назад. Вимкніть, щоб «Назад» завжди виходила з застосунку.",
+    "ca": "A Android, el botó Enrere del sistema tanca el menú o diàleg superior i després torna una pantalla enrere. Desactiva-ho perquè Enrere sempre surti de l'aplicació.",
+    "id": "Di Android, tombol Kembali sistem menutup menu atau dialog teratas, lalu kembali satu layar. Matikan agar Kembali selalu keluar dari aplikasi."
   }
 }

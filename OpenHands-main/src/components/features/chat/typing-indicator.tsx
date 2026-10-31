@@ -132,11 +132,12 @@ export function TypingIndicator({ events }: TypingIndicatorProps) {
       role="status"
       aria-live="polite"
     >
-      <span
-        aria-hidden="true"
-        className="size-1.5 shrink-0 animate-pulse rounded-full bg-status-success motion-reduce:animate-none"
-      />
-      <span className="min-w-0 truncate">
+      <span className="thinking-dots shrink-0" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </span>
+      <span className="min-w-0 truncate thinking-label">
         {activity.kind === "text" ? (
           activity.text
         ) : (

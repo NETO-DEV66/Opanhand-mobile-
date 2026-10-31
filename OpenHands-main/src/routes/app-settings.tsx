@@ -13,6 +13,7 @@ import { LanguageInput } from "#/components/features/settings/app-settings/langu
 import { ThemeInput } from "#/components/features/settings/app-settings/theme-input";
 import { GettingStartedChecklistSwitch } from "#/components/features/settings/app-settings/getting-started-checklist-switch";
 import { RecommendedAutomationsSwitch } from "#/components/features/settings/app-settings/recommended-automations-switch";
+import { AndroidBackButtonSwitch } from "#/components/features/settings/app-settings/android-back-button-switch";
 import { VoiceInputSettings } from "#/components/features/settings/app-settings/voice-input-settings";
 import {
   displayErrorToast,
@@ -243,6 +244,9 @@ function AppSettingsForm() {
           {/* Locked-to-Cloud never shows the checklist (OHE-3683). */}
           {getLockedCloudHost() === null && <GettingStartedChecklistSwitch />}
           <RecommendedAutomationsSwitch />
+
+          {/* Native-only: the hardware Back button does not exist in a browser. */}
+          <AndroidBackButtonSwitch />
 
           <div className="border-t border-border pt-6 mt-2">
             <h3 className="text-lg font-medium mb-2">

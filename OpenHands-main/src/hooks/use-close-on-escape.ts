@@ -81,13 +81,40 @@ export const useCloseOnEscape = (
  * backend modals) would take Escape, close, and unmount the dialog with it.
  * A layout effect registers the boundary before the passive effects of
  * anything the dialog renders, so a menu inside the dialog still sits above it.
+ *
+ * When `onClose` is given, the boundary is itself closable: Escape (or the
+ * Android back button, which shares this stack) dismisses the dialog. Without
+ * it, the boundary swallows the press without acting, which is the deliberate
+ * "this dialog ignores Escape" case.
  */
-export const useEscapeBoundary = (isActive: boolean) => {
+export const useEscapeBoundary = (isActive: boolean, onClose?: () => void) => {
+  const onCloseRef = React.useRef(onClose);
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
   React.useLayoutEffect(() => {
     if (!isActive) return undefined;
 
-    const layer: EscapeLayer = { close: () => {} };
+    const layer: EscapeLayer = {
+      close: () => onCloseRef.current?.(),
+    };
     pushLayer(layer);
     return () => removeLayer(layer);
   }, [isActive]);
+};
+
+/**
+ * Close the topmost open layer, if any, exactly as one Escape would.
+ *
+ * Used by the Android hardware back button: an open menu, popover or dialog
+ * should be dismissed before the back press is allowed to change the route.
+ * Returns whether a layer was actually closed, so the caller can fall back to
+ * navigation when nothing was open.
+ */
+export const closeTopEscapeLayer = (): boolean => {
+  const topLayer = openLayers[openLayers.length - 1];
+  if (!topLayer) return false;
+  topLayer.close();
+  return true;
 };

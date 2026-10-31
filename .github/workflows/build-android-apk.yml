@@ -58,7 +58,9 @@ jobs:
       - name: Install Capacitor toolchain
         # The Capacitor packages are not in package.json; install them at the
         # same major version the android/ project was generated with.
-        run: npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
+        # @capacitor/app supplies the Android back-button event the web app
+        # listens for (see src/hooks/use-android-back-button.ts).
+        run: npm install --no-save @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 @capacitor/app@7
 
       - name: Build web bundle
         env:

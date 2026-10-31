@@ -14,6 +14,18 @@ export interface UsePageVisibilityReconnectOptions {
   /** Skip wiring listeners entirely when there is nothing to manage yet. */
   enabled: boolean;
   /**
+   * Keep the connection open while the page is hidden instead of closing it.
+   *
+   * True inside the Capacitor native shell, which runs a foreground service
+   * (`KeepAliveService`) precisely so the WebView and its socket survive in the
+   * background. Tearing the socket down there — as the browser path must —
+   * would stop live updates the moment the user leaves the app, which is the
+   * opposite of the guarantee the shell provides. The reconnect-on-foreground
+   * safety net below still runs, so a socket the OS did kill is revived on
+   * return.
+   */
+  keepAliveWhenHidden: boolean;
+  /**
    * Close the socket(s) cleanly. The debounced `visibilitychange`-hidden path
    * only calls this on mobile user agents: desktop browsers keep sockets
    * alive across ordinary tab switches, so tearing them down there would stop
@@ -44,6 +56,7 @@ export interface UsePageVisibilityReconnectOptions {
  */
 export function usePageVisibilityReconnect({
   enabled,
+  keepAliveWhenHidden,
   disconnect,
   reconnectIfStale,
 }: UsePageVisibilityReconnectOptions): void {
@@ -55,6 +68,8 @@ export function usePageVisibilityReconnect({
   disconnectRef.current = disconnect;
   const reconnectRef = useRef(reconnectIfStale);
   reconnectRef.current = reconnectIfStale;
+  const keepAliveRef = useRef(keepAliveWhenHidden);
+  keepAliveRef.current = keepAliveWhenHidden;
 
   useEffect(() => {
     if (!enabled) return undefined;
@@ -68,6 +83,10 @@ export function usePageVisibilityReconnect({
     };
 
     const handleHidden = () => {
+      // In the native shell the process is kept alive on purpose, so the
+      // socket must stay open: no teardown at all, on either the debounced or
+      // the `pagehide` path.
+      if (keepAliveRef.current) return;
       if (!isMobileUserAgent()) return;
       // Restart rather than stack: rapid flapping keeps pushing this out
       // rather than ever accumulating a second pending teardown.
@@ -102,6 +121,10 @@ export function usePageVisibilityReconnect({
     // freeze the page (immediately on mobile, or after a long-hidden desktop
     // tab), the socket is already on borrowed time regardless of platform.
     const handleFreeze = () => {
+      // Same native-shell exception as `handleHidden`: the foreground service
+      // is what keeps the WebView running, so a freeze signal must not close
+      // the socket it exists to protect.
+      if (keepAliveRef.current) return;
       clearHideTimeout();
       disconnectRef.current();
     };

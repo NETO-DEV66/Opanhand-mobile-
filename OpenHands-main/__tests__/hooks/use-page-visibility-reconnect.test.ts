@@ -48,6 +48,7 @@ describe("usePageVisibilityReconnect", () => {
     renderHook(() =>
       usePageVisibilityReconnect({
         enabled: true,
+        keepAliveWhenHidden: false,
         disconnect,
         reconnectIfStale,
       }),
@@ -70,6 +71,7 @@ describe("usePageVisibilityReconnect", () => {
     renderHook(() =>
       usePageVisibilityReconnect({
         enabled: true,
+        keepAliveWhenHidden: false,
         disconnect,
         reconnectIfStale,
       }),
@@ -94,6 +96,7 @@ describe("usePageVisibilityReconnect", () => {
     renderHook(() =>
       usePageVisibilityReconnect({
         enabled: true,
+        keepAliveWhenHidden: false,
         disconnect,
         reconnectIfStale,
       }),
@@ -114,6 +117,7 @@ describe("usePageVisibilityReconnect", () => {
     renderHook(() =>
       usePageVisibilityReconnect({
         enabled: true,
+        keepAliveWhenHidden: false,
         disconnect,
         reconnectIfStale,
       }),
@@ -141,6 +145,7 @@ describe("usePageVisibilityReconnect", () => {
     renderHook(() =>
       usePageVisibilityReconnect({
         enabled: true,
+        keepAliveWhenHidden: false,
         disconnect,
         reconnectIfStale,
       }),
@@ -161,6 +166,7 @@ describe("usePageVisibilityReconnect", () => {
     renderHook(() =>
       usePageVisibilityReconnect({
         enabled: true,
+        keepAliveWhenHidden: false,
         disconnect,
         reconnectIfStale,
       }),
@@ -183,6 +189,7 @@ describe("usePageVisibilityReconnect", () => {
     renderHook(() =>
       usePageVisibilityReconnect({
         enabled: true,
+        keepAliveWhenHidden: false,
         disconnect,
         reconnectIfStale,
       }),
@@ -200,6 +207,7 @@ describe("usePageVisibilityReconnect", () => {
     renderHook(() =>
       usePageVisibilityReconnect({
         enabled: true,
+        keepAliveWhenHidden: false,
         disconnect,
         reconnectIfStale,
       }),
@@ -221,6 +229,7 @@ describe("usePageVisibilityReconnect", () => {
     renderHook(() =>
       usePageVisibilityReconnect({
         enabled: true,
+        keepAliveWhenHidden: false,
         disconnect,
         reconnectIfStale,
       }),
@@ -231,6 +240,40 @@ describe("usePageVisibilityReconnect", () => {
     expect(reconnectIfStale).toHaveBeenCalledOnce();
   });
 
+  it("never disconnects while keep-alive is on, but still reconnects on return", () => {
+    setUserAgent(MOBILE_USER_AGENT);
+    const disconnect = vi.fn();
+    const reconnectIfStale = vi.fn();
+    renderHook(() =>
+      usePageVisibilityReconnect({
+        enabled: true,
+        keepAliveWhenHidden: true,
+        disconnect,
+        reconnectIfStale,
+      }),
+    );
+
+    act(() => {
+      setVisibility("hidden");
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(disconnect).not.toHaveBeenCalled();
+
+    // `freeze`/`pagehide` must be ignored too — the whole point of the native
+    // shell is that the socket outlives the hidden state.
+    act(() => {
+      window.dispatchEvent(new Event("pagehide"));
+      document.dispatchEvent(new Event("freeze"));
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(disconnect).not.toHaveBeenCalled();
+
+    // Returning still runs the health check so a socket the OS actually killed
+    // is revived.
+    act(() => setVisibility("visible"));
+    expect(reconnectIfStale).toHaveBeenCalled();
+  });
+
   it("does nothing when disabled", () => {
     setUserAgent(MOBILE_USER_AGENT);
     const disconnect = vi.fn();
@@ -238,6 +281,7 @@ describe("usePageVisibilityReconnect", () => {
     renderHook(() =>
       usePageVisibilityReconnect({
         enabled: false,
+        keepAliveWhenHidden: false,
         disconnect,
         reconnectIfStale,
       }),
@@ -260,6 +304,7 @@ describe("usePageVisibilityReconnect", () => {
     const { unmount } = renderHook(() =>
       usePageVisibilityReconnect({
         enabled: true,
+        keepAliveWhenHidden: false,
         disconnect,
         reconnectIfStale,
       }),

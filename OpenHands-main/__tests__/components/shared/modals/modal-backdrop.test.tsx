@@ -6,7 +6,10 @@ import userEvent from "@testing-library/user-event";
 
 import { ConfirmationModal } from "#/components/shared/modals/confirmation-modal";
 import { ModalBackdrop } from "#/components/shared/modals/modal-backdrop";
-import { useCloseOnEscape } from "#/hooks/use-close-on-escape";
+import {
+  useCloseOnEscape,
+  closeTopEscapeLayer,
+} from "#/hooks/use-close-on-escape";
 
 describe("ModalBackdrop", () => {
   it("portals out of a transformed ancestor so position: fixed resolves against the viewport", () => {
@@ -466,5 +469,34 @@ describe("ModalBackdrop Escape layering", () => {
     await user.keyboard("{Escape}");
 
     expect(onCloseMenu).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes the dialog through closeTopEscapeLayer (the Android back path)", () => {
+    // The hardware back button has no key event: it calls the same helper
+    // Escape uses. A modal that registers an inert boundary would swallow the
+    // press and leave the user stuck, so the dialog must be dismissable there.
+    const onClose = vi.fn();
+    render(
+      <ModalBackdrop onClose={onClose}>
+        <p>dialog content</p>
+      </ModalBackdrop>,
+    );
+
+    expect(closeTopEscapeLayer()).toBe(true);
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("swallows the back press without acting when the dialog ignores Escape", () => {
+    const onClose = vi.fn();
+    render(
+      <ModalBackdrop onClose={onClose} closeOnEscape={false}>
+        <p>dialog content</p>
+      </ModalBackdrop>,
+    );
+
+    // The boundary is still consumed (so the press does not leak to the route
+    // behind it) but the dialog is deliberately not closed.
+    expect(closeTopEscapeLayer()).toBe(true);
+    expect(onClose).not.toHaveBeenCalled();
   });
 });

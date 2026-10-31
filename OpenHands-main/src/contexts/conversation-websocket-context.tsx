@@ -13,6 +13,7 @@ import { ConversationClient } from "@openhands/typescript-client/clients";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWebSocket, WebSocketHookOptions } from "#/hooks/use-websocket";
 import { usePageVisibilityReconnect } from "#/hooks/use-page-visibility-reconnect";
+import { isNativeShell } from "#/api/native-shell";
 import { SERVER_CONNECTION_ERROR_MESSAGE } from "#/constants/server-connection-error";
 import { useEventStore } from "#/stores/use-event-store";
 import { useErrorMessageStore } from "#/stores/error-message-store";
@@ -1408,6 +1409,10 @@ export function ConversationWebSocketProvider({
 
   usePageVisibilityReconnect({
     enabled: !!(websocketUrl || planningAgentWsUrl),
+    // Inside the Capacitor shell a foreground service keeps the process (and
+    // this socket) alive in the background, so it must not be torn down on
+    // hide — see `use-page-visibility-reconnect`.
+    keepAliveWhenHidden: isNativeShell(),
     disconnect: disconnectForBackground,
     reconnectIfStale: reconnectStaleOnForeground,
   });

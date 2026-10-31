@@ -27,18 +27,13 @@ export function ModalBackdrop({
 }: ModalBackdropProps) {
   const focus = useModalFocus({ elevated });
   // The dialog is on top: menus and drawers opened before it never take its
-  // Escape, whether or not it closes on Escape itself.
-  useEscapeBoundary(true);
-
-  React.useEffect(() => {
-    if (!closeOnEscape) return undefined;
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose?.();
-    };
-
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [closeOnEscape, onClose]);
+  // Escape, whether or not it closes on Escape itself. Passing `onClose` makes
+  // the boundary dismissable, so Escape and the Android back button close the
+  // dialog here rather than being swallowed; when the dialog ignores Escape the
+  // boundary still swallows it without acting. This is the only Escape handler
+  // the dialog needs — routing it through the shared layer stack is what keeps
+  // one press from closing both the dialog and whatever sits under it.
+  useEscapeBoundary(true, closeOnEscape ? onClose : undefined);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!closeOnBackdropClick) return;

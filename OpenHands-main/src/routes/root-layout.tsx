@@ -24,6 +24,7 @@ import { useSyncDocumentLanguage } from "#/hooks/use-sync-document-language";
 import { LoadingSpinner } from "#/components/shared/loading-spinner";
 import { CloudOrganizationBoundary } from "#/components/features/backends/cloud-organization-boundary";
 import { useAppTitle } from "#/hooks/use-app-title";
+import { useAndroidBackButton } from "#/hooks/use-android-back-button";
 import { ReactRouterNavigationProvider } from "./react-router-navigation-provider";
 import { OnboardingHost } from "#/components/features/onboarding";
 import { isOnboardingPreviewActive } from "#/components/features/onboarding/onboarding-preview";
@@ -150,6 +151,10 @@ function MainAppContent() {
     }
   }, [settings?.language]);
   useSyncDocumentLanguage();
+
+  // Android: make the hardware back button go one step back (overlay, then
+  // route) instead of quitting the app. No-op everywhere else.
+  useAndroidBackButton();
 
   if (config.isLoading) {
     return (
