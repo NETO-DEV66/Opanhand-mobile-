@@ -59,6 +59,18 @@ const initializeI18n = (instance: I18nInstance) => {
         interpolation: {
           escapeValue: false,
         },
+        // Never suspend on a pending translation load. The startup path awaits
+        // `waitForI18n()` before hydrating, but it races an 8s deadline: on a
+        // slow device the deadline wins and `hydrateRoot` runs while the
+        // `locales/*.json` fetch is still in flight. With the default
+        // (`useSuspense: true`) every `useTranslation()` then suspends during
+        // hydration, React cannot match the prerendered shell, and the app
+        // renders nothing - the same black screen this file's polyfills exist
+        // to prevent. With `useSuspense: false` the first paint uses the keys
+        // and react-i18next re-renders the tree once the resources land.
+        react: {
+          useSuspense: false,
+        },
       });
 
     initializationPromises.set(instance, initPromise);

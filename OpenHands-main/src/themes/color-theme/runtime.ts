@@ -125,7 +125,9 @@ export function applyColorTheme(key: ColorThemeKey): void {
 export const COLOR_THEME_BOOTSTRAP_SCRIPT = `(() => {
   const themes = ${JSON.stringify(Object.fromEntries(Object.keys(COLOR_THEMES).map((key) => [key, { css: getColorThemeCss(key as ColorThemeKey), appearance: COLOR_THEMES[key as ColorThemeKey].appearance }]))).replace(/</g, "\\u003c")};
   let key = ${JSON.stringify(DEFAULT_COLOR_THEME)};
-  try { const stored = localStorage.getItem(${JSON.stringify(STORAGE_KEY)}); if (Object.hasOwn(themes, stored)) key = stored; } catch {}
+  // Runs in <head>, before the legacy polyfill in <body> has defined
+  // \`Object.hasOwn\`, so use the long-form call that every supported engine has.
+  try { const stored = localStorage.getItem(${JSON.stringify(STORAGE_KEY)}); if (stored !== null && Object.prototype.hasOwnProperty.call(themes, stored)) key = stored; } catch {}
   const style = document.createElement('style');
   style.id = ${JSON.stringify(THEME_STYLE_TAG_ID)};
   style.textContent = themes[key].css;

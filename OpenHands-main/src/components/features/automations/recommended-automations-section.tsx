@@ -322,13 +322,20 @@ function AutomationCardGrid({
         ).length;
 
         return (
-          <button
+          <div
             key={automation.id}
-            type="button"
+            role="button"
+            tabIndex={0}
             data-testid={`recommended-automation-card-${automation.id}`}
             onClick={() => onSelect(automation)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onSelect(automation);
+              }
+            }}
             className={cn(
-              "flex min-w-0 overflow-hidden p-4 text-left",
+              "flex min-w-0 cursor-pointer overflow-hidden p-4 text-left",
               extensionModuleCardSurfaceClassName,
               extensionModuleCardInteractiveClassName,
             )}
@@ -380,7 +387,7 @@ function AutomationCardGrid({
                 />
               </div>
             </div>
-          </button>
+          </div>
         );
       })}
     </div>

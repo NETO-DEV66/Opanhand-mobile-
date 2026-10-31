@@ -104,12 +104,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="OpenHands" />
-        {/* Classic script, first in <head>, before any module. Fills in the
-            globals a recent Chrome has and an old Android System WebView does
-            not; without them the module graph throws before React mounts and
-            the app shows a black screen. Must stay a plain <script src>: a
-            module would be subject to the very features it supplies. */}
-        <script src="/legacy-polyfills.js" />
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <Meta />
@@ -119,6 +113,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body data-agent-server-ui="" className="m-0">
+        {/* Classic script, before any module and before React's content. Fills
+            in the globals a recent Chrome has and an old Android System WebView
+            does not; without them the module graph throws before React mounts
+            and the app shows a black screen. Must stay a plain <script src>: a
+            module would be subject to the very features it supplies.
+
+            It lives in <body>, not <head>, on purpose. React 19 hoists a
+            non-async `<script src>` out of its <head> position while server
+            rendering, but the client hydration renders it where it sits, so
+            the two disagree and React reports a hydration mismatch (#418).
+            Recent Chrome recovers from that; the old WebView the APK targets
+            does not, and blanks the screen. React leaves a body script alone,
+            so server and client agree here. */}
+        <script src="/legacy-polyfills.js" />
         <AgentServerUIRoot contentClassName="min-h-screen">
           <ColorThemeApplier />
           {children}

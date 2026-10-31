@@ -14,39 +14,54 @@ import { shouldStartMockWorker } from "./mocks/should-start-mock-worker";
 import { startMockWorkerWithFallback } from "./mocks/start-mock-worker";
 
 async function prepareApp() {
+  const usesMockRuntime =
+    import.meta.env.DEV || import.meta.env.VITE_MOCK_API === "true";
+
+  // Install the in-process transport first. It is a local module (no network),
+  // and it is what makes every request answerable. If the startup deadline
+  // below fires while the i18n fetch is still in flight, the UI rendered then
+  // must already have a transport, or it shows a spurious "no backend" screen.
+  //
+  // The socket shim must also be in place before the first request: a service
+  // worker cannot intercept a WebSocket, and Capacitor's Android WebView has no
+  // usable service worker at all.
+  const mockRuntime = usesMockRuntime ? await import("./local-runtime") : null;
+  mockRuntime?.installLocalRuntime();
+
   // DigitalOcean Managed Agents in the browser: present only when the server
   // this page came from hosts the MARS bridge (scripts/mars-web-bridge.mjs).
   // Must settle before render — the UI reads `window.marsBridge` synchronously.
   // Both steps resolve rather than reject on the paths that matter, but nothing
   // here is worth a blank screen, so a throw is contained below.
-  await Promise.all([waitForI18n(), installMarsWebBridge()]);
+  // The mock worker and i18n both gate the first render, and neither is worth
+  // serialising: run them together so a slow locale fetch cannot delay the
+  // transport (and vice versa). The worker path is bounded internally (4s), so
+  // a WebView that never activates the worker cannot hold up i18n.
+  const startTransport = async () => {
+    if (!usesMockRuntime || !shouldStartMockWorker()) return;
+    const { worker } = await import("./mocks/browser");
 
-  if (import.meta.env.DEV || import.meta.env.VITE_MOCK_API === "true") {
-    // The socket shim must be in place before the first request: a service
-    // worker cannot intercept a WebSocket, and Capacitor's Android WebView has
-    // no usable service worker at all.
-    const { installInProcessFetch, installLocalRuntime } =
-      await import("./local-runtime");
-    installLocalRuntime();
+    // Never await the worker unbounded: a WebView that registers the worker
+    // but never activates it would otherwise hang startup forever and the
+    // app would render nothing. The helper falls back to the in-process
+    // handlers when the worker does not come up in time.
+    await startMockWorkerWithFallback({
+      startWorker: () => worker.start({ onUnhandledRequest: "bypass" }),
+      installFallback: () => mockRuntime?.installInProcessFetch(),
+      stopWorker: () => worker.stop(),
+    });
+  };
 
-    if (shouldStartMockWorker()) {
-      const { worker } = await import("./mocks/browser");
-
-      // Never await the worker unbounded: a WebView that registers the worker
-      // but never activates it would otherwise hang startup forever and the
-      // app would render nothing. The helper falls back to the in-process
-      // handlers when the worker does not come up in time.
-      await startMockWorkerWithFallback({
-        startWorker: () => worker.start({ onUnhandledRequest: "bypass" }),
-        installFallback: installInProcessFetch,
-        stopWorker: () => worker.stop(),
-      });
-    }
-  }
+  await Promise.all([
+    waitForI18n(),
+    installMarsWebBridge(),
+    startTransport(),
+  ]);
 
   if (import.meta.env.DEV) {
-    const { installPendingChatPreview } =
-      await import("./dev/seed-pending-chat-preview");
+    const { installPendingChatPreview } = await import(
+      "./dev/seed-pending-chat-preview"
+    );
     installPendingChatPreview();
   }
 }
