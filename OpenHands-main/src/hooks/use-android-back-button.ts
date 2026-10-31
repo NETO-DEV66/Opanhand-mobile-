@@ -11,15 +11,15 @@ import { readAndroidBackButtonStepsBack } from "#/components/features/settings/a
  * imported.
  */
 interface BackButtonListenerHandle {
-  remove: () => Promise<void>;
+  remove: () => void | Promise<void>;
 }
 
 interface CapacitorAppPlugin {
   addListener: (
     eventName: "backButton",
     listenerFunc: (event: { canGoBack: boolean }) => void,
-  ) => Promise<BackButtonListenerHandle>;
-  exitApp: () => Promise<void>;
+  ) => BackButtonListenerHandle | Promise<BackButtonListenerHandle>;
+  exitApp: () => void | Promise<void>;
 }
 
 function getAppPlugin(): CapacitorAppPlugin | null {
@@ -69,8 +69,18 @@ export function useAndroidBackButton(): void {
     let disposed = false;
     let handle: BackButtonListenerHandle | null = null;
 
-    app
-      .addListener("backButton", () => {
+    // `@capacitor/app`'s JS implementation resolves a Promise, but the Android
+    // native bridge injects a plugin whose `addListener` returns the handle
+    // object directly. Accept either shape: assuming a Promise throws
+    // `addListener(...).then is not a function` on the device and the listener
+    // is never registered. A failure here must never reach the render tree —
+    // an effect that throws unmounts the app and leaves a blank screen — so
+    // the whole registration is guarded.
+    let registered:
+      | BackButtonListenerHandle
+      | Promise<BackButtonListenerHandle>;
+    try {
+      registered = app.addListener("backButton", () => {
         // The setting can be flipped at any time; read it on each press rather
         // than capturing it when the listener was registered.
         if (!readAndroidBackButtonStepsBack()) {
@@ -87,20 +97,29 @@ export function useAndroidBackButton(): void {
         }
 
         void app.exitApp();
-      })
-      .then((registered) => {
-        // The listener may resolve after the effect was torn down (a fast
-        // unmount); remove it immediately in that case so it cannot leak.
-        if (disposed) {
-          void registered.remove();
-        } else {
-          handle = registered;
-        }
-      })
-      .catch(() => {
-        // No native plugin (web build, or a shell without it): the browser's
-        // own back handling applies and there is nothing to wire up.
       });
+    } catch {
+      return undefined;
+    }
+
+    if (registered instanceof Promise) {
+      registered
+        .then((resolved) => {
+          // The listener may resolve after the effect was torn down (a fast
+          // unmount); remove it immediately in that case so it cannot leak.
+          if (disposed) {
+            void resolved.remove();
+          } else {
+            handle = resolved;
+          }
+        })
+        .catch(() => {
+          // No native plugin (web build, or a shell without it): the browser's
+          // own back handling applies and there is nothing to wire up.
+        });
+    } else {
+      handle = registered;
+    }
 
     return () => {
       disposed = true;

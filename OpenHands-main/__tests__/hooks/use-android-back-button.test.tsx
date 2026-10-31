@@ -5,7 +5,16 @@ import { useAndroidBackButton } from "#/hooks/use-android-back-button";
 
 type BackListener = (event: { canGoBack: boolean }) => void;
 
-function installNativeShell() {
+/**
+ * Install a fake `window.Capacitor` shaped like the real Android bridge.
+ *
+ * `sync` selects how `addListener` hands back the listener handle: the Android
+ * native bridge returns the `{ remove }` object directly, while the
+ * `@capacitor/app` JS implementation resolves it through a Promise. Both must
+ * work — the hook used to assume a Promise and threw
+ * `addListener(...).then is not a function` on the device.
+ */
+function installNativeShell({ sync = true }: { sync?: boolean } = {}) {
   const listeners: BackListener[] = [];
   const exitApp = vi.fn().mockResolvedValue(undefined);
   const remove = vi.fn().mockResolvedValue(undefined);
@@ -19,7 +28,9 @@ function installNativeShell() {
             addListener: (
               event: string,
               listener: BackListener,
-            ) => Promise<{ remove: () => Promise<void> }>;
+            ) =>
+              | { remove: () => Promise<void> }
+              | Promise<{ remove: () => Promise<void> }>;
             exitApp: () => Promise<void>;
           };
         };
@@ -31,7 +42,8 @@ function installNativeShell() {
       App: {
         addListener: (_event, listener) => {
           listeners.push(listener);
-          return Promise.resolve({ remove });
+          const handle = { remove };
+          return sync ? handle : Promise.resolve(handle);
         },
         exitApp,
       },
@@ -130,6 +142,30 @@ describe("useAndroidBackButton", () => {
     expect(exitApp).toHaveBeenCalledOnce();
     // The route must not move — Back left the app instead of navigating.
     expect(screen.getByTestId("path").textContent).toBe("/settings");
+  });
+
+  it("registers the listener when addListener returns the handle synchronously (Android bridge)", async () => {
+    const { listeners, exitApp } = installNativeShell({ sync: true });
+    renderAt("/settings");
+
+    // The listener must actually be registered — a Promise-only assumption
+    // threw here on the device and left Back doing nothing.
+    expect(listeners).toHaveLength(1);
+
+    window.history.replaceState({ idx: 3 }, "");
+    await fireBack(listeners[0]);
+
+    expect(exitApp).not.toHaveBeenCalled();
+    expect(screen.getByTestId("path").textContent).toBe("/");
+  });
+
+  it("still supports the Promise-returning @capacitor/app JS implementation", async () => {
+    const { listeners, exitApp } = installNativeShell({ sync: false });
+    renderAt("/settings");
+
+    expect(listeners).toHaveLength(1);
+    await fireBack(listeners[0]);
+    expect(exitApp).toHaveBeenCalledOnce();
   });
 
   it("removes the native listener on unmount", async () => {
