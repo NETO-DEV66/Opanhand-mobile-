@@ -227,6 +227,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           SIGNING_CERT_SHA256: ${{ vars.SIGNING_CERT_SHA256 }}
+          STANDALONE_MODE: ${{ vars.STANDALONE_MODE }}
         run: |
           TAG="${GITHUB_REF_NAME}"
           APK=android/app/build/outputs/apk/release/app-release.apk
@@ -234,6 +235,23 @@ jobs:
           SHA256=$(sha256sum "$APK" | cut -d' ' -f1)
           MD5=$(md5sum "$APK" | cut -d' ' -f1)
           CERT="${SIGNING_CERT_SHA256:-unknown}"
+          # The launch experience depends on the build mode, so the notes must
+          # too: a cloud build signs in with a Git provider, a standalone build
+          # asks for an LLM key. Describing the wrong one sends users hunting
+          # for a screen that is not there.
+          if [ "${STANDALONE_MODE:-true}" = "false" ]; then
+            MODE_DESC_1='**Sign in with your Git provider.** This build is an OpenHands'
+            MODE_DESC_2='Cloud client: on first launch, tap GitHub (or GitLab / Bitbucket)'
+            MODE_DESC_3='to sign in. No local server, no API key to paste.'
+            LAUNCH_3='3. On first launch, tap "Log in with GitHub" (or GitLab) and finish the'
+            LAUNCH_4='   sign-in in the browser that opens. You land in your workspace.'
+          else
+            MODE_DESC_1='**Standalone.** The agent runtime runs on the phone and talks straight'
+            MODE_DESC_2='to the LLM provider you choose. There is no server to run and no account'
+            MODE_DESC_3='to create.'
+            LAUNCH_3='3. On first launch, pick an agent, then a model and paste your LLM'
+            LAUNCH_4='   provider API key. Everything stays on the device.'
+          fi
           # printf, not a heredoc: a heredoc body would inherit this step's YAML
           # indentation and render as a code block on the release page.
           printf '%s\n' \
@@ -244,15 +262,15 @@ jobs:
             'split per architecture. Signed with the project release key, so it' \
             'installs in place over any later build.' \
             '' \
-            '**Standalone.** The agent runtime runs on the phone and talks straight' \
-            'to the LLM provider you choose. There is no server to run and no account' \
-            'to create.' \
+            "$MODE_DESC_1" \
+            "$MODE_DESC_2" \
+            "$MODE_DESC_3" \
             '' \
             '**Install**' \
             '1. Allow install from unknown sources for your browser or file manager.' \
             '2. Open the APK on the phone and install it.' \
-            '3. On first launch, pick an agent, then a model and paste your LLM' \
-            '   provider API key. Everything stays on the device.' \
+            "$LAUNCH_3" \
+            "$LAUNCH_4" \
             '' \
             '**Verify the download**' \
             '' \
